@@ -11,8 +11,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func ListDeployments(clientset *kubernetes.Clientset) {
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+type KubernetesInteractor struct {
+	Clientset *kubernetes.Clientset
+}
+
+func (it *KubernetesInteractor) ListDeployments() {
+	deploymentsClient := it.Clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	deployments, err := deploymentsClient.List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
@@ -20,8 +24,8 @@ func ListDeployments(clientset *kubernetes.Clientset) {
 	spew.Dump(deployments)
 }
 
-func CreateDeployment(clientset *kubernetes.Clientset, deployment *appsv1.Deployment) {
-	deploymentsClient := clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
+func (it *KubernetesInteractor) CreateDeployment(deployment *appsv1.Deployment) {
+	deploymentsClient := it.Clientset.AppsV1().Deployments(apiv1.NamespaceDefault)
 	result, err := deploymentsClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
