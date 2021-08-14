@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/pflag"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -44,6 +45,7 @@ func main() {
 		panic(err)
 	}
 
+	kubernetesinteractor.CreateDeployment(clientset, &appsv1.Deployment{})
 	kubernetesinteractor.ListDeployments(clientset)
 
 	return
