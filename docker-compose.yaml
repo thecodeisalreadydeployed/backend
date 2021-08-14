@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  database:
+    image: postgres:13.4
+    restart: unless-stopped
+    environments:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: codedeploy
+      POSTGRES_USER: user
+    ports:
+      - 5432:5432
