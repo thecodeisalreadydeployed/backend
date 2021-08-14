@@ -3,7 +3,7 @@ package kanikointeractor
 import (
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor"
-	v1 "k8s.io/api/apps/v1"
+	apiv1 "k8s.io/api/core/v1"
 )
 
 type KanikoInteractor struct {
@@ -12,5 +12,5 @@ type KanikoInteractor struct {
 
 func (it KanikoInteractor) BuildContainerImage() {
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
-	k8s.CreateDeployment(&v1.Deployment{})
+	k8s.CreatePod(&apiv1.Pod{})
 }
