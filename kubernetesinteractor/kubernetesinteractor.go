@@ -61,6 +61,15 @@ func (it *KubernetesInteractor) CreateDeployment(deployment *appsv1.Deployment) 
 	spew.Dump(result.GetObjectMeta())
 }
 
+func (it *KubernetesInteractor) CreatePod(pod *apiv1.Pod) {
+	podsClient := it.Clientset.CoreV1().Pods(apiv1.NamespaceDefault)
+	result, err := podsClient.Create(context.TODO(), pod, metav1.CreateOptions{})
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
+	spew.Dump(result.GetObjectMeta())
+}
+
 func absolutePath(path string) string {
 	if filepath.IsAbs(path) {
 		return path
