@@ -31,6 +31,7 @@ func absolutePath(path string) string {
 func main() {
 	var kubeconfig string
 	pflag.StringVar(&kubeconfig, "kubeconfig", "", "")
+	pflag.Parse()
 	kubeconfig = absolutePath(kubeconfig)
 
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
@@ -43,7 +44,7 @@ func main() {
 		panic(err)
 	}
 
-	kubernetesinteractor.ListDeployments()
+	kubernetesinteractor.ListDeployments(clientset)
 
 	return
 }
