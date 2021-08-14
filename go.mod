@@ -20,6 +20,8 @@ require (
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
+	k8s.io/api v0.19.13 // indirect
+	k8s.io/apimachinery v0.19.13 // indirect
 	k8s.io/client-go v0.19.13 // indirect
 	k8s.io/klog v0.3.1 // indirect
 )
