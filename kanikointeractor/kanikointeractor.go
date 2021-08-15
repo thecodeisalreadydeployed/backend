@@ -14,6 +14,7 @@ import (
 type KanikoInteractor struct {
 	Registry     containerregistry.ContainerRegistryType
 	BuildContext string
+	Destination  string
 }
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
@@ -27,6 +28,11 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 				{
 					Name:  "kaniko",
 					Image: "gcr.io/kaniko-project/executor:v1.6.0",
+					Args: []string{
+						fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
+						fmt.Sprintf("--context=%s", it.BuildContext),
+						fmt.Sprintf("--destination=%s", it.Destination),
+					},
 				},
 			},
 		},
