@@ -8,7 +8,7 @@ import (
 )
 
 type GitInteractor struct {
-	Repository *git.Repository
+	repository *git.Repository
 }
 
 func NewGitInteractor() GitInteractor {
@@ -22,11 +22,11 @@ func (it *GitInteractor) Init() {
 	if err != nil {
 		panic(err)
 	}
-	it.Repository = repo
+	it.repository = repo
 }
 
 func (it *GitInteractor) Add(filePath string) {
-	w, err := it.Repository.Worktree()
+	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +34,7 @@ func (it *GitInteractor) Add(filePath string) {
 }
 
 func (it *GitInteractor) Commit(message string) {
-	w, err := it.Repository.Worktree()
+	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
 	}
