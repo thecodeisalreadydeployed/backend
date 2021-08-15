@@ -49,5 +49,9 @@ func (it *GitInteractor) Commit(message string) {
 }
 
 func (it *GitInteractor) WriteFile(name string, data []byte) {
-	util.WriteFile(it.fs, name, data, 0644)
+	w, err := it.repository.Worktree()
+	if err != nil {
+		panic(err)
+	}
+	util.WriteFile(w.Filesystem, name, data, 0644)
 }
