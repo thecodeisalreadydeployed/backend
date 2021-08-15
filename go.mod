@@ -18,8 +18,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/valyala/fasthttp v1.28.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
+	golang.org/x/crypto v0.0.0-20210813211128-0a44fdfbc16e // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
-	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	k8s.io/api v0.19.13 // indirect
 	k8s.io/apimachinery v0.19.13 // indirect
 	k8s.io/client-go v0.19.13 // indirect
