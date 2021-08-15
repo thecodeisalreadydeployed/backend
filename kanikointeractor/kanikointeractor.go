@@ -1,6 +1,10 @@
 package kanikointeractor
 
 import (
+	"errors"
+	"fmt"
+	"strings"
+
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor"
 	apiv1 "k8s.io/api/core/v1"
@@ -8,7 +12,8 @@ import (
 )
 
 type KanikoInteractor struct {
-	Registry containerregistry.ContainerRegistryType
+	Registry     containerregistry.ContainerRegistryType
+	BuildContext string
 }
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
@@ -39,7 +44,13 @@ func (it *KanikoInteractor) ecrKanikoPodSpec() apiv1.Pod {
 	return podSpec
 }
 
-func (it *KanikoInteractor) BuildContainerImage() {
+func (it *KanikoInteractor) BuildContainerImage() error {
+	if !strings.HasPrefix(it.BuildContext, "git") {
+		return errors.New(fmt.Sprintf("Build context %s is not supported.", it.BuildContext))
+	}
+
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
 	k8s.CreatePod(&apiv1.Pod{})
+
+	return nil
 }
