@@ -13,15 +13,13 @@ func APIServer(port int) {
 		return c.SendString(projectID)
 	})
 
-	app.Get("/project/:projectID/app/:appID", func(c *fiber.Ctx) error {
-		projectID := cast.ToString(c.Params("projectID"))
+	app.Get("/app/:appID", func(c *fiber.Ctx) error {
 		appID := cast.ToString(c.Params("appID"))
-		return c.SendString(projectID)
+		return c.SendString(appID)
 	})
 
-	app.Get("/project/:projectID/app/:appID/deployment/:deploymentID", func(c *fiber.Ctx) error {
-		projectID := cast.ToString(c.Params("projectID"))
-		appID := cast.ToString(c.Params("appID"))
-		return c.SendString(projectID)
+	app.Get("/deployment/:deploymentID", func(c *fiber.Ctx) error {
+		deploymentID := cast.ToString(c.Params("deploymentID"))
+		return c.SendString(deploymentID)
 	})
 }
