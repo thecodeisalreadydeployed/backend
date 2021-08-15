@@ -19,6 +19,14 @@ func Init() {
 	})
 }
 
+func Logger() *zap.Logger {
+	if instance == nil {
+		Init()
+	}
+
+	return instance
+}
+
 func Info(message string, fields ...zap.Field) {
-	instance.Info(message, fields...)
+	Logger().Info(message, fields...)
 }
