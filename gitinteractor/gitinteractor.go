@@ -48,10 +48,18 @@ func (it *GitInteractor) Commit(message string) {
 	w.Commit(message, &git.CommitOptions{Author: config.DefaultGitSignature()})
 }
 
-func (it *GitInteractor) WriteFile(name string, data []byte) {
+func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
 	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
 	}
-	util.WriteFile(w.Filesystem, name, data, 0644)
+
+	fs := w.Filesystem
+
+	err = fs.MkdirAll(path, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	util.WriteFile(fs, fs.Join(path, name), data, 0644)
 }
