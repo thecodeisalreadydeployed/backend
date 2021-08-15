@@ -18,3 +18,7 @@ func Init() {
 		instance = logger
 	})
 }
+
+func Info(message string, fields ...zap.Field) {
+	instance.Info(message, fields...)
+}
