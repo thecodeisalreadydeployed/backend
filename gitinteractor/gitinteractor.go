@@ -25,6 +25,14 @@ func (it *GitInteractor) Init() {
 	it.Repository = repo
 }
 
+func (it *GitInteractor) Add(filePath string) {
+	w, err := it.Repository.Worktree()
+	if err != nil {
+		panic(err)
+	}
+	w.Add(filePath)
+}
+
 func (it *GitInteractor) Commit(message string) {
 	w, err := it.Repository.Worktree()
 	if err != nil {
