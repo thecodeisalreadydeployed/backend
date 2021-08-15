@@ -50,7 +50,15 @@ func (it *KanikoInteractor) BuildContainerImage() error {
 	}
 
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
-	k8s.CreatePod(&apiv1.Pod{})
+
+	switch it.Registry {
+	case containerregistry.GCR:
+		podSpec := it.gcrKanikoPodSpec()
+		k8s.CreatePod(&podSpec)
+	case containerregistry.ECR:
+		podSpec := it.ecrKanikoPodSpec()
+		k8s.CreatePod(&podSpec)
+	}
 
 	return nil
 }
