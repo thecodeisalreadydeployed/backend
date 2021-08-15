@@ -7,5 +7,5 @@ type GitOpsController struct {
 }
 
 func (c *GitOpsController) Init() {
-	c.gitInteractor = NewGitInteractor()
+	c.gitInteractor = gitinteractor.NewGitInteractor()
 }
