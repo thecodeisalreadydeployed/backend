@@ -18,4 +18,10 @@ func APIServer(port int) {
 		appID := cast.ToString(c.Params("appID"))
 		return c.SendString(projectID)
 	})
+
+	app.Get("/project/:projectID/app/:appID/deployment/:deploymentID", func(c *fiber.Ctx) error {
+		projectID := cast.ToString(c.Params("projectID"))
+		appID := cast.ToString(c.Params("appID"))
+		return c.SendString(projectID)
+	})
 }
