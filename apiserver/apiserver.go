@@ -22,4 +22,9 @@ func APIServer(port int) {
 		deploymentID := cast.ToString(c.Params("deploymentID"))
 		return c.SendString(deploymentID)
 	})
+
+	app.Get("/deployment/:deploymentID/event", func(c *fiber.Ctx) error {
+		deploymentID := cast.ToString(c.Params("deploymentID"))
+		return c.SendString(deploymentID)
+	})
 }
