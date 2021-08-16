@@ -8,16 +8,28 @@ import (
 )
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
+	__w := "__w"
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "kaniko",
 		},
 		Spec: apiv1.PodSpec{
 			RestartPolicy: apiv1.RestartPolicyNever,
+			Volumes: []apiv1.Volume{
+				{
+					Name: __w,
+				},
+			},
 			InitContainers: []apiv1.Container{
 				{
 					Name:  "git",
 					Image: "alpine/git:v2.30.2",
+					VolumeMounts: []apiv1.VolumeMount{
+						{
+							MountPath: fmt.Sprintf("/%s", __w),
+							Name:      __w,
+						},
+					},
 				},
 			},
 			Containers: []apiv1.Container{
@@ -28,6 +40,12 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
 						fmt.Sprintf("--context=%s", it.BuildContext),
 						fmt.Sprintf("--destination=%s", it.Destination),
+					},
+					VolumeMounts: []apiv1.VolumeMount{
+						{
+							MountPath: fmt.Sprintf("/%s", __w),
+							Name:      __w,
+						},
 					},
 				},
 			},
