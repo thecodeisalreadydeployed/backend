@@ -14,6 +14,12 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		},
 		Spec: apiv1.PodSpec{
 			RestartPolicy: apiv1.RestartPolicyNever,
+			InitContainers: []apiv1.Container{
+				{
+					Name:  "git",
+					Image: "alpine/git:v2.30.2",
+				},
+			},
 			Containers: []apiv1.Container{
 				{
 					Name:  "kaniko",
