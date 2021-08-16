@@ -38,7 +38,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Image: "gcr.io/kaniko-project/executor:v1.6.0",
 					Args: []string{
 						fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
-						fmt.Sprintf("--context=%s", it.BuildContext),
+						fmt.Sprintf("--context=dir://%s", __w),
 						fmt.Sprintf("--destination=%s", it.Destination),
 					},
 					VolumeMounts: []apiv1.VolumeMount{
