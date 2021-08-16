@@ -8,7 +8,7 @@ import (
 )
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
-	__w := "__w"
+	workingDirectory := "__w"
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "kaniko",
@@ -17,7 +17,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			RestartPolicy: apiv1.RestartPolicyNever,
 			Volumes: []apiv1.Volume{
 				{
-					Name: __w,
+					Name: workingDirectory,
 				},
 			},
 			InitContainers: []apiv1.Container{
@@ -26,8 +26,8 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Image: "alpine/git:v2.30.2",
 					VolumeMounts: []apiv1.VolumeMount{
 						{
-							MountPath: fmt.Sprintf("/%s", __w),
-							Name:      __w,
+							MountPath: fmt.Sprintf("/%s", workingDirectory),
+							Name:      workingDirectory,
 						},
 					},
 				},
@@ -38,13 +38,13 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Image: "gcr.io/kaniko-project/executor:v1.6.0",
 					Args: []string{
 						fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
-						fmt.Sprintf("--context=dir://%s", __w),
+						fmt.Sprintf("--context=dir://%s", workingDirectory),
 						fmt.Sprintf("--destination=%s", it.Destination),
 					},
 					VolumeMounts: []apiv1.VolumeMount{
 						{
-							MountPath: fmt.Sprintf("/%s", __w),
-							Name:      __w,
+							MountPath: fmt.Sprintf("/%s", workingDirectory),
+							Name:      workingDirectory,
 						},
 					},
 				},
