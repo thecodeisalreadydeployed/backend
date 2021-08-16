@@ -6,5 +6,5 @@ import (
 )
 
 func Info(msg string) {
-	logger.Logger().Info(msg, zap.String("module", "gitopscontroller"))
+	logger.Logger().Info(msg, zap.String("package", "gitopscontroller"))
 }
