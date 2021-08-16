@@ -26,6 +26,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210813211128-0a44fdfbc16e // indirect
 	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	gorm.io/gorm v1.21.13 // indirect
 	k8s.io/api v0.19.13 // indirect
 	k8s.io/apimachinery v0.19.13 // indirect
 	k8s.io/client-go v0.19.13 // indirect
