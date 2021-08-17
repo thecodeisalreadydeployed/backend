@@ -33,6 +33,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 							Name:      workingDirectory,
 						},
 					},
+					Command: []string{"clone", it.BuildContext},
 				},
 			},
 			Containers: []apiv1.Container{
