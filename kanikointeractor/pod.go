@@ -18,6 +18,9 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			Volumes: []apiv1.Volume{
 				{
 					Name: workingDirectory,
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{},
+					},
 				},
 			},
 			InitContainers: []apiv1.Container{
