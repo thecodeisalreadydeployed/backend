@@ -19,7 +19,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git@github.com:thecodeisalreadydeployed/backend.git
+    repoURL: https://github.com/thecodeisalreadydeployed/backend.git
     targetRevision: k8s
     path: .
   destination:
