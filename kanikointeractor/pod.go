@@ -5,6 +5,7 @@ import (
 
 	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/util"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -29,7 +30,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "kaniko",
+			Name:   fmt.Sprintf("kaniko-%s", util.RandomString(5)),
 			Labels: podLabel,
 		},
 		Spec: apiv1.PodSpec{
