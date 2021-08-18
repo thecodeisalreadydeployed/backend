@@ -21,6 +21,7 @@ spec:
   source:
     repoURL: git@github.com:thecodeisalreadydeployed/backend.git
     targetRevision: k8s
+    path: .
   destination:
     server: https://kubernetes.default.svc
     namespace: default
