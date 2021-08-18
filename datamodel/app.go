@@ -15,5 +15,11 @@ type App struct {
 }
 
 func (app *App) toModel() model.App {
-	return model.App{}
+	return model.App{
+		ID:        app.ID,
+		Name:      app.Name,
+		GitSource: app.GitSource,
+		CreatedAt: app.CreatedAt,
+		UpdatedAt: app.UpdatedAt,
+	}
 }

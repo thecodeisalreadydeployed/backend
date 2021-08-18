@@ -14,5 +14,10 @@ type Project struct {
 }
 
 func (p *Project) toModel() model.Project {
-	return model.Project{}
+	return model.Project{
+		ID:        p.ID,
+		Name:      p.Name,
+		CreatedAt: p.CreatedAt,
+		UpdatedAt: p.UpdatedAt,
+	}
 }
