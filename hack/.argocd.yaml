@@ -8,3 +8,16 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   admin.enabled: "true"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: codedeploy
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:thecodeisalreadydeployed/backend.git
+    targetRevision: k8s
