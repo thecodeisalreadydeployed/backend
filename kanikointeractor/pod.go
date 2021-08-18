@@ -14,6 +14,8 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		Name:      workingDirectory,
 	}
 
+	dotSSH := ".ssh"
+
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "kaniko",
@@ -30,15 +32,21 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
-					Name:         "busybox",
-					Image:        "busybox:1.33.1",
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
+					Name:  "busybox",
+					Image: "busybox:1.33.1",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
+						MountPath: fmt.Sprintf("/%s", dotSSH),
+						Name:      dotSSH,
+					}},
 				},
 				{
-					Name:         "git",
-					Image:        "alpine/git:v2.30.2",
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
-					Command:      []string{"clone", it.BuildContext},
+					Name:  "git",
+					Image: "alpine/git:v2.30.2",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
+						MountPath: "/root/.ssh",
+						Name:      dotSSH,
+					}},
+					Command: []string{"clone", it.BuildContext},
 				},
 			},
 			Containers: []apiv1.Container{
