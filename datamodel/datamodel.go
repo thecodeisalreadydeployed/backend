@@ -9,3 +9,7 @@ func NewProjectFromModel() Project {
 func NewAppFromModel(app model.App) App {
 	return App{}
 }
+
+func NewDeploymentFromModel() Deployment {
+	return Deployment{}
+}
