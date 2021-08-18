@@ -1,6 +1,10 @@
 package datamodel
 
-import "time"
+import (
+	"time"
+
+	"github.com/thecodeisalreadydeployed/model"
+)
 
 type Project struct {
 	ID        string `gorm:"primaryKey"`
@@ -9,4 +13,6 @@ type Project struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-func (p *Project) toModel() {}
+func (p *Project) toModel() model.Project {
+	return model.Project{}
+}

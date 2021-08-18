@@ -1,6 +1,10 @@
 package datamodel
 
-import "time"
+import (
+	"time"
+
+	"github.com/thecodeisalreadydeployed/model"
+)
 
 type DeploymentState string
 
@@ -23,4 +27,4 @@ type Deployment struct {
 	State     DeploymentState
 }
 
-func (dpl *Deployment) toModel() {}
+func (dpl *Deployment) toModel() model.Deployment {}
