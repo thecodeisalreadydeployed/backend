@@ -3,6 +3,8 @@ package kanikointeractor
 import (
 	"fmt"
 
+	"github.com/imdario/mergo"
+	"github.com/thecodeisalreadydeployed/model"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -16,9 +18,19 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 
 	dotSSH := ".ssh"
 
+	podLabel := map[string]string{
+		"codedeploy/component": "kaniko",
+	}
+	defaultPodLabel := model.PodLabel(it.DeploymentID)
+	err := mergo.Merge(&podLabel, defaultPodLabel)
+	if err != nil {
+		panic(err)
+	}
+
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "kaniko",
+			Name:   "kaniko",
+			Labels: podLabel,
 		},
 		Spec: apiv1.PodSpec{
 			RestartPolicy: apiv1.RestartPolicyNever,
