@@ -8,3 +8,9 @@ type Project struct {
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
+
+func NewProjectFromModel() Project {
+	return Project{}
+}
+
+func (p *Project) toModel() {}
