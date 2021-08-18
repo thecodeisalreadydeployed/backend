@@ -22,3 +22,5 @@ type Deployment struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	State     DeploymentState
 }
+
+func (dpl *Deployment) toModel() {}
