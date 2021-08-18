@@ -9,6 +9,11 @@ import (
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 	workingDirectory := "__w"
+	workingDirectoryVolumeMount := apiv1.VolumeMount{
+		MountPath: fmt.Sprintf("/%s", workingDirectory),
+		Name:      workingDirectory,
+	}
+
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "kaniko",
@@ -25,19 +30,15 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
-					Name:  "git",
-					Image: "alpine/git:v2.30.2",
-					VolumeMounts: []apiv1.VolumeMount{
-						{
-							MountPath: fmt.Sprintf("/%s", workingDirectory),
-							Name:      workingDirectory,
-						},
-					},
-					Command: []string{"clone", it.BuildContext},
+					Name:         "git",
+					Image:        "alpine/git:v2.30.2",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
+					Command:      []string{"clone", it.BuildContext},
 				},
 				{
-					Name:  "busybox",
-					Image: "busybox:1.33.1",
+					Name:         "busybox",
+					Image:        "busybox:1.33.1",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
 			Containers: []apiv1.Container{
@@ -49,12 +50,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						fmt.Sprintf("--context=dir://%s", workingDirectory),
 						fmt.Sprintf("--destination=%s", it.Destination),
 					},
-					VolumeMounts: []apiv1.VolumeMount{
-						{
-							MountPath: fmt.Sprintf("/%s", workingDirectory),
-							Name:      workingDirectory,
-						},
-					},
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
 		},
