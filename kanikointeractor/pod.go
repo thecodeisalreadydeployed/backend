@@ -29,6 +29,12 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						EmptyDir: &apiv1.EmptyDirVolumeSource{},
 					},
 				},
+				{
+					Name: dotSSH,
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{},
+					},
+				},
 			},
 			InitContainers: []apiv1.Container{
 				{
