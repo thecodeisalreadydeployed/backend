@@ -30,15 +30,15 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
+					Name:         "busybox",
+					Image:        "busybox:1.33.1",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
+				},
+				{
 					Name:         "git",
 					Image:        "alpine/git:v2.30.2",
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 					Command:      []string{"clone", it.BuildContext},
-				},
-				{
-					Name:         "busybox",
-					Image:        "busybox:1.33.1",
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
 			Containers: []apiv1.Container{
