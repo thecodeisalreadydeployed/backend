@@ -12,6 +12,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2 // indirect
 	github.com/gofiber/fiber/v2 v2.16.0 // indirect
 	github.com/gophercloud/gophercloud v0.0.0-20190126172459-c818fa66e4c8 // indirect
+	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jcmturner/gokrb5/v8 v8.2.0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
