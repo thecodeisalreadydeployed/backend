@@ -4,6 +4,7 @@ resources:
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/common/ns-and-sa.yaml
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/rbac/rbac.yaml
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/common/ingress-class.yaml
+  - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/common/default-server-secret.yaml
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/common/crds/k8s.nginx.org_virtualservers.yaml
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/common/crds/k8s.nginx.org_virtualserverroutes.yaml
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubernetes-ingress/v1.12.0/deployments/common/crds/k8s.nginx.org_transportservers.yaml
