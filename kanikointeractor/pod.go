@@ -35,6 +35,10 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					},
 					Command: []string{"clone", it.BuildContext},
 				},
+				{
+					Name:  "busybox",
+					Image: "busybox:1.33.1",
+				},
 			},
 			Containers: []apiv1.Container{
 				{
