@@ -3,7 +3,7 @@ package apiserver
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/cast"
+	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"log"
@@ -13,23 +13,29 @@ func APIServer(port int) {
 	app := fiber.New()
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
-		projectID := cast.ToString(c.Params("projectID"))
-		return c.SendString(projectID)
+		query := new(model.Project)
+		query.ID = c.Params("projectID")
+		result := datastore.GetProject(query)
+		return c.JSON(result)
 	})
 
 	app.Get("/app/:appID", func(c *fiber.Ctx) error {
-		appID := cast.ToString(c.Params("appID"))
-		return c.SendString(appID)
+		query := new(model.App)
+		query.ID = c.Params("appID")
+		result := datastore.GetApp(query)
+		return c.JSON(result)
 	})
 
 	app.Get("/deployment/:deploymentID", func(c *fiber.Ctx) error {
-		deploymentID := cast.ToString(c.Params("deploymentID"))
-		return c.SendString(deploymentID)
+		query := new(model.Deployment)
+		query.ID = c.Params("appID")
+		result := datastore.GetDeployment(query)
+		return c.JSON(result)
 	})
 
 	app.Get("/deployment/:deploymentID/event", func(c *fiber.Ctx) error {
-		deploymentID := cast.ToString(c.Params("deploymentID"))
-		return c.SendString(deploymentID)
+		event := datastore.GetEvent(c.Params("deploymentID"))
+		return c.SendString(event)
 	})
 
 	app.Post("/create", func(c *fiber.Ctx) error {
