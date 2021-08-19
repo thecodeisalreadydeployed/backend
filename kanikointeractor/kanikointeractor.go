@@ -13,6 +13,7 @@ type KanikoInteractor struct {
 	Registry     containerregistry.ContainerRegistryType
 	BuildContext string
 	Destination  string
+	DeploymentID string
 }
 
 func (it *KanikoInteractor) BuildContainerImage() error {
