@@ -2,11 +2,12 @@ package apiserver
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/model"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
-	"log"
 )
 
 func APIServer(port int) {
@@ -38,12 +39,11 @@ func APIServer(port int) {
 		return c.SendString(event)
 	})
 
-	app.Post("/create", func(c *fiber.Ctx) error {
-		payload := model.Payload{}
+	app.Post("/project/new", func(c *fiber.Ctx) error {
+		payload := dto.CreateProjectDTO{}
 		if err := c.BodyParser(&payload); err != nil {
 			return c.SendStatus(500)
 		}
-		workloadcontroller.CreateWorkload(&payload)
 		return c.SendStatus(200)
 	})
 
