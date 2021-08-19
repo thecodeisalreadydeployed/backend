@@ -1,6 +1,7 @@
 package datamodel
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/model"
@@ -11,7 +12,7 @@ type Deployment struct {
 	Name      string
 	Creator   string
 	Meta      string
-	GitBranch string
+	GitSource string
 	BuildedAt time.Time
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
@@ -19,12 +20,24 @@ type Deployment struct {
 }
 
 func (dpl *Deployment) toModel() model.Deployment {
+	gitSource := model.GitSource{}
+	err := json.Unmarshal([]byte(dpl.GitSource), &gitSource)
+	if err != nil {
+		panic(err)
+	}
+
+	creator := model.Actor{}
+	err = json.Unmarshal([]byte(dpl.Creator), &creator)
+	if err != nil {
+		panic(err)
+	}
+
 	return model.Deployment{
 		ID:        dpl.ID,
 		Name:      dpl.Name,
-		Creator:   dpl.Creator,
+		Creator:   creator,
 		Meta:      dpl.Meta,
-		GitBranch: dpl.GitBranch,
+		GitSource: gitSource,
 		BuildedAt: dpl.BuildedAt,
 		CreatedAt: dpl.CreatedAt,
 		UpdatedAt: dpl.UpdatedAt,

@@ -1,15 +1,24 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"github.com/thecodeisalreadydeployed/util"
+)
 
 type Deployment struct {
 	ID        string
 	Name      string
-	Creator   string
+	Creator   Actor
 	Meta      string
-	GitBranch string
+	GitSource GitSource
 	BuildedAt time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	State     DeploymentState
+}
+
+func GenerateDeploymentID() {
+	return fmt.Sprintf("dpl_%s", util.RandomString(5))
 }
