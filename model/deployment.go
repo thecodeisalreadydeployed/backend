@@ -7,7 +7,7 @@ type Deployment struct {
 	Name      string
 	Creator   Actor
 	Meta      string
-	GitBranch string
+	GitSource GitSource
 	BuildedAt time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
