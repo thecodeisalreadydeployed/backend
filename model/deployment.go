@@ -5,7 +5,7 @@ import "time"
 type Deployment struct {
 	ID        string
 	Name      string
-	Creator   string
+	Creator   Actor
 	Meta      string
 	GitBranch string
 	BuildedAt time.Time
