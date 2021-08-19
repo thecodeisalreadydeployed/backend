@@ -40,7 +40,7 @@ func APIServer(port int) {
 	})
 
 	app.Post("/project/new", func(c *fiber.Ctx) error {
-		payload := dto.CreateProjectDTO{}
+		payload := dto.CreateProjectRequest{}
 		if err := c.BodyParser(&payload); err != nil {
 			return c.SendStatus(500)
 		}
