@@ -1,6 +1,7 @@
 package datamodel
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/model"
@@ -15,10 +16,15 @@ type App struct {
 }
 
 func (app *App) toModel() model.App {
+	gitSource := model.GitSource{}
+	err := json.Unmarshal([]byte(app.GitSource), &gitSource)
+	if err != nil {
+		panic(err)
+	}
 	return model.App{
 		ID:        app.ID,
 		Name:      app.Name,
-		GitSource: app.GitSource,
+		GitSource: gitSource,
 		CreatedAt: app.CreatedAt,
 		UpdatedAt: app.UpdatedAt,
 	}
