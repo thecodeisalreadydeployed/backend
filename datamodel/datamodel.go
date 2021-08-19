@@ -32,5 +32,25 @@ func NewAppFromModel(app model.App) App {
 }
 
 func NewDeploymentFromModel(dpl model.Deployment) Deployment {
-	return Deployment{}
+	gitSource, err := json.Marshal(dpl.GitSource)
+	if err != nil {
+		panic(err)
+	}
+
+	creator, err := json.Marshal(dpl.Creator)
+	if err != nil {
+		panic(err)
+	}
+
+	return Deployment{
+		ID:        dpl.ID,
+		Name:      dpl.Name,
+		Meta:      dpl.Meta,
+		State:     dpl.State,
+		GitSource: cast.ToString(gitSource),
+		Creator:   cast.ToString(creator),
+		BuildedAt: dpl.BuildedAt,
+		CreatedAt: dpl.CreatedAt,
+		UpdatedAt: dpl.UpdatedAt,
+	}
 }
