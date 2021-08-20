@@ -23,7 +23,10 @@ jobs:
       - run: ssh-keygen -b 2048 -t rsa -f $(pwd)/_ssh/id_rsa -q -N ""
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
-      - run: sudo cp _ssh/id_rsa ~/.ssh
+      - id: private-key
+        run: |
+          PRIVATE_KEY=$(cat _ssh/id_rsa)
+          echo '::set-output name=ssh-private-key::$PRIVATE_KEY'
       - run: docker restart gitserver
       - run: |
           cd _tmp/repos
@@ -33,5 +36,8 @@ jobs:
           sudo touch .codedeploy
           sudo git add .codedeploy
           sudo git commit -m ".codedeploy: init"
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ steps.private-key.outputs.ssh-private-key }}
       - run: git clone ssh://codedeploy@localhost:2222/gitserver/repos/userspace.git
       - run: ls
