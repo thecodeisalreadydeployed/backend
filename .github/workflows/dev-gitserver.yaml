@@ -20,7 +20,7 @@ jobs:
             -v $(pwd)/_tmp/keys:/__w/keys \
             -v $(pwd)/_tmp/repos:/__w/repos \
             thecodeisalreadydeployed/gitserver:dev
-      - run: ssh-keygen -b 2048 -t rsa -f $(pwd)/_ssh/id_rsa -q -N ""
+      - run: ssh-keygen -b 2048 -t rsa -f $(pwd)/_ssh/id_rsa -q -N "" -m pem
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
       - id: private-key
