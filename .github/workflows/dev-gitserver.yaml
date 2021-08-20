@@ -26,9 +26,9 @@ jobs:
       - run: sudo cp _ssh/sshkey ~/.ssh
       - run: docker restart gitserver
       - run: |
-          sudo cd _tmp/repos
+          cd _tmp/repos
           sudo mkdir userspace
-          sudo cd userspace
+          cd userspace
           sudo git init --shared=true
           sudo touch .codedeploy
           sudo git add .codedeploy
