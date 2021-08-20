@@ -12,5 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: cd dev/gitserver && docker build -t thecodeisalreadydeployed/gitserver:dev .
-      - run: docker run -itd -p 2222:22 --name gitserver thecodeisalreadydeployed/gitserver:dev
+      - run: docker run -d -p 2222:22 --name gitserver thecodeisalreadydeployed/gitserver:dev
       - run: docker exec gitserver init-repo codedeploy password userspace
