@@ -8,11 +8,14 @@ import (
 )
 
 type App struct {
-	ID        string
-	Name      string
-	GitSource GitSource
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID              string
+	Name            string
+	GitSource       GitSource
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	BuildCommand    string
+	OutputDirectory string
+	InstallCommand  string
 }
 
 func GenerateAppID() string {
