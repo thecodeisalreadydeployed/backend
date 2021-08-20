@@ -11,5 +11,5 @@ W=/__w
 
 PATH=$W/$USERNAME/$REPO
 
-pwd
+ls -a /usr/bin
 git init --bare $PATH
