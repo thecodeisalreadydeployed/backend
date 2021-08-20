@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ "$(ls -A /__w/keys/)" ]; then
-  cd /home/git
+  cd /home/codedeploy
   cat /__w/keys/*.pub > .ssh/authorized_keys
   chown -R codedeploy:codedeploy .ssh
   chmod 700 .ssh
