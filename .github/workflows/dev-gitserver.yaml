@@ -24,3 +24,4 @@ jobs:
       - run: ls _ssh/
       - run: sudo cp _ssh/sshkey.pub _tmp/keys
       - run: sudo cp _ssh/sshkey ~/.ssh
+      - run: docker restart gitserver
