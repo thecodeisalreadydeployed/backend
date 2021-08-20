@@ -6,7 +6,6 @@ RUN apk add git
 RUN apk add shadow
 
 VOLUME /__w
-WORKDIR /__w
 
 COPY init-user.sh /usr/local/bin/init-user
 COPY init-repo.sh /usr/local/bin/init-repo
