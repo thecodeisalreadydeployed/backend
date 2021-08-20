@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "dev/gitserver/**"
+      - ".github/workflows/dev-gitserver.yaml"
     branches:
       - dev/gitserver
 jobs:
