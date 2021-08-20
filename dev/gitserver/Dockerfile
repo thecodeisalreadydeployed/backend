@@ -4,4 +4,6 @@ RUN apk add openssh-server
 RUN ssh-keygen -A
 RUN apk add git
 RUN apk add shadow
-RUN mkdir /__w
+
+VOLUME /__w
+WORKDIR /__w
