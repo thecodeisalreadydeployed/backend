@@ -19,6 +19,6 @@ type Deployment struct {
 	State     DeploymentState
 }
 
-func GenerateDeploymentID() {
+func GenerateDeploymentID() string {
 	return fmt.Sprintf("dpl_%s", util.RandomString(5))
 }
