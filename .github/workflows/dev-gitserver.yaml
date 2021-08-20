@@ -12,11 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: cd dev/gitserver && docker build -t thecodeisalreadydeployed/gitserver:dev .
+      - run: mkdir _tmp && mkdir _ssh
       - run: |
-          mkdir tmp
           docker run -d \
             -p 2222:22 \
             --name gitserver \
-            -v $(pwd)/tmp/keys:/__w/keys \
-            -v $(pwd)/tmp/repos:/__w/repos \
+            -v $(pwd)/_tmp/keys:/__w/keys \
+            -v $(pwd)/_tmp/repos:/__w/repos \
             thecodeisalreadydeployed/gitserver:dev
+      - run: ssh-keygen -b 2048 -t rsa -f $(pwd)/_ssh/sshkey -q -N ""
+      - run: ls _ssh/
+      - run: cp _ssh/sshkey.pub _tmp/keys
