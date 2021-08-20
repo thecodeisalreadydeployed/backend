@@ -8,7 +8,7 @@ import (
 
 func CreateDeploymentYAML(dpl *dto.Deployment) string {
 	var port json.Port
-	port.ContainerPort                        = []int{ dpl.ContainerSpec.Port }
+	port.ContainerPort                        = dpl.ContainerSpec.Port
 
 	var ctn json.Container
 	ctn.ContainerName                         = dpl.ContainerSpec.Name

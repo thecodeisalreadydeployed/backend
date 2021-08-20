@@ -42,6 +42,6 @@ type Container struct {
 }
 
 type Port struct {
-	ContainerPort    []int             `json:"containerPort"`
+	ContainerPort    int             `json:"containerPort"`
 }
 
