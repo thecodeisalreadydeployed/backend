@@ -26,11 +26,12 @@ jobs:
       - run: sudo cp _ssh/sshkey ~/.ssh
       - run: docker restart gitserver
       - run: |
-          cd _tmp/repos
-          mkdir userspace
-          cd userspace
-          git init --shared=true
-          touch .codedeploy
-          git add .codedeploy
-          git commit -m ".codedeploy: init"
+          sudo cd _tmp/repos
+          sudo mkdir userspace
+          sudo cd userspace
+          sudo git init --shared=true
+          sudo touch .codedeploy
+          sudo git add .codedeploy
+          sudo git commit -m ".codedeploy: init"
       - run: git clone ssh://codedeploy@localhost:2222/gitserver/repos/userspace.git
+      - run: ls
