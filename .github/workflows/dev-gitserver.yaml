@@ -26,7 +26,7 @@ jobs:
       - id: private-key
         run: |
           PRIVATE_KEY=$(cat _ssh/id_rsa)
-          echo "::set-output name=ssh-private-key::$PRIVATE_KEY"
+          echo "PRIVATE_KEY=$PRIVATE_KEY" >> $GITHUB_ENV
       - run: docker restart gitserver
       - run: |
           cd _tmp/repos
@@ -36,9 +36,9 @@ jobs:
           sudo touch .codedeploy
           sudo git add .codedeploy
           sudo git commit -m ".codedeploy: init"
-      - run: echo ${{ steps.private-key.outputs.ssh-private-key }}
+      - run: echo ${{ env.PRIVATE_KEY }}
       - uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ steps.private-key.outputs.ssh-private-key }}
+          ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: git clone ssh://codedeploy@localhost:2222/gitserver/repos/userspace.git
       - run: ls
