@@ -11,4 +11,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - run: cd dev/gitserver && docker build .
+      - run: cd dev/gitserver && docker build -t thecodeisalreadydeployed/gitserver:dev .
+      - run: docker run -d -p 2222:22 --name gitserver thecodeisalreadydeployed/gitserver:dev
+      - run: docker exec gitserver init-user codedeploy password
