@@ -6,7 +6,7 @@ RUN apk add --no-cache openssh git
 RUN ssh-keygen -A
 WORKDIR /__w/
 RUN mkdir /__w/keys \
-  && adduser -D -s /usr/bin/git-shell git \
+  && adduser -D -s /usr/bin/git-shell codedeploy \
   && echo codedeploy:password | chpasswd \
   && mkdir /home/git/.ssh
 COPY sshd_config /etc/ssh/sshd_config
