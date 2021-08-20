@@ -25,7 +25,7 @@ jobs:
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
       - id: private-key
         run: |
-          echo 'PRIVATE_KEY=<<EOF' >> $GITHUB_ENV
+          echo 'PRIVATE_KEY<<EOF' >> $GITHUB_ENV
           cat _ssh/id_rsa >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - run: docker restart gitserver
