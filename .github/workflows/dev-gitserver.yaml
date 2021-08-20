@@ -22,4 +22,4 @@ jobs:
             thecodeisalreadydeployed/gitserver:dev
       - run: ssh-keygen -b 2048 -t rsa -f $(pwd)/_ssh/sshkey -q -N ""
       - run: ls _ssh/
-      - run: cp _ssh/sshkey.pub _tmp/keys
+      - run: sudo cp _ssh/sshkey.pub _tmp/keys
