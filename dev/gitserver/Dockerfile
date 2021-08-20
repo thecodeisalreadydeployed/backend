@@ -1,9 +1,10 @@
 FROM alpine
 
 RUN apk update
-RUN apk add openssh-server
+RUN apk upgrade
+RUN apk add --no-cache openssh-server
 RUN ssh-keygen -A
-RUN apk add git shadow
+RUN apk add --no-cache git shadow bash
 
 RUN mkdir /__w
 
