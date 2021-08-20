@@ -8,11 +8,14 @@ import (
 )
 
 type App struct {
-	ID        string `gorm:"primaryKey"`
-	Name      string
-	GitSource string
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+	ID              string `gorm:"primaryKey"`
+	Name            string
+	GitSource       string
+	CreatedAt       time.Time `gorm:"autoCreateTime"`
+	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
+	BuildCommand    string
+	OutputDirectory string
+	InstallCommand  string
 }
 
 func (app *App) toModel() model.App {
@@ -27,5 +30,8 @@ func (app *App) toModel() model.App {
 		GitSource: gitSource,
 		CreatedAt: app.CreatedAt,
 		UpdatedAt: app.UpdatedAt,
+		BuildCommand:    app.BuildCommand,
+		OutputDirectory: app.OutputDirectory,
+		InstallCommand:  app.InstallCommand,
 	}
 }
