@@ -17,6 +17,6 @@ jobs:
           docker run -d \
             -p 2222:22 \
             --name gitserver \
-            -v tmp/keys:/__w/keys \
-            -v tmp/repos:/__w/repos \
+            -v $(pwd)/tmp/keys:/__w/keys \
+            -v $(pwd)/tmp/repos:/__w/repos \
             thecodeisalreadydeployed/gitserver:dev
