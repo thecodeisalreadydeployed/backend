@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add openssh-server
+RUN apk --update add openssh-server
 RUN ssh-keygen -A
 RUN apk add git
 RUN apk add shadow
