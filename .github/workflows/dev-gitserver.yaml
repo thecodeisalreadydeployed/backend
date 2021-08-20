@@ -14,3 +14,4 @@ jobs:
       - run: cd dev/gitserver && docker build -t thecodeisalreadydeployed/gitserver:dev .
       - run: docker run -d -p 2222:22 --name gitserver thecodeisalreadydeployed/gitserver:dev
       - run: docker exec gitserver init-user codedeploy password
+      - run: docker exec gitserver init-repo codedeploy userspace
