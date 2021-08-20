@@ -7,3 +7,6 @@ RUN apk add shadow
 
 VOLUME /__w
 WORKDIR /__w
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
