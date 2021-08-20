@@ -1,0 +1,13 @@
+name: dev/gitserver
+on:
+  push:
+    paths:
+      - "dev/gitserver/**"
+    branches:
+      - dev/gitserver
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: cd dev/gitserver && docker build .
