@@ -37,7 +37,6 @@ jobs:
           sudo touch .codedeploy
           sudo git add .codedeploy
           sudo git commit -m ".codedeploy: init"
-      - run: echo ${{ env.PRIVATE_KEY }}
       - uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
