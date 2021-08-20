@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -44,6 +45,14 @@ func APIServer(port int) {
 		if err := c.BodyParser(&payload); err != nil {
 			return c.SendStatus(500)
 		}
+		return c.SendStatus(200)
+	})
+
+	app.Get("/test", func(c *fiber.Ctx) error {
+		payload := dto.CreateProjectRequest{
+			Name: "test",
+		}
+		workloadcontroller.CreateWorkload(&payload)
 		return c.SendStatus(200)
 	})
 
