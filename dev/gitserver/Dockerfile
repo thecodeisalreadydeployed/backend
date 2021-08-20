@@ -8,8 +8,8 @@ RUN apk add shadow
 VOLUME /__w
 WORKDIR /__w
 
-COPY adduser.sh /usr/local/bin/adduser
-COPY gitinit.sh /usr/local/bin/gitinit
+COPY init-user.sh /usr/local/bin/init-user
+COPY init-repo.sh /usr/local/bin/init-repo
 RUN chmod +x /usr/local/bin/adduser /usr/local/bin/gitinit
 
 EXPOSE 22
