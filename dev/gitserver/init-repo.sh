@@ -11,6 +11,7 @@ W=/__w
 
 PATH=$W/$USERNAME/$REPO
 
+pwd
 git init --bare $PATH
 
 chown $USERNAME.$USERNAME -R $PATH
