@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine
 
 RUN apk add openssh-server
 RUN ssh-keygen -A
