@@ -48,12 +48,13 @@ func APIServer(port int) {
 		return c.SendStatus(200)
 	})
 
+	// TODO: Delete this.
 	app.Get("/test", func(c *fiber.Ctx) error {
 		payload := dto.CreateProjectRequest{
 			Name: "test",
 		}
-		workloadcontroller.CreateWorkload(&payload)
-		return c.SendStatus(200)
+		yaml := workloadcontroller.CreateWorkload(&payload)
+		return c.SendString(yaml)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))

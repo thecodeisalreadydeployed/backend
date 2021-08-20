@@ -1,18 +1,15 @@
 package workloadcontroller
 
 import (
-	"fmt"
 	apidto "github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
 	manifestdto "github.com/thecodeisalreadydeployed/manifestgenerator/dto"
 )
 
-func CreateWorkload(w *apidto.CreateProjectRequest) {
-	fmt.Printf("Workload %s created.", w.Name)
-
+func CreateWorkload(w *apidto.CreateProjectRequest) string {
 	spec := manifestdto.ContainerSpec{
 		Name: "nginx-container",
-		Image: "nginx-fa6ajsgh",
+		Image: "nginx",
 		Port: 8000,
 	}
 
@@ -24,5 +21,5 @@ func CreateWorkload(w *apidto.CreateProjectRequest) {
 		ContainerSpec: spec,
 	}
 
-	fmt.Println(manifestgenerator.CreateDeploymentYAML(&dpl))
+	return manifestgenerator.CreateDeploymentYAML(&dpl)
 }
