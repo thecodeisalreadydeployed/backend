@@ -8,7 +8,7 @@ WORKDIR /__w/
 RUN mkdir /__w/keys \
   && adduser -D -s /usr/bin/git-shell codedeploy \
   && echo codedeploy:password | chpasswd \
-  && mkdir /home/git/.ssh
+  && mkdir /home/codedeploy/.ssh
 COPY sshd_config /etc/ssh/sshd_config
 COPY start.sh start.sh
 
