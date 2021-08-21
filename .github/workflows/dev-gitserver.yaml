@@ -23,6 +23,7 @@ jobs:
       - run: ssh-keygen -t ed25519 -a 100 -f $(pwd)/_ssh/id_rsa -q -N "" -m pem -R localhost:2222
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
+      - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
       - id: private-key
         run: |
           echo 'PRIVATE_KEY<<EOF' >> $GITHUB_ENV
@@ -41,8 +42,5 @@ jobs:
       - run: docker ps
       - run: docker exec gitserver ls /__w/keys
       - run: docker exec gitserver ls /__w/repos
-      - uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
       - run: ls
