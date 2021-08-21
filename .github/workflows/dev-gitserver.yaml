@@ -45,5 +45,12 @@ jobs:
       - run: docker inspect gitserver
       - run: docker exec gitserver ls /__w/keys
       - run: docker exec gitserver ls /__w/repos
+      - uses: appleboy/ssh-action@master
+        with:
+          host: localhost
+          port: 2222
+          username: codedeploy
+          key: ${{ env.PRIVATE_KEY }}
+          script: whoami
       - run: sudo git clone ssh://codedeploy@127.0.0.1:2222/__w/repos/userspace.git
       - run: ls
