@@ -29,7 +29,7 @@ func NewGitInteractor() GitInteractor {
 }
 
 func NewGitInteractorSSH(url string) GitInteractor {
-	if strings.HasPrefix(url, "ssh://") {
+	if !strings.HasPrefix(url, "ssh://") {
 		panic("Repository URL has no ssh:// prefix.")
 	}
 
