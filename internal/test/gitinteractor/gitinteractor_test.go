@@ -9,5 +9,6 @@ import (
 
 func TestGitInteractor_Clone(t *testing.T) {
 	git := it.NewGitInteractor()
+	_ = git
 	assert.True(t, true)
 }
