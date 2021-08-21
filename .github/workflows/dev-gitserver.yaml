@@ -56,7 +56,7 @@ jobs:
       - uses: appleboy/ssh-action@master
         with:
           host: 127.0.0.1
-          port: 2222
+          port: 8080
           username: git
           key: ${{ env.PRIVATE_KEY }}
           script: whoami
