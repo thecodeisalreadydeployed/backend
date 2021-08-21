@@ -31,7 +31,7 @@ jobs:
       - run: docker restart gitserver
       - run: mkdir ~/.ssh
       - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
-      - run: ssh-keyscan localhost >> ~/.ssh/known_hosts
+      - run: ssh-keyscan 127.0.0.1:2222 >> ~/.ssh/known_hosts
       - run: |
           cd _tmp/repos
           sudo mkdir userspace
@@ -45,5 +45,5 @@ jobs:
       - run: docker inspect gitserver
       - run: docker exec gitserver ls /__w/keys
       - run: docker exec gitserver ls /__w/repos
-      - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
+      - run: git clone ssh://codedeploy@127.0.0.1:2222/__w/repos/userspace
       - run: ls
