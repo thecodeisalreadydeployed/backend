@@ -44,4 +44,7 @@ jobs:
           chmod 700 ~/.ssh
           sudo chmod -c 0755 ~/
           ls -la ~/.ssh
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: go test -v ./internal/test/gitinteractor/
