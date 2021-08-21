@@ -50,7 +50,6 @@ jobs:
       - run: |
           chmod 600 ~/.ssh/authorized_keys
           chmod 600 ~/.ssh
-          sudo chmod -c 0755 ~/
           ls -la ~/.ssh
       - uses: webfactory/ssh-agent@v0.5.3
         with:
