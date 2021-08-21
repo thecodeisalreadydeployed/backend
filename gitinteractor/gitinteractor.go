@@ -2,7 +2,6 @@ package gitinteractor
 
 import (
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -41,8 +40,7 @@ func NewGitInteractorSSH(url string) GitInteractor {
 	home, _ := homedir.Dir()
 	sshKeyFile := filepath.Join(home, "/.ssh/id_rsa")
 	fmt.Printf("sshKeyFile: %v\n", sshKeyFile)
-	sshKey, _ := ioutil.ReadFile(sshKeyFile)
-	publicKey, keyError := ssh.NewPublicKeys("codedeploy", []byte(sshKey), "")
+	publicKey, keyError := ssh.NewPublicKeysFromFile("codedeploy", sshKeyFile, "")
 	if keyError != nil {
 		panic(keyError)
 	}
