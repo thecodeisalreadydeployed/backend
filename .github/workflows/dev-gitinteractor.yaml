@@ -1,0 +1,41 @@
+name: dev/gitinteractor
+on:
+  push:
+    paths:
+      - "internal/test/gitinteractor/**"
+      - ".github/workflows/dev-gitinteractor.yaml"
+    branches:
+      - dev/gitinteractor
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: cd dev/gitserver && docker build -t thecodeisalreadydeployed/gitserver:dev .
+      - run: mkdir _tmp && mkdir _ssh
+      - run: |
+          docker run -d \
+            -p 2222:22 \
+            --name gitserver \
+            -v $(pwd)/_tmp/keys:/__w/keys \
+            -v $(pwd)/_tmp/repos:/__w/repos \
+            thecodeisalreadydeployed/gitserver:dev
+      - run: ssh-keygen -t rsa -f $(pwd)/_ssh/id_rsa -q -N "" -m pem
+      - run: ls _ssh/
+      - run: sudo cp _ssh/id_rsa.pub _tmp/keys
+      - id: private-key
+        run: |
+          echo 'PRIVATE_KEY<<EOF' >> $GITHUB_ENV
+          cat _ssh/id_rsa >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+      - run: docker restart gitserver
+      - run: mkdir ~/.ssh
+      - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
+      - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
+      - run: cat _ssh/id_rsa.pub | tee -a ~/.ssh/authorized_keys
+      - run: |
+          chmod 600 ~/.ssh/authorized_keys
+          chmod 700 ~/.ssh
+          sudo chmod -c 0755 ~/
+          ls -la ~/.ssh
+      - run: go test -v internal/test/gitinteractor
