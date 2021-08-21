@@ -20,13 +20,6 @@ jobs:
             -v $(pwd)/_tmp/keys:/__w/keys \
             -v $(pwd)/_tmp/repos:/__w/repos \
             thecodeisalreadydeployed/gitserver:dev
-      - run: |
-          docker run -d \
-            -p 8080:22 \
-            --name gitserver-docker \
-            -v $(pwd)/_tmp/keys:/git-server/keys \
-            -v $(pwd)/_tmp/repos:/git-server/repos \
-            jkarlos/git-server-docker:latest
       - run: ssh-keygen -t rsa -f $(pwd)/_ssh/id_rsa -q -N ""
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
@@ -60,5 +53,5 @@ jobs:
       - run: docker inspect gitserver
       - run: docker exec gitserver ls /__w/keys
       - run: docker exec gitserver ls /__w/repos
-      - run: sudo git clone ssh://codedeploy@127.0.0.1:2222/__w/repos/userspace.git
+      - run: sudo git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
       - run: ls
