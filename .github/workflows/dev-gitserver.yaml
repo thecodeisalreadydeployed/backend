@@ -55,4 +55,4 @@ jobs:
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
-      - run: ls userspace/
+      - run: ls -a userspace/
