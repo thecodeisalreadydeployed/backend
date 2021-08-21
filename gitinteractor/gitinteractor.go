@@ -2,7 +2,6 @@ package gitinteractor
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -12,7 +11,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/mitchellh/go-homedir"
 	"github.com/thecodeisalreadydeployed/config"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -31,11 +29,8 @@ func NewGitInteractor() GitInteractor {
 	return it
 }
 
-func NewGitInteractorSSH(url string) GitInteractor {
-	home, _ := homedir.Dir()
-	sshKeyFile := filepath.Join(home, "/.ssh/id_rsa")
-	fmt.Printf("sshKeyFile: %v\n", sshKeyFile)
-	publicKey, keyError := ssh.NewPublicKeysFromFile("codedeploy", sshKeyFile, "")
+func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
+	publicKey, keyError := ssh.NewPublicKeys("codedeploy", []byte(privateKey), "")
 	if keyError != nil {
 		panic(keyError)
 	}
