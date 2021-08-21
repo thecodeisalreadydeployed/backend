@@ -48,8 +48,8 @@ jobs:
       - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
       - run: cat _ssh/id_rsa.pub | tee -a ~/.ssh/authorized_keys
       - run: |
-          sudo chmod 600 ~/.ssh/authorized_keys
-          sudo chmod 600 ~/.ssh
+          sudo chmod -R 600 ~/.ssh/authorized_keys
+          sudo chmod -R 600 ~/.ssh
           ls -la ~/.ssh
       - uses: webfactory/ssh-agent@v0.5.3
         with:
