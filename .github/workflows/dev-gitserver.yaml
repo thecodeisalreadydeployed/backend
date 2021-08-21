@@ -23,13 +23,15 @@ jobs:
       - run: ssh-keygen -t ed25519 -a 100 -f $(pwd)/_ssh/id_rsa -q -N "" -m pem
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
-      - run: mkdir ~/.ssh && sudo cp _ssh/id_rsa ~/.ssh/id_rsa
       - id: private-key
         run: |
           echo 'PRIVATE_KEY<<EOF' >> $GITHUB_ENV
           cat _ssh/id_rsa >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - run: docker restart gitserver
+      - run: mkdir ~/.ssh
+      - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
+      - run: ssh-keyscan localhost:2222 >> ~/.ssh/known_hosts
       - run: |
           cd _tmp/repos
           sudo mkdir userspace
