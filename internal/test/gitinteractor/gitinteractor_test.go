@@ -11,7 +11,7 @@ import (
 var privateKey = flag.String("private-key", "", "")
 
 func TestGitInteractor_Clone(t *testing.T) {
-	git := it.NewGitInteractorSSH("ssh://codedeploy@localhost:2222/__w/repos/userspace.git", *privateKey)
+	git := it.NewGitInteractorSSH("git+ssh://git@localhost:2222/__w/repos/userspace.git", *privateKey)
 	log := git.Log()
 	assert.Equal(t, 1, len(log))
 }
