@@ -23,7 +23,7 @@ jobs:
       - run: ssh-keygen -t ed25519 -a 100 -f $(pwd)/_ssh/id_rsa -q -N "" -m pem
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
-      - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
+      - run: mkdir ~/.ssh && sudo cp _ssh/id_rsa ~/.ssh/id_rsa
       - id: private-key
         run: |
           echo 'PRIVATE_KEY<<EOF' >> $GITHUB_ENV
