@@ -2,6 +2,8 @@ package gitinteractor
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/go-git/go-billy/v5"
@@ -9,6 +11,7 @@ import (
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/thecodeisalreadydeployed/config"
@@ -33,10 +36,18 @@ func NewGitInteractorSSH(url string) GitInteractor {
 		panic("Repository URL has no ssh:// prefix.")
 	}
 
+	sshKeyFile := os.Getenv("HOME") + "/.ssh/id_rsa"
+	sshKey, _ := ioutil.ReadFile(sshKeyFile)
+	publicKey, keyError := ssh.NewPublicKeys("codedeploy", []byte(sshKey), "")
+	if keyError != nil {
+		panic(keyError)
+	}
+
 	it := GitInteractor{}
 
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
-		URL: url,
+		URL:  url,
+		Auth: publicKey,
 	})
 	if err != nil {
 		panic(err)
