@@ -51,5 +51,8 @@ jobs:
       - run: docker inspect gitserver
       - run: docker exec gitserver ls /__w/keys
       - run: docker exec gitserver ls /__w/repos
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
       - run: ls
