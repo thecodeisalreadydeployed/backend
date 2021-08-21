@@ -31,18 +31,23 @@ func NewGitInteractor() GitInteractor {
 }
 
 func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
-	publicKey, keyError := ssh.NewPublicKeys("codedeploy", []byte(privateKey), "")
-	if keyError != nil {
-		panic(keyError)
+	signer, parsePrivateKeyErr := gossh.ParsePrivateKey([]byte(privateKey))
+	if parsePrivateKeyErr != nil {
+		panic(parsePrivateKeyErr)
 	}
 
-	publicKey.HostKeyCallback = gossh.InsecureIgnoreHostKey()
+	auth := &ssh.PublicKeys{
+		User:   "codedeploy",
+		Signer: signer,
+	}
+
+	auth.HostKeyCallback = gossh.InsecureIgnoreHostKey()
 
 	it := GitInteractor{}
 
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
 		URL:  url,
-		Auth: publicKey,
+		Auth: auth,
 	})
 	if err != nil {
 		spew.Dump(err)
