@@ -20,6 +20,13 @@ jobs:
             -v $(pwd)/_tmp/keys:/__w/keys \
             -v $(pwd)/_tmp/repos:/__w/repos \
             thecodeisalreadydeployed/gitserver:dev
+      - run: |
+          docker run -d \
+            jkarlos/git-server-docker \
+            -p 8080:22
+            --name gitserver-docker \
+            -v $(pwd)/_tmp/keys:/git-server/keys \
+            -v $(pwd)/_tmp/repos:/git-server/repos \
       - run: ssh-keygen -t ed25519 -a 100 -f $(pwd)/_ssh/id_rsa -q -N "" -m pem
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
@@ -29,6 +36,7 @@ jobs:
           cat _ssh/id_rsa >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - run: docker restart gitserver
+      - run: docker restart gitserver-docker
       - run: mkdir ~/.ssh
       - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
       - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
@@ -49,7 +57,7 @@ jobs:
         with:
           host: 127.0.0.1
           port: 2222
-          username: codedeploy
+          username: git
           key: ${{ env.PRIVATE_KEY }}
           script: whoami
       - run: sudo git clone ssh://codedeploy@127.0.0.1:2222/__w/repos/userspace.git
