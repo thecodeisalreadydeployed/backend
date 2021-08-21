@@ -3,7 +3,6 @@ package gitinteractor
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
@@ -33,10 +32,6 @@ func NewGitInteractor() GitInteractor {
 }
 
 func NewGitInteractorSSH(url string) GitInteractor {
-	if !strings.HasPrefix(url, "ssh://") {
-		panic("Repository URL has no ssh:// prefix.")
-	}
-
 	home, _ := homedir.Dir()
 	sshKeyFile := filepath.Join(home, "/.ssh/id_rsa")
 	fmt.Printf("sshKeyFile: %v\n", sshKeyFile)
