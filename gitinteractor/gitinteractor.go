@@ -3,6 +3,7 @@ package gitinteractor
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/util"
@@ -44,6 +45,7 @@ func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
 		Auth: publicKey,
 	})
 	if err != nil {
+		spew.Dump(err)
 		panic(err)
 	}
 
