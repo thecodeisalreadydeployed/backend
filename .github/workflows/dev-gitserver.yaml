@@ -31,7 +31,7 @@ jobs:
       - run: docker restart gitserver
       - run: mkdir ~/.ssh
       - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
-      - run: echo "StrictHostKeyChecking no" > ~/.ssh/config
+      - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
       - run: |
           cd _tmp/repos
           sudo mkdir userspace
