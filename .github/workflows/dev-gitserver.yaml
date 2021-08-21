@@ -3,9 +3,12 @@ on:
   push:
     paths:
       - "dev/gitserver/**"
+      - "gitinteractor/**"
+      - "internal/test/gitinteractor/**"
       - ".github/workflows/dev-gitserver.yaml"
     branches:
       - dev/gitserver
+      - dev/gitinteractor
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -55,4 +58,6 @@ jobs:
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
+      - run: git clone git@localhost:2222/__w/repos/userspace _userspace
       - run: ls -a userspace/
+      - run: ls -a _userspace/
