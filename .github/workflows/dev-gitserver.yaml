@@ -29,7 +29,6 @@ jobs:
           cat _ssh/id_rsa >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       - run: docker restart gitserver
-      - run: docker restart gitserver-docker
       - run: mkdir ~/.ssh
       - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
       - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
@@ -39,7 +38,6 @@ jobs:
           chmod 700 ~/.ssh
           sudo chmod -c 0755 ~/
           ls -la ~/.ssh
-      - run: ssh -vvv -i ~/.ssh/id_rsa -o BatchMode=yes -o StrictHostKeyChecking=no codedeploy@localhost -p 2222
       - run: |
           cd _tmp/repos
           sudo mkdir userspace
