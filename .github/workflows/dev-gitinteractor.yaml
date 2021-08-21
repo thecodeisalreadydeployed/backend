@@ -47,4 +47,5 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
+      - run: ssh-keyscan [localhost]:2222 >> ~/.ssh/known_hosts
       - run: go test -v ./internal/test/gitinteractor/
