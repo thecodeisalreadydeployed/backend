@@ -41,4 +41,4 @@ jobs:
           chmod 700 ~/.ssh
           sudo chmod -c 0755 ~/
           ls -la ~/.ssh
-      - run: go test -v internal/test/gitinteractor
+      - run: go test -v ./internal/test/gitinteractor/
