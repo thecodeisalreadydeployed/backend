@@ -49,7 +49,7 @@ jobs:
       - run: cat _ssh/id_rsa.pub | tee -a ~/.ssh/authorized_keys
       - run: |
           chmod 600 ~/.ssh/authorized_keys
-          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh
           sudo chmod -c 0755 ~/
           ls -la ~/.ssh
       - uses: webfactory/ssh-agent@v0.5.3
