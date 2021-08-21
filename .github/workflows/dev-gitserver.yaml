@@ -31,7 +31,7 @@ jobs:
       - run: docker restart gitserver
       - run: mkdir ~/.ssh
       - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
-      - run: ssh-keyscan localhost:2222 >> ~/.ssh/known_hosts
+      - run: ssh-keyscan localhost >> ~/.ssh/known_hosts
       - run: |
           cd _tmp/repos
           sudo mkdir userspace
