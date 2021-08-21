@@ -8,12 +8,11 @@ import (
 	it "github.com/thecodeisalreadydeployed/gitinteractor"
 )
 
-func TestGitInteractor_Clone(t *testing.T) {
-	var privateKey string
-	pflag.StringVarP(&privateKey, "private-key", "", "", "")
-	pflag.Parse()
+var privateKey = pflag.String("private-key", "", "")
 
-	git := it.NewGitInteractorSSH("git@localhost:2222/__w/repos/userspace", privateKey)
+func TestGitInteractor_Clone(t *testing.T) {
+	pflag.Parse()
+	git := it.NewGitInteractorSSH("git@localhost:2222/__w/repos/userspace", *privateKey)
 	log := git.Log()
 	assert.Equal(t, 1, len(log))
 }
