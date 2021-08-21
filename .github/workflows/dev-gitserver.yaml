@@ -33,8 +33,8 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
       - run: docker restart gitserver
       - run: mkdir ~/.ssh
-      - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
-      - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
+      - run: cp _ssh/id_rsa ~/.ssh/id_rsa
+      - run: cp dev/gitserver/.ssh/config ~/.ssh/config
       - run: cat _ssh/id_rsa.pub | tee -a ~/.ssh/authorized_keys
       - run: |
           chmod 600 ~/.ssh/authorized_keys
