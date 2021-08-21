@@ -16,6 +16,7 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/mitchellh/go-homedir"
 	"github.com/thecodeisalreadydeployed/config"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 type GitInteractor struct {
@@ -45,6 +46,8 @@ func NewGitInteractorSSH(url string) GitInteractor {
 	if keyError != nil {
 		panic(keyError)
 	}
+
+	publicKey.HostKeyCallback = gossh.InsecureIgnoreHostKey()
 
 	it := GitInteractor{}
 
