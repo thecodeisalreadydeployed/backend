@@ -11,7 +11,6 @@ RUN mkdir /__w/keys \
   && mkdir /home/codedeploy/.ssh
 COPY sshd_config /etc/ssh/sshd_config
 COPY git-shell-commands /home/codedeploy/git-shell-commands
-COPY authorized-keys.sh /usr/local/bin/authorized-keys.sh
 COPY start.sh start.sh
 
 EXPOSE 22
