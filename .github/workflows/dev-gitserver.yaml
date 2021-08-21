@@ -55,7 +55,7 @@ jobs:
       - run: docker exec gitserver ls /__w/repos
       - uses: appleboy/ssh-action@master
         with:
-          host: 127.0.0.1
+          host: 0.0.0.0
           port: 8080
           username: git
           key: ${{ env.PRIVATE_KEY }}
