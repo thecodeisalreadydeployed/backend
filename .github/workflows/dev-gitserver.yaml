@@ -37,9 +37,10 @@ jobs:
           sudo touch .codedeploy
           sudo git add .codedeploy
           sudo git commit -m ".codedeploy: init"
+      - run: docker exec gitserver ls /__w/keys
+      - run: docker exec gitserver ls /__w/repos
       - uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
-      - run: ssh codedeploy@localhost -p 2222
       - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace.git
       - run: ls
