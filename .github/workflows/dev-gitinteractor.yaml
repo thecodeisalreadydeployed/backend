@@ -2,6 +2,8 @@ name: dev/gitinteractor
 on:
   push:
     paths:
+      - "go.mod"
+      - "go.sum"
       - "internal/test/gitinteractor/**"
       - ".github/workflows/dev-gitinteractor.yaml"
     branches:
