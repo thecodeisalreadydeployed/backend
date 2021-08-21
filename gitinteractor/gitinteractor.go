@@ -2,6 +2,7 @@ package gitinteractor
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-git/go-billy/v5"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/mitchellh/go-homedir"
 	"github.com/thecodeisalreadydeployed/config"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -35,7 +37,8 @@ func NewGitInteractorSSH(url string) GitInteractor {
 		panic("Repository URL has no ssh:// prefix.")
 	}
 
-	sshKeyFile := "~/.ssh/id_rsa"
+	home, _ := homedir.Dir()
+	sshKeyFile := filepath.Join(home, "/.ssh/id_rsa")
 	fmt.Printf("sshKeyFile: %v\n", sshKeyFile)
 	publicKey, keyError := ssh.NewPublicKeysFromFile("codedeploy", sshKeyFile, "")
 	if keyError != nil {
