@@ -23,7 +23,7 @@ jobs:
       - run: |
           docker run -d \
             jkarlos/git-server-docker \
-            -p 8080:22
+            -p 8080:22 \
             --name gitserver-docker \
             -v $(pwd)/_tmp/keys:/git-server/keys \
             -v $(pwd)/_tmp/repos:/git-server/repos \
