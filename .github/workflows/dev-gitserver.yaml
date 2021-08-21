@@ -46,6 +46,7 @@ jobs:
           chmod 700 ~/.ssh
           sudo chmod -c 0755 ~/
           ls -la ~/.ssh
+      - run: ssh -vvv -i ~/.ssh/id_rsa -o BatchMode=yes -o StrictHostKeyChecking=no codedeploy@localhost -p 2222
       - run: |
           cd _tmp/repos
           sudo mkdir userspace
