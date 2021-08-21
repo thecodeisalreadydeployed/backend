@@ -27,7 +27,7 @@ jobs:
             -v $(pwd)/_tmp/keys:/git-server/keys \
             -v $(pwd)/_tmp/repos:/git-server/repos \
             jkarlos/git-server-docker:latest
-      - run: ssh-keygen -t ed25519 -a 100 -f $(pwd)/_ssh/id_rsa -q -N ""
+      - run: ssh-keygen -t rsa -f $(pwd)/_ssh/id_rsa -q -N ""
       - run: ls _ssh/
       - run: sudo cp _ssh/id_rsa.pub _tmp/keys
       - id: private-key
