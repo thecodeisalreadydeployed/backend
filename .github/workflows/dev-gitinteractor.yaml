@@ -55,4 +55,4 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
-      - run: sudo go test -v ./internal/test/gitinteractor/
+      - run: go test -v ./internal/test/gitinteractor/
