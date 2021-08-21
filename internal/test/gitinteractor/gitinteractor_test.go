@@ -8,7 +8,7 @@ import (
 )
 
 func TestGitInteractor_Clone(t *testing.T) {
-	git := it.NewGitInteractor()
-	_ = git
-	assert.True(t, true)
+	git := it.NewGitInteractorSSH("ssh://codedeploy@localhost:2222/__w/repos/userspace")
+	log := git.Log()
+	assert.Equal(t, 1, len(log))
 }
