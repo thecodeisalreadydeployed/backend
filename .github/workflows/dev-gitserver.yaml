@@ -58,6 +58,7 @@ jobs:
       - uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
+      - run: ssh-keyscan thecodeisalreadydeployed.local | tee -a ~/.ssh/known_hosts
       - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
       - run: git clone ssh://codedeploy@thecodeisalreadydeployed.local/__w/repos/userspace _userspace
       - run: ls -a userspace/
