@@ -38,7 +38,7 @@ jobs:
       - run: cat _ssh/id_rsa.pub | tee -a ~/.ssh/authorized_keys
       - run: |
           chmod 600 ~/.ssh/authorized_keys
-          chmod 600 ~/.ssh/id_rsa
+          sudo chmod 600 ~/.ssh/id_rsa
           chmod 700 ~/.ssh
           sudo chmod -c 0755 ~/
           ls -la ~/.ssh
