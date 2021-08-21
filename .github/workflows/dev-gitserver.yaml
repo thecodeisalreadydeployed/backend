@@ -53,5 +53,5 @@ jobs:
       - run: docker inspect gitserver
       - run: docker exec gitserver ls /__w/keys
       - run: docker exec gitserver ls /__w/repos
-      - run: sudo git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
+      - run: git clone ssh://codedeploy@localhost:2222/__w/repos/userspace
       - run: ls
