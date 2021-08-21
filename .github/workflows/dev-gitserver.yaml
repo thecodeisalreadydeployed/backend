@@ -47,7 +47,7 @@ jobs:
       - run: docker exec gitserver ls /__w/repos
       - uses: appleboy/ssh-action@master
         with:
-          host: localhost
+          host: 127.0.0.1
           port: 2222
           username: codedeploy
           key: ${{ env.PRIVATE_KEY }}
