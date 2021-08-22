@@ -21,20 +21,7 @@ type Deployment struct {
 	State     model.DeploymentState
 }
 
-type BareDeployment struct {
-	ID        string
-	AppID     string
-	Name      string
-	Creator   string
-	Meta      string
-	GitSource string
-	BuildedAt time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	State     model.DeploymentState
-}
-
-func (dpl *Deployment) toModel() model.Deployment {
+func (dpl *Deployment) ToModel() model.Deployment {
 	gitSource := model.GitSource{}
 	err := json.Unmarshal([]byte(dpl.GitSource), &gitSource)
 	if err != nil {
