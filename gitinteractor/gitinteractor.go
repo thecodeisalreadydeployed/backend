@@ -3,6 +3,7 @@ package gitinteractor
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/util"
@@ -12,6 +13,8 @@ import (
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/thecodeisalreadydeployed/config"
+	"github.com/thecodeisalreadydeployed/logger"
+	"go.uber.org/zap"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -30,25 +33,40 @@ func NewGitInteractor() GitInteractor {
 }
 
 func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
-	publicKey, keyError := ssh.NewPublicKeys("codedeploy", []byte(privateKey), "")
-	if keyError != nil {
-		panic(keyError)
+	signer, parsePrivateKeyErr := gossh.ParsePrivateKey([]byte(privateKey))
+	if parsePrivateKeyErr != nil {
+		panic(parsePrivateKeyErr)
 	}
 
-	publicKey.HostKeyCallback = gossh.InsecureIgnoreHostKey()
+	auth := &ssh.PublicKeys{
+		User:   "codedeploy",
+		Signer: signer,
+	}
+
+	auth.HostKeyCallback = gossh.InsecureIgnoreHostKey()
 
 	it := GitInteractor{}
 
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
 		URL:  url,
-		Auth: publicKey,
+		Auth: auth,
 	})
 	if err != nil {
+		spew.Dump(err)
 		panic(err)
 	}
 
 	it.repository = r
 	return it
+}
+
+func InitRepository(path string) error {
+	_, err := git.PlainInit(path, false)
+	if err != nil {
+		logger.Info(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
+		return err
+	}
+	return nil
 }
 
 func (it *GitInteractor) Init() {

@@ -25,33 +25,8 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - run: cd dev/gitserver && docker build -t thecodeisalreadydeployed/gitserver:dev .
-      - run: mkdir _tmp && mkdir _ssh
       - run: |
-          docker run -d \
-            -p 2222:22 \
-            --name gitserver \
-            -v $(pwd)/_tmp/keys:/__w/keys \
-            -v $(pwd)/_tmp/repos:/__w/repos \
-            thecodeisalreadydeployed/gitserver:dev
-      - run: ssh-keygen -t rsa -f $(pwd)/_ssh/id_rsa -q -N "" -m pem
-      - run: ls _ssh/
-      - run: sudo cp _ssh/id_rsa.pub _tmp/keys
-      - id: private-key
-        run: |
-          echo 'PRIVATE_KEY<<EOF' >> $GITHUB_ENV
-          cat _ssh/id_rsa >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-      - run: docker restart gitserver
-      - run: mkdir ~/.ssh
-      - run: sudo cp _ssh/id_rsa ~/.ssh/id_rsa
-      - run: sudo cp dev/gitserver/.ssh/config ~/.ssh/config
-      - run: cat _ssh/id_rsa.pub | tee -a ~/.ssh/authorized_keys
-      - run: |
-          sudo chmod 600 ~/.ssh/authorized_keys
-          sudo chmod 600 ~/.ssh/id_rsa
-          ls -la ~/.ssh
-      - uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ env.PRIVATE_KEY }}
-      - run: go test -v ./internal/test/gitinteractor/ -private-key '${{ env.PRIVATE_KEY }}'
+          sudo mkdir /__w
+          sudo chmod -R a+rwX /__w
+          ls -la /__w
+      - run: go test -v ./internal/test/gitopscontroller/

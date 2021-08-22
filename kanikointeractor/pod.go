@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/imdario/mergo"
+	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/util"
 	apiv1 "k8s.io/api/core/v1"
@@ -13,7 +14,7 @@ import (
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 	workingDirectory := "__w"
 	workingDirectoryVolumeMount := apiv1.VolumeMount{
-		MountPath: fmt.Sprintf("/%s", workingDirectory),
+		MountPath: config.DefaultKanikoWorkingDirectory,
 		Name:      workingDirectory,
 	}
 
