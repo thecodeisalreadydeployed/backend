@@ -1,6 +1,9 @@
 package gitopscontroller
 
 import (
+	"errors"
+
+	"github.com/go-git/go-git/v5"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/gitinteractor"
 )
@@ -16,5 +19,8 @@ func (c *GitOpsController) Init() {
 
 func SetupUserspace() error {
 	err := gitinteractor.InitRepository(config.DefaultUserspaceRepository)
+	if errors.Is(err, git.ErrRepositoryAlreadyExists) {
+		return nil
+	}
 	return err
 }
