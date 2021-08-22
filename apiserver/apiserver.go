@@ -42,7 +42,7 @@ func APIServer(port int) {
 	})
 
 	app.Get("/deployment/:deploymentID/event", func(c *fiber.Ctx) error {
-		event := datastore.GetEvent(c.Params("deploymentID"))
+		event := datastore.GetEventByDeploymentID(c.Params("deploymentID"))
 		return c.SendString(event)
 	})
 
