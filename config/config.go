@@ -13,3 +13,8 @@ func DefaultGitSignature() *object.Signature {
 		When:  time.Now(),
 	}
 }
+
+const (
+	DefaultKanikoWorkingDirectory string = "/__w/kaniko/"
+	DefaultUserspaceRepository    string = "/__w/userspace.git"
+)
