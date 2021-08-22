@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -27,6 +28,8 @@ func Logger() *zap.Logger {
 	return instance
 }
 
+//TODO: Logger caller field is not descriptive, should state error line.
+
 func Debug(message string, fields ...zap.Field) {
 	Logger().Debug(message, fields...)
 }
@@ -40,7 +43,7 @@ func Warn(message string, fields ...zap.Field) {
 }
 
 func Error(message string, fields ...zap.Field) {
-	Logger().Error(message, fields...)
+	fmt.Println(message)
 }
 
 func Fatal(message string, fields ...zap.Field) {
