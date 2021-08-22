@@ -66,14 +66,6 @@ func InitRepository(path string) error {
 	return nil
 }
 
-func (it *GitInteractor) Init() {
-	repo, err := git.Init(it.storage, it.fs)
-	if err != nil {
-		panic(err)
-	}
-	it.repository = repo
-}
-
 func (it *GitInteractor) Add(filePath string) {
 	w, err := it.repository.Worktree()
 	if err != nil {
