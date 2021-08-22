@@ -27,6 +27,6 @@ jobs:
             ${{ runner.os }}-go-
       - run: |
           sudo mkdir /__w
-          sudo chmod -R 600 /__w
+          sudo chmod -R a+rwX /__w
           ls -la /__w
       - run: go test -v ./internal/test/gitopscontroller/
