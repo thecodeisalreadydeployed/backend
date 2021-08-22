@@ -5,10 +5,13 @@ on:
       - "go.mod"
       - "go.sum"
       - "gitinteractor/**"
+      - "gitopscontroller/**"
       - "internal/test/gitinteractor/**"
+      - "internal/test/gitopscontroller/**"
       - ".github/workflows/dev-gitinteractor.yaml"
     branches:
       - dev/gitinteractor
+      - dev/gitopscontroller
 jobs:
   test:
     runs-on: ubuntu-20.04
