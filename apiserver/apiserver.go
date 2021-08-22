@@ -18,7 +18,7 @@ func APIServer(port int) {
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
 		query := new(model.Project)
 		query.ID = c.Params("projectID")
-		result := datastore.GetProject(datamodel.NewProjectFromModel(*query))
+		result := datastore.GetProjectByID(datamodel.NewProjectFromModel(*query))
 		return c.JSON(result)
 	})
 
@@ -30,7 +30,7 @@ func APIServer(port int) {
 	app.Get("/app/:appID", func(c *fiber.Ctx) error {
 		query := new(model.App)
 		query.ID = c.Params("appID")
-		result := datastore.GetApp(datamodel.NewAppFromModel(*query))
+		result := datastore.GetAppByID(datamodel.NewAppFromModel(*query))
 		return c.JSON(result)
 	})
 
@@ -42,7 +42,7 @@ func APIServer(port int) {
 	app.Get("/deployment/:deploymentID", func(c *fiber.Ctx) error {
 		query := new(model.Deployment)
 		query.ID = c.Params("deploymentID")
-		result := datastore.GetDeployment(datamodel.NewDeploymentFromModel(*query))
+		result := datastore.GetDeploymentByID(datamodel.NewDeploymentFromModel(*query))
 		return c.JSON(result)
 	})
 
