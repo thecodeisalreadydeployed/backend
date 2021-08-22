@@ -21,6 +21,6 @@ func Init() {
 	seed(database)
 }
 
-func getInstance() *gorm.DB {
+func getDB() *gorm.DB {
 	return database
 }
