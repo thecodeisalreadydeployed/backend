@@ -5,7 +5,6 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-git/go-billy/v5"
-	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -24,10 +23,8 @@ type GitInteractor struct {
 	fs         billy.Filesystem
 }
 
-func NewGitInteractor() GitInteractor {
+func NewGitInteractor(path string) GitInteractor {
 	it := GitInteractor{}
-	it.storage = memory.NewStorage()
-	it.fs = memfs.New()
 	it.Init()
 	return it
 }
@@ -63,7 +60,7 @@ func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
 func InitRepository(path string) error {
 	_, err := git.PlainInit(path, false)
 	if err != nil {
-		logger.Info(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
+		logger.Logger().Fatal(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
 		return err
 	}
 	return nil
