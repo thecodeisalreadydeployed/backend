@@ -9,6 +9,8 @@ import (
 
 type Deployment struct {
 	ID        string `gorm:"primaryKey"`
+	AppID     string
+	App       App
 	Name      string
 	Creator   string
 	Meta      string
