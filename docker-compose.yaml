@@ -4,7 +4,7 @@ services:
   database:
     image: postgres:13.4
     restart: unless-stopped
-    environments:
+    environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: codedeploy
       POSTGRES_USER: user
