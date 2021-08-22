@@ -1,10 +1,12 @@
 package datastore
 
 import (
+	"encoding/json"
 	"fmt"
 	faker "github.com/bxcodec/faker/v3"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/logger"
+	"github.com/thecodeisalreadydeployed/model"
 	"gorm.io/gorm"
 	"math/rand"
 )
@@ -61,7 +63,7 @@ func seedApps(db *gorm.DB, size int) {
 		}
 
 		setAppForeignKey(&datum, keys)
-		setGitSource(&datum)
+		setAppGitSource(&datum)
 
 		data = append(data, datum)
 	}
@@ -91,6 +93,8 @@ func seedDeployments(db *gorm.DB, size int) {
 		}
 
 		setDeploymentForeignKey(&datum, keys)
+		setDeploymentGitSource(&datum)
+		setDeploymentCreator(&datum)
 
 		data = append(data, datum)
 	}
@@ -102,4 +106,32 @@ func setDeploymentForeignKey(datum *datamodel.Deployment, keys []string) {
 	datum.AppID = keys[index]
 }
 
+func setAppGitSource(datum *datamodel.App) {
+	var gs model.GitSource
+	err := faker.FakeData(&gs)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	res, err := json.Marshal(gs)
+	datum.GitSource = string(res)
+}
 
+func setDeploymentGitSource(datum *datamodel.Deployment) {
+	var gs model.GitSource
+	err := faker.FakeData(&gs)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	res, err := json.Marshal(gs)
+	datum.GitSource = string(res)
+}
+
+func setDeploymentCreator(datum *datamodel.Deployment) {
+	var c model.Actor
+	err := faker.FakeData(&c)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	res, err := json.Marshal(c)
+	datum.Creator = string(res)
+}
