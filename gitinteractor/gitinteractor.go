@@ -13,6 +13,8 @@ import (
 	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/thecodeisalreadydeployed/config"
+	"github.com/thecodeisalreadydeployed/logger"
+	"go.uber.org/zap"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -56,6 +58,15 @@ func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
 
 	it.repository = r
 	return it
+}
+
+func InitRepository(path string) error {
+	_, err := git.PlainInit(path, false)
+	if err != nil {
+		logger.Info(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
+		return err
+	}
+	return nil
 }
 
 func (it *GitInteractor) Init() {
