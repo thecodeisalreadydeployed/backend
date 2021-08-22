@@ -2,11 +2,11 @@ package apiserver
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/model"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
@@ -57,15 +57,6 @@ func APIServer(port int) {
 			return c.SendStatus(500)
 		}
 		return c.SendStatus(200)
-	})
-
-	// TODO: Delete this.
-	app.Get("/test", func(c *fiber.Ctx) error {
-		payload := dto.CreateProjectRequest{
-			Name: "test",
-		}
-		yaml := workloadcontroller.CreateWorkload(&payload)
-		return c.SendString(yaml)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
