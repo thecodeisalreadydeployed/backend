@@ -55,4 +55,4 @@ jobs:
         with:
           ssh-private-key: ${{ env.PRIVATE_KEY }}
       - run: go test -v ./internal/test/gitinteractor/ -private-key '${{ env.PRIVATE_KEY }}'
-      - run: go test -v ./internal/test/gitopscontroller/
+      - run: mkdir /__w && go test -v ./internal/test/gitopscontroller/
