@@ -17,7 +17,9 @@ func getDB() *gorm.DB {
 	return db
 }
 
-func InitDB(db *gorm.DB) {
+func InitDB() {
+	db := getDB()
+
 	createTable(db, &datamodel.Project{})
 	createTable(db, &datamodel.App{})
 	createTable(db, &datamodel.Deployment{})
