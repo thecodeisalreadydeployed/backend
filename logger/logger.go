@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -43,7 +42,7 @@ func Warn(message string, fields ...zap.Field) {
 }
 
 func Error(message string, fields ...zap.Field) {
-	fmt.Println(message)
+	Logger().Error(message, fields...)
 }
 
 func Fatal(message string, fields ...zap.Field) {
