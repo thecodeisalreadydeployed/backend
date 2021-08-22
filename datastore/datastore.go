@@ -2,18 +2,10 @@ package datastore
 
 import (
 	"fmt"
+
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/logger"
 )
-
-func GetProjectByID(p datamodel.Project) datamodel.Project {
-	var res datamodel.Project
-	err := getDB().Table("projects").Where("ID = ?", p.ID).Scan(&res).Error
-	if err != nil {
-		logger.Warn(err.Error())
-	}
-	return res
-}
 
 func GetProjectApps(key string) []datamodel.BareApp {
 	var res []datamodel.BareApp
