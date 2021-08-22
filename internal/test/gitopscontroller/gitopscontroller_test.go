@@ -14,6 +14,8 @@ func TestGitOpsController_Log(t *testing.T) {
 	controller := gitopscontroller.GitOpsController{}
 	controller.Init()
 	userspaceRepository := controller.Userspace
-	assert.Equal(t, 0, len(userspaceRepository.Log()))
-
+	userspaceRepository.WriteFile("/", ".thecodeisalreadydeployed", []byte(""))
+	userspaceRepository.Add("/.thecodeisalreadydeployed")
+	userspaceRepository.Commit(".thecodeisalreadydeployed: init")
+	assert.Equal(t, 1, len(userspaceRepository.Log()))
 }
