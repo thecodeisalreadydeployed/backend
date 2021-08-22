@@ -20,6 +20,18 @@ type App struct {
 	InstallCommand  string
 }
 
+type BareApp struct {
+	ID              string
+	ProjectID       string
+	Name            string
+	GitSource       string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	BuildCommand    string
+	OutputDirectory string
+	InstallCommand  string
+}
+
 func (app *App) toModel() model.App {
 	gitSource := model.GitSource{}
 	err := json.Unmarshal([]byte(app.GitSource), &gitSource)
