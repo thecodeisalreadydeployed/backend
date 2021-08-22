@@ -6,6 +6,7 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"reflect"
 )
 
 func GetDB() *gorm.DB {
@@ -14,21 +15,26 @@ func GetDB() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
-
-	createTableIfNotExists(db, &datamodel.Project{})
-	createTableIfNotExists(db, &datamodel.App{})
-	createTableIfNotExists(db, &datamodel.Deployment{})
-
 	return db
 }
 
-func createTableIfNotExists(db *gorm.DB, i interface{}) {
+func InitDB(db *gorm.DB) {
+	createTable(db, &datamodel.Project{})
+	createTable(db, &datamodel.App{})
+	createTable(db, &datamodel.Deployment{})
+
+	seed(db)
+}
+
+func createTable(db *gorm.DB, i interface{}) {
 	if !db.Migrator().HasTable(i) {
 		err := db.Migrator().CreateTable(i)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("hai")
+	} else {
+		name := reflect.TypeOf(i).Elem().Name()
+		fmt.Printf("Table %s already created.\n", name)
 	}
 }
 
