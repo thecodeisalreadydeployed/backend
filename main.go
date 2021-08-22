@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	datastore.InitDB()
+	datastore.Init()
 	apiserver.APIServer(3000)
 }
