@@ -3,67 +3,54 @@ package datastore
 import (
 	"fmt"
 	"github.com/thecodeisalreadydeployed/datamodel"
-	"github.com/thecodeisalreadydeployed/model"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"reflect"
+	"github.com/thecodeisalreadydeployed/logger"
 )
 
-func GetDB() *gorm.DB {
-	dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func GetProject(p datamodel.Project) []datamodel.Project {
+	var res []datamodel.Project
+	err := getDB().Table("projects").Where(p).Scan(&res).Error
 	if err != nil {
-		panic(err)
+		logger.Warn(err.Error())
 	}
-	return db
+	return res
 }
 
-func InitDB(db *gorm.DB) {
-	createTable(db, &datamodel.Project{})
-	createTable(db, &datamodel.App{})
-	createTable(db, &datamodel.Deployment{})
-
-	seed(db)
-}
-
-func createTable(db *gorm.DB, i interface{}) {
-	if !db.Migrator().HasTable(i) {
-		err := db.Migrator().CreateTable(i)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		name := reflect.TypeOf(i).Elem().Name()
-		fmt.Printf("Table %s already created.\n", name)
+func GetProjectApps(key string) []datamodel.App {
+	var res []datamodel.App
+	err := getDB().Table("apps").Where(datamodel.App{ProjectID: key}).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
 	}
+	return res
 }
 
-//func GetAllProjects(p *model.Project) *[]model.Project {
-//
-//}
-//
-//func GetAllAppsFromProject(app *model.App) *[]model.App {
-//
-//}
-//
-//func GetAllDeploymentsFromApp(dpl *model.Deployment) *[]model.Deployment {
-//
-//}
-func GetProject(db *gorm.DB, p *datamodel.Project) *datamodel.Project {
-	GetDB()
-	var result datamodel.Project
-	db.First(&result)
-	return &result
+func GetApp(app datamodel.App) []datamodel.App {
+	var res []datamodel.App
+	err := getDB().Table("apps").Where(app).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
 }
 
-func GetApp(app *model.App) *model.App {
-	return new(model.App)
+func GetAppDeployments(key string) []datamodel.Deployment {
+	var res []datamodel.Deployment
+	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: key}).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
 }
 
-func GetDeployment(dpl *model.Deployment) *model.Deployment {
-	return new(model.Deployment)
+func GetDeployment(dpl datamodel.Deployment) []datamodel.Deployment {
+	var res []datamodel.Deployment
+	err := getDB().Table("apps").Where(dpl).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
 }
 
 func GetEvent(id string) string {
-	return "Dummy event."
+	return fmt.Sprintf("Dummy event %s.", id)
 }
