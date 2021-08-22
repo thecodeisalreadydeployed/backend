@@ -9,10 +9,24 @@ import (
 
 type App struct {
 	ID              string `gorm:"primaryKey"`
+	ProjectID       string
+	Project         Project
 	Name            string
 	GitSource       string
 	CreatedAt       time.Time `gorm:"autoCreateTime"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
+	BuildCommand    string
+	OutputDirectory string
+	InstallCommand  string
+}
+
+type BareApp struct {
+	ID              string
+	ProjectID       string
+	Name            string
+	GitSource       string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 	BuildCommand    string
 	OutputDirectory string
 	InstallCommand  string

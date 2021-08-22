@@ -9,6 +9,8 @@ import (
 
 type Deployment struct {
 	ID        string `gorm:"primaryKey"`
+	AppID     string
+	App       App
 	Name      string
 	Creator   string
 	Meta      string
@@ -16,6 +18,19 @@ type Deployment struct {
 	BuildedAt time.Time
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+	State     model.DeploymentState
+}
+
+type BareDeployment struct {
+	ID        string
+	AppID     string
+	Name      string
+	Creator   string
+	Meta      string
+	GitSource string
+	BuildedAt time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	State     model.DeploymentState
 }
 

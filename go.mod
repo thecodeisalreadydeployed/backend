@@ -7,6 +7,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/alexbrainman/sspi v0.0.0-20180613141037-e580b900e9f5 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/bxcodec/faker/v3 v3.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0 //indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect

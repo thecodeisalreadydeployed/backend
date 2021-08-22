@@ -1,19 +1,56 @@
 package datastore
 
-import "github.com/thecodeisalreadydeployed/model"
+import (
+	"fmt"
+	"github.com/thecodeisalreadydeployed/datamodel"
+	"github.com/thecodeisalreadydeployed/logger"
+)
 
-func GetProject(p *model.Project) *model.Project {
-	return new(model.Project)
+func GetProjectByID(p datamodel.Project) datamodel.Project {
+	var res datamodel.Project
+	err := getDB().Table("projects").Where("ID = ?", p.ID).Scan(&res).Error
+	if err != nil {
+		logger.Warn(err.Error())
+	}
+	return res
 }
 
-func GetApp(app *model.App) *model.App {
-	return new(model.App)
+func GetProjectApps(key string) []datamodel.BareApp {
+	var res []datamodel.BareApp
+	err := getDB().Table("apps").Where(datamodel.App{ProjectID: key}).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
 }
 
-func GetDeployment(dpl *model.Deployment) *model.Deployment {
-	return new(model.Deployment)
+func GetAppByID(app datamodel.App) datamodel.BareApp {
+	var res datamodel.BareApp
+	err := getDB().Table("apps").Where("ID = ?", app.ID).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
+}
+
+func GetAppDeployments(key string) []datamodel.BareDeployment {
+	var res []datamodel.BareDeployment
+	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: key}).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
+}
+
+func GetDeploymentByID(dpl datamodel.Deployment) datamodel.BareDeployment {
+	var res datamodel.BareDeployment
+	err := getDB().Table("deployments").Where("ID = ?", dpl.ID).Scan(&res).Error
+	if err != nil {
+		logger.Error(err.Error())
+	}
+	return res
 }
 
 func GetEvent(id string) string {
-	return "Dummy event."
+	return fmt.Sprintf("Dummy event %s.", id)
 }

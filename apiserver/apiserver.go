@@ -2,13 +2,14 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/datamodel"
+	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
-	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/model"
 )
 
 func APIServer(port int) {
@@ -17,21 +18,31 @@ func APIServer(port int) {
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
 		query := new(model.Project)
 		query.ID = c.Params("projectID")
-		result := datastore.GetProject(query)
+		result := datastore.GetProjectByID(datamodel.NewProjectFromModel(*query))
+		return c.JSON(result)
+	})
+
+	app.Get("/project/:projectID/apps", func(c *fiber.Ctx) error {
+		result := datastore.GetProjectApps(c.Params("projectID"))
 		return c.JSON(result)
 	})
 
 	app.Get("/app/:appID", func(c *fiber.Ctx) error {
 		query := new(model.App)
 		query.ID = c.Params("appID")
-		result := datastore.GetApp(query)
+		result := datastore.GetAppByID(datamodel.NewAppFromModel(*query))
+		return c.JSON(result)
+	})
+
+	app.Get("/app/:appID/deployments", func(c *fiber.Ctx) error {
+		result := datastore.GetAppDeployments(c.Params("appID"))
 		return c.JSON(result)
 	})
 
 	app.Get("/deployment/:deploymentID", func(c *fiber.Ctx) error {
 		query := new(model.Deployment)
-		query.ID = c.Params("appID")
-		result := datastore.GetDeployment(query)
+		query.ID = c.Params("deploymentID")
+		result := datastore.GetDeploymentByID(datamodel.NewDeploymentFromModel(*query))
 		return c.JSON(result)
 	})
 
