@@ -4,12 +4,10 @@ import (
 	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/go-git/go-git/v5/storage"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/logger"
@@ -19,13 +17,15 @@ import (
 
 type GitInteractor struct {
 	repository *git.Repository
-	storage    storage.Storer
-	fs         billy.Filesystem
 }
 
 func NewGitInteractor(path string) GitInteractor {
 	it := GitInteractor{}
-	it.Init()
+	repo, err := git.PlainOpen(path)
+	if err != nil {
+		panic(err)
+	}
+	it.repository = repo
 	return it
 }
 
