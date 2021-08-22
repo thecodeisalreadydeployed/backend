@@ -9,6 +9,8 @@ import (
 
 type App struct {
 	ID              string `gorm:"primaryKey"`
+	ProjectID       string
+	Project         Project
 	Name            string
 	GitSource       string
 	CreatedAt       time.Time `gorm:"autoCreateTime"`
@@ -18,18 +20,18 @@ type App struct {
 	InstallCommand  string
 }
 
-func (app *App) toModel() model.App {
+func (app *App) ToModel() model.App {
 	gitSource := model.GitSource{}
 	err := json.Unmarshal([]byte(app.GitSource), &gitSource)
 	if err != nil {
 		panic(err)
 	}
 	return model.App{
-		ID:        app.ID,
-		Name:      app.Name,
-		GitSource: gitSource,
-		CreatedAt: app.CreatedAt,
-		UpdatedAt: app.UpdatedAt,
+		ID:              app.ID,
+		Name:            app.Name,
+		GitSource:       gitSource,
+		CreatedAt:       app.CreatedAt,
+		UpdatedAt:       app.UpdatedAt,
 		BuildCommand:    app.BuildCommand,
 		OutputDirectory: app.OutputDirectory,
 		InstallCommand:  app.InstallCommand,

@@ -1,19 +1,26 @@
 package datastore
 
-import "github.com/thecodeisalreadydeployed/model"
+import (
+	"github.com/thecodeisalreadydeployed/datamodel"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
 
-func GetProject(p *model.Project) *model.Project {
-	return new(model.Project)
+var database *gorm.DB
+
+func Init() {
+	dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	database.AutoMigrate(&datamodel.Project{})
+	database.AutoMigrate(&datamodel.App{})
+	database.AutoMigrate(&datamodel.Deployment{})
+	seed(database)
 }
 
-func GetApp(app *model.App) *model.App {
-	return new(model.App)
-}
-
-func GetDeployment(dpl *model.Deployment) *model.Deployment {
-	return new(model.Deployment)
-}
-
-func GetEvent(id string) string {
-	return "Dummy event."
+func getDB() *gorm.DB {
+	return database
 }

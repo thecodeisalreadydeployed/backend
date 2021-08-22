@@ -13,7 +13,7 @@ type Project struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-func (p *Project) toModel() model.Project {
+func (p *Project) ToModel() model.Project {
 	return model.Project{
 		ID:        p.ID,
 		Name:      p.Name,

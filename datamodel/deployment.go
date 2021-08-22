@@ -9,6 +9,8 @@ import (
 
 type Deployment struct {
 	ID        string `gorm:"primaryKey"`
+	AppID     string
+	App       App
 	Name      string
 	Creator   string
 	Meta      string
@@ -19,7 +21,7 @@ type Deployment struct {
 	State     model.DeploymentState
 }
 
-func (dpl *Deployment) toModel() model.Deployment {
+func (dpl *Deployment) ToModel() model.Deployment {
 	gitSource := model.GitSource{}
 	err := json.Unmarshal([]byte(dpl.GitSource), &gitSource)
 	if err != nil {
