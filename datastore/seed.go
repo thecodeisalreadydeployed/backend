@@ -40,6 +40,8 @@ func seedProjects(size int) {
 		if err != nil {
 			logger.Error(err.Error())
 		}
+
+		datum.ID = getPrefix(datum.ID, "prj")
 		data = append(data, datum)
 	}
 	getDB().Create(&data)
@@ -61,17 +63,13 @@ func seedApps(size int) {
 			logger.Error(err.Error())
 		}
 
-		setAppForeignKey(&datum, keys)
-		setAppGitSource(&datum)
+		datum.ID = getPrefix(datum.ID, "app")
+		datum.ProjectID = getForeignKey(keys)
+		datum.GitSource = getGitSource()
 
 		data = append(data, datum)
 	}
 	getDB().Omit("Project").Create(&data)
-}
-
-func setAppForeignKey(datum *datamodel.App, keys []string) {
-	index := rand.Intn(len(keys))
-	datum.ProjectID = keys[index]
 }
 
 func seedDeployments(size int) {
@@ -91,46 +89,51 @@ func seedDeployments(size int) {
 			logger.Error(err.Error())
 		}
 
-		setDeploymentForeignKey(&datum, keys)
-		setDeploymentGitSource(&datum)
-		setDeploymentCreator(&datum)
+		datum.ID = getPrefix(datum.ID, "dpl")
+		datum.AppID = getForeignKey(keys)
+		datum.GitSource = getGitSource()
+		datum.Creator = getCreator()
+		datum.State = model.DeploymentState(getState())
 
 		data = append(data, datum)
 	}
 	getDB().Omit("App").Create(&data)
 }
 
-func setDeploymentForeignKey(datum *datamodel.Deployment, keys []string) {
-	index := rand.Intn(len(keys))
-	datum.AppID = keys[index]
+func getForeignKey(keys []string) string {
+	return keys[rand.Intn(len(keys))]
 }
 
-func setAppGitSource(datum *datamodel.App) {
+func getGitSource() string {
 	var gs model.GitSource
 	err := faker.FakeData(&gs)
 	if err != nil {
 		logger.Error(err.Error())
 	}
 	res, err := json.Marshal(gs)
-	datum.GitSource = string(res)
+	return string(res)
 }
 
-func setDeploymentGitSource(datum *datamodel.Deployment) {
-	var gs model.GitSource
-	err := faker.FakeData(&gs)
-	if err != nil {
-		logger.Error(err.Error())
-	}
-	res, err := json.Marshal(gs)
-	datum.GitSource = string(res)
-}
-
-func setDeploymentCreator(datum *datamodel.Deployment) {
+func getCreator() string {
 	var c model.Actor
 	err := faker.FakeData(&c)
 	if err != nil {
 		logger.Error(err.Error())
 	}
 	res, err := json.Marshal(c)
-	datum.Creator = string(res)
+	return string(res)
+}
+
+func getPrefix(body string, prefix string) string {
+	return fmt.Sprintf("%s_%s", prefix, body)
+}
+
+func getState() string {
+	states := []string{
+		"DeploymentStateQueueing",
+		"DeploymentStateBuilding",
+		"DeploymentStateReady",
+		"DeploymentStateError",
+	}
+	return states[rand.Intn(4)]
 }
