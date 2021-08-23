@@ -8,9 +8,9 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetProjectByID(projectID string) model.Project {
+func GetProjectByID(projectID string) (*model.Project, error) {
 	if !strings.HasPrefix(projectID, "prj_") {
-		return model.Project{}
+		return nil, ErrInvalidArgument
 	}
 
 	var _data datamodel.Project
@@ -18,8 +18,9 @@ func GetProjectByID(projectID string) model.Project {
 
 	if err != nil {
 		logger.Warn(err.Error())
-		return model.Project{}
+		return nil, ErrNotFound
 	}
 
-	return _data.ToModel()
+	ret := _data.ToModel()
+	return &ret, nil
 }
