@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"log"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -52,6 +53,19 @@ func APIServer(port int) {
 			return c.SendStatus(500)
 		}
 		return c.SendStatus(200)
+	})
+
+	app.Get("/ping", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
+	// TODO: Jean will delete this. Don't delete it now.
+	app.Get("/test", func(c *fiber.Ctx) error {
+		payload := dto.CreateProjectRequest{
+			Name: "test",
+		}
+		yaml := workloadcontroller.CreateWorkload(&payload)
+		return c.SendString(yaml)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
