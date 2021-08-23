@@ -19,7 +19,7 @@ func APIServer(port int) {
 		projectID := c.Params("projectID")
 		result, err := datastore.GetProjectByID(projectID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusNotFound)
+			return fiber.NewError(mapStatusCode(err))
 		}
 		return c.JSON(result)
 	})
@@ -36,7 +36,10 @@ func APIServer(port int) {
 	})
 
 	app.Get("/app/:appID/deployments", func(c *fiber.Ctx) error {
-		result := datastore.GetDeploymentsByAppID(c.Params("appID"))
+		result, err := datastore.GetDeploymentsByAppID(c.Params("appID"))
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
