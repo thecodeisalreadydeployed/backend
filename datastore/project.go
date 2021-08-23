@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
-	"github.com/thecodeisalreadydeployed/logger"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
@@ -14,10 +13,10 @@ func GetProjectByID(projectID string) (*model.Project, error) {
 	}
 
 	var _data datamodel.Project
-	err := getDB().Table("projects").Where("ID = ?", projectID).Scan(&_data).Error
 
-	if err != nil {
-		logger.Warn(err.Error())
+	result := getDB().First(&_data, "id = ?", projectID)
+
+	if result.Error != nil {
 		return nil, ErrNotFound
 	}
 
