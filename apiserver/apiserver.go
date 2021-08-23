@@ -2,8 +2,9 @@ package apiserver
 
 import (
 	"fmt"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"log"
+
+	"github.com/thecodeisalreadydeployed/workloadcontroller"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 
@@ -16,34 +17,52 @@ func APIServer(port int) {
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
 		projectID := c.Params("projectID")
-		result := datastore.GetProjectByID(projectID)
+		result, err := datastore.GetProjectByID(projectID)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
 	app.Get("/project/:projectID/apps", func(c *fiber.Ctx) error {
-		result := datastore.GetAppsByProjectID(c.Params("projectID"))
+		result, err := datastore.GetAppsByProjectID(c.Params("projectID"))
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
 	app.Get("/app/:appID", func(c *fiber.Ctx) error {
 		appID := c.Params("appID")
-		result := datastore.GetAppByID(appID)
+		result, err := datastore.GetAppByID(appID)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
 	app.Get("/app/:appID/deployments", func(c *fiber.Ctx) error {
-		result := datastore.GetDeploymentsByAppID(c.Params("appID"))
+		result, err := datastore.GetDeploymentsByAppID(c.Params("appID"))
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
 	app.Get("/deployment/:deploymentID", func(c *fiber.Ctx) error {
 		deploymentID := c.Params("deploymentID")
-		result := datastore.GetDeploymentByID(deploymentID)
+		result, err := datastore.GetDeploymentByID(deploymentID)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
 	app.Get("/deployment/:deploymentID/event", func(c *fiber.Ctx) error {
-		event := datastore.GetEventByDeploymentID(c.Params("deploymentID"))
+		event, err := datastore.GetEventByDeploymentID(c.Params("deploymentID"))
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.SendString(event)
 	})
 

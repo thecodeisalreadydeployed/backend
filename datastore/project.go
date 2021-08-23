@@ -4,24 +4,22 @@ import (
 	"strings"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
-	"github.com/thecodeisalreadydeployed/logger"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetProjectByID(projectID string) model.Project {
-	//TODO: For all endpoints: Better to return error instead of zero value?
-
+func GetProjectByID(projectID string) (*model.Project, error) {
 	if !strings.HasPrefix(projectID, "prj_") {
-		return model.Project{}
+		return nil, ErrInvalidArgument
 	}
 
 	var _data datamodel.Project
-	err := getDB().Table("projects").Where("ID = ?", projectID).Scan(&_data).Error
 
-	if err != nil {
-		logger.Warn(err.Error())
-		return model.Project{}
+	result := getDB().First(&_data, "id = ?", projectID)
+
+	if result.Error != nil {
+		return nil, ErrNotFound
 	}
 
-	return _data.ToModel()
+	ret := _data.ToModel()
+	return &ret, nil
 }

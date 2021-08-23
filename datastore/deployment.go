@@ -7,38 +7,40 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetDeploymentsByAppID(appID string) []model.Deployment {
+func GetDeploymentsByAppID(appID string) (*([]model.Deployment), error) {
 	if !strings.HasPrefix(appID, "app_") {
-		return []model.Deployment{}
+		return nil, ErrInvalidArgument
 	}
 
 	var _data []datamodel.Deployment
 	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
 
 	if err != nil {
-		return []model.Deployment{}
+		return nil, ErrNotFound
 	}
 
-	var ret []model.Deployment
+	var _ret []model.Deployment
 	for _, data := range _data {
 		m := data.ToModel()
-		ret = append(ret, m)
+		_ret = append(_ret, m)
 	}
 
-	return ret
+	ret := &_ret
+	return ret, nil
 }
 
-func GetDeploymentByID(deploymentID string) model.Deployment {
+func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	if !strings.HasPrefix(deploymentID, "dpl_") {
-		return model.Deployment{}
+		return nil, ErrInvalidArgument
 	}
 
 	var _data datamodel.Deployment
-	err := getDB().Table("deployments").Where("ID = ?", deploymentID).Scan(&_data).Error
+	err := getDB().First(&_data, "id = ?", deploymentID)
 
 	if err != nil {
-		return model.Deployment{}
+		return nil, ErrNotFound
 	}
 
-	return _data.ToModel()
+	ret := _data.ToModel()
+	return &ret, nil
 }
