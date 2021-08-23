@@ -2,8 +2,9 @@ package apiserver
 
 import (
 	"fmt"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"log"
+
+	"github.com/thecodeisalreadydeployed/workloadcontroller"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 
@@ -16,7 +17,10 @@ func APIServer(port int) {
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
 		projectID := c.Params("projectID")
-		result := datastore.GetProjectByID(projectID)
+		result, err := datastore.GetProjectByID(projectID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
 		return c.JSON(result)
 	})
 
