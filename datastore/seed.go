@@ -7,22 +7,23 @@ import (
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/logger"
 	"github.com/thecodeisalreadydeployed/model"
+	"gorm.io/gorm"
 	"math/rand"
 )
 
-func seed() {
+func seed(db *gorm.DB) {
 	//TODO: Updated at may come before created at
 
-	seedProjects(20)
-	seedApps(100)
-	seedDeployments(500)
+	seedProjects(db, 20)
+	seedApps(db, 100)
+	seedDeployments(db, 500)
 }
 
-func checkSeedExists(tablename string) {
+func checkSeedExists(db *gorm.DB, tablename string) {
 	var existing int64
-	err := getDB().Table(tablename).Count(&existing).Error
+	err := db.Table(tablename).Count(&existing).Error
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Fatal(err.Error())
 		return
 	} else if existing > 0 {
 		logger.Info(fmt.Sprintf("Table %s already seeded.", tablename))
@@ -30,8 +31,8 @@ func checkSeedExists(tablename string) {
 	}
 }
 
-func seedProjects(size int) {
-	checkSeedExists("projects")
+func seedProjects(db *gorm.DB, size int) {
+	checkSeedExists(db, "projects")
 
 	var data []datamodel.Project
 	for i := 0; i < size; i++ {
@@ -42,13 +43,13 @@ func seedProjects(size int) {
 		}
 		data = append(data, datum)
 	}
-	getDB().Create(&data)
+	db.Create(&data)
 }
 
-func seedApps(size int) {
-	checkSeedExists("apps")
+func seedApps(db *gorm.DB, size int) {
+	checkSeedExists(db, "apps")
 	var keys []string
-	err := getDB().Table("projects").Select("ID").Scan(&keys).Error
+	err := db.Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -66,7 +67,7 @@ func seedApps(size int) {
 
 		data = append(data, datum)
 	}
-	getDB().Omit("Project").Create(&data)
+	db.Omit("Project").Create(&data)
 }
 
 func setAppForeignKey(datum *datamodel.App, keys []string) {
@@ -74,11 +75,11 @@ func setAppForeignKey(datum *datamodel.App, keys []string) {
 	datum.ProjectID = keys[index]
 }
 
-func seedDeployments(size int) {
-	checkSeedExists("deployments")
+func seedDeployments(db *gorm.DB, size int) {
+	checkSeedExists(db, "deployments")
 
 	var keys []string
-	err := getDB().Table("apps").Select("ID").Scan(&keys).Error
+	err := db.Table("apps").Select("ID").Scan(&keys).Error
 	if err != nil {
 		logger.Error(err.Error())
 	}
@@ -97,7 +98,7 @@ func seedDeployments(size int) {
 
 		data = append(data, datum)
 	}
-	getDB().Omit("App").Create(&data)
+	db.Omit("App").Create(&data)
 }
 
 func setDeploymentForeignKey(datum *datamodel.Deployment, keys []string) {
