@@ -9,6 +9,8 @@ import (
 )
 
 func GetProjectByID(projectID string) model.Project {
+	//TODO: For all endpoints: Better to return error instead of zero value?
+
 	if !strings.HasPrefix(projectID, "prj_") {
 		return model.Project{}
 	}
