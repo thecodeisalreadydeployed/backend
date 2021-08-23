@@ -12,14 +12,20 @@ func GetAppsByProjectID(projectID string) []model.App {
 		return []model.App{}
 	}
 
-	var data []model.App
-	err := getDB().Table("apps").Where(datamodel.App{ProjectID: projectID}).Scan(&data).Error
+	var _data []datamodel.App
+	err := getDB().Table("apps").Where(datamodel.App{ProjectID: projectID}).Scan(&_data).Error
 
 	if err != nil {
 		return []model.App{}
 	}
 
-	return data
+	var ret []model.App
+	for _, data := range _data {
+		m := data.ToModel()
+		ret = append(ret, m)
+	}
+
+	return ret
 }
 
 func GetAppByID(appID string) model.App {
@@ -27,12 +33,12 @@ func GetAppByID(appID string) model.App {
 		return model.App{}
 	}
 
-	var data model.App
-	err := getDB().Table("apps").Where("ID = ?", appID).Scan(&data).Error
+	var _data datamodel.App
+	err := getDB().Table("apps").Where("ID = ?", appID).Scan(&_data).Error
 
 	if err != nil {
 		return model.App{}
 	}
 
-	return data
+	return _data.ToModel()
 }
