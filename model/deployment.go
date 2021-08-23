@@ -8,15 +8,15 @@ import (
 )
 
 type Deployment struct {
-	ID        string
-	Name      string
-	Creator   Actor
-	Meta      string
-	GitSource GitSource
-	BuildedAt time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	State     DeploymentState
+	ID        string          `json:"id"`
+	Name      string          `json:"name"`
+	Creator   Actor           `json:"creator"`
+	Meta      string          `json:"meta"`
+	GitSource GitSource       `json:"git_source"`
+	BuildedAt time.Time       `json:"builded_at"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	State     DeploymentState `json:"state"`
 }
 
 func GenerateDeploymentID() string {

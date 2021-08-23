@@ -8,14 +8,14 @@ import (
 )
 
 type App struct {
-	ID              string
-	Name            string
-	GitSource       GitSource
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	BuildCommand    string
-	OutputDirectory string
-	InstallCommand  string
+	ID              string    `json:"id"`
+	Name            string    `json:"name"`
+	GitSource       GitSource `json:"git_source"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	BuildCommand    string    `json:"build_command"`
+	OutputDirectory string    `json:"output_directory"`
+	InstallCommand  string    `json:"install_command"`
 }
 
 func GenerateAppID() string {
