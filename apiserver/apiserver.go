@@ -19,7 +19,7 @@ func APIServer(port int) {
 		projectID := c.Params("projectID")
 		result, err := datastore.GetProjectByID(projectID)
 		if err != nil {
-			return fiber.NewError(fiber.StatusBadRequest)
+			return fiber.NewError(fiber.StatusNotFound)
 		}
 		return c.JSON(result)
 	})
