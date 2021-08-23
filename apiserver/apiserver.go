@@ -45,7 +45,10 @@ func APIServer(port int) {
 
 	app.Get("/deployment/:deploymentID", func(c *fiber.Ctx) error {
 		deploymentID := c.Params("deploymentID")
-		result := datastore.GetDeploymentByID(deploymentID)
+		result, err := datastore.GetDeploymentByID(deploymentID)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
