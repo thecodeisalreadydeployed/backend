@@ -18,9 +18,9 @@ func seed() {
 	seedDeployments(500)
 }
 
-func checkSeedExists(db *gorm.DB, name string) {
+func checkSeedExists(name string) {
 	var existing int64
-	err := db.Table(name).Count(&existing).Error
+	err := getDB().Table(name).Count(&existing).Error
 	if err != nil {
 		logger.Error(err.Error())
 		return
