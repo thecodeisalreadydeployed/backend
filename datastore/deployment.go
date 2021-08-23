@@ -12,20 +12,14 @@ func GetDeploymentsByAppID(appID string) []model.Deployment {
 		return []model.Deployment{}
 	}
 
-	var _data []datamodel.Deployment
-	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
+	var data []model.Deployment
+	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&data).Error
 
 	if err != nil {
 		return []model.Deployment{}
 	}
 
-	var ret []model.Deployment
-	for _, data := range _data {
-		m := data.ToModel()
-		ret = append(ret, m)
-	}
-
-	return ret
+	return data
 }
 
 func GetDeploymentByID(deploymentID string) model.Deployment {
@@ -33,12 +27,12 @@ func GetDeploymentByID(deploymentID string) model.Deployment {
 		return model.Deployment{}
 	}
 
-	var _data datamodel.Deployment
-	err := getDB().Table("deployments").Where("ID = ?", deploymentID).Scan(&_data).Error
+	var data model.Deployment
+	err := getDB().Table("deployments").Where("ID = ?", deploymentID).Scan(&data).Error
 
 	if err != nil {
 		return model.Deployment{}
 	}
 
-	return _data.ToModel()
+	return data
 }
