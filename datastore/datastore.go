@@ -18,7 +18,7 @@ func Init() {
 	database.AutoMigrate(&datamodel.Project{})
 	database.AutoMigrate(&datamodel.App{})
 	database.AutoMigrate(&datamodel.Deployment{})
-	seed(database)
+	seed()
 }
 
 func getDB() *gorm.DB {
