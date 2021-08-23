@@ -29,65 +29,59 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		panic(err)
 	}
 
-	containers := []apiv1.Container{
-		{
-			Name:  "kaniko",
-			Image: "gcr.io/kaniko-project/executor:v1.6.0",
-			Args: []string{
-				fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
-				fmt.Sprintf("--context=dir://%s", workingDirectory),
-				fmt.Sprintf("--destination=%s", it.Destination),
-			},
-			VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
-		},
-	}
-
-	initContainers := []apiv1.Container{
-		{
-			Name:  "busybox",
-			Image: "busybox:1.33.1",
-			VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
-				MountPath: fmt.Sprintf("/%s", dotSSH),
-				Name:      dotSSH,
-			}},
-		},
-		{
-			Name:  "git",
-			Image: "alpine/git:v2.30.2",
-			VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
-				MountPath: "/root/.ssh",
-				Name:      dotSSH,
-			}},
-			Command: []string{"clone", it.BuildContext},
-		},
-	}
-
-	spec := apiv1.PodSpec{
-		RestartPolicy: apiv1.RestartPolicyNever,
-		Volumes: []apiv1.Volume{
-			{
-				Name: workingDirectory,
-				VolumeSource: apiv1.VolumeSource{
-					EmptyDir: &apiv1.EmptyDirVolumeSource{},
-				},
-			},
-			{
-				Name: dotSSH,
-				VolumeSource: apiv1.VolumeSource{
-					EmptyDir: &apiv1.EmptyDirVolumeSource{},
-				},
-			},
-		},
-		InitContainers: initContainers,
-		Containers: containers,
-	}
-
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   fmt.Sprintf("kaniko-%s", util.RandomString(5)),
 			Labels: podLabel,
 		},
-		Spec: spec,
+		Spec: apiv1.PodSpec{
+			RestartPolicy: apiv1.RestartPolicyNever,
+			Volumes: []apiv1.Volume{
+				{
+					Name: workingDirectory,
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{},
+					},
+				},
+				{
+					Name: dotSSH,
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{},
+					},
+				},
+			},
+			InitContainers: []apiv1.Container{
+				{
+					Name:  "busybox",
+					Image: "busybox:1.33.1",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
+						MountPath: fmt.Sprintf("/%s", dotSSH),
+						Name:      dotSSH,
+					}},
+				},
+				{
+					Name:  "git",
+					Image: "alpine/git:v2.30.2",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
+						MountPath: "/root/.ssh",
+						Name:      dotSSH,
+					}},
+					Command: []string{"clone", it.BuildContext},
+				},
+			},
+			Containers: []apiv1.Container{
+				{
+					Name:  "kaniko",
+					Image: "gcr.io/kaniko-project/executor:v1.6.0",
+					Args: []string{
+						fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
+						fmt.Sprintf("--context=dir://%s", workingDirectory),
+						fmt.Sprintf("--destination=%s", it.Destination),
+					},
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
+				},
+			},
+		},
 	}
 	return podSpec
 }
