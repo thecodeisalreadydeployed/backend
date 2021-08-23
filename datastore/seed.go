@@ -19,14 +19,14 @@ func seed(db *gorm.DB) {
 	seedDeployments(db, 500)
 }
 
-func checkSeedExists(db *gorm.DB, tablename string) {
+func checkSeedExists(db *gorm.DB, name string) {
 	var existing int64
-	err := db.Table(tablename).Count(&existing).Error
+	err := db.Table(name).Count(&existing).Error
 	if err != nil {
 		logger.Fatal(err.Error())
 		return
 	} else if existing > 0 {
-		logger.Info(fmt.Sprintf("Table %s already seeded.", tablename))
+		logger.Info(fmt.Sprintf("Table %s already seeded.", name))
 		return
 	}
 }
