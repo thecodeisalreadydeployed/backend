@@ -25,13 +25,19 @@ func APIServer(port int) {
 	})
 
 	app.Get("/project/:projectID/apps", func(c *fiber.Ctx) error {
-		result := datastore.GetAppsByProjectID(c.Params("projectID"))
+		result, err := datastore.GetAppsByProjectID(c.Params("projectID"))
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
 	app.Get("/app/:appID", func(c *fiber.Ctx) error {
 		appID := c.Params("appID")
-		result := datastore.GetAppByID(appID)
+		result, err := datastore.GetAppByID(appID)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.JSON(result)
 	})
 
@@ -53,7 +59,10 @@ func APIServer(port int) {
 	})
 
 	app.Get("/deployment/:deploymentID/event", func(c *fiber.Ctx) error {
-		event := datastore.GetEventByDeploymentID(c.Params("deploymentID"))
+		event, err := datastore.GetEventByDeploymentID(c.Params("deploymentID"))
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
 		return c.SendString(event)
 	})
 
