@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var database *gorm.DB
+var DB *gorm.DB
 
 func Init() {
 	dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
@@ -15,12 +15,13 @@ func Init() {
 		panic(err)
 	}
 
-	database.AutoMigrate(&datamodel.Project{})
-	database.AutoMigrate(&datamodel.App{})
-	database.AutoMigrate(&datamodel.Deployment{})
+	DB = database
+	DB.AutoMigrate(&datamodel.Project{})
+	DB.AutoMigrate(&datamodel.App{})
+	DB.AutoMigrate(&datamodel.Deployment{})
 	seed()
 }
 
 func getDB() *gorm.DB {
-	return database
+	return DB
 }
