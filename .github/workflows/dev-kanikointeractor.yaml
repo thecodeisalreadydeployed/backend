@@ -25,6 +25,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - run: GO111MODULE=on go get sigs.k8s.io/kind
+      - run: PATH=$(go env GOPATH)/bin:$PATH kind create cluster --config hack/.kind.config.yaml
+      - run: kubectl get services --all-namespaces -o wide
       - run: |
           sudo mkdir /__w
           sudo chmod -R a+rwX /__w
