@@ -63,6 +63,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						"sh",
 						"-c",
 						"echo '" + PresetNestJS("yarn install --frozen-lockfile", "yarn run build", "dist", "yarn run start:prod") + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
 					},
 				},
 				{
