@@ -1,10 +1,6 @@
 package kanikointeractor
 
 import (
-	"errors"
-	"fmt"
-	"strings"
-
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor"
 )
@@ -17,10 +13,6 @@ type KanikoInteractor struct {
 }
 
 func (it *KanikoInteractor) BuildContainerImage() error {
-	if !strings.HasPrefix(it.BuildContext, "git") {
-		return errors.New(fmt.Sprintf("Build context %s is not supported.", it.BuildContext))
-	}
-
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
 
 	switch it.Registry {
