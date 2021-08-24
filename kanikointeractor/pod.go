@@ -2,6 +2,7 @@ package kanikointeractor
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/config"
@@ -58,6 +59,11 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						MountPath: fmt.Sprintf("/%s", dotSSH),
 						Name:      dotSSH,
 					}},
+					Command: []string{
+						"sh",
+						"-c",
+						"echo '" + PresetNestJS("yarn install --frozen-lockfile", "yarn run build", "dist", "yarn run start:prod") + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+					},
 				},
 				{
 					Name:         "git",
