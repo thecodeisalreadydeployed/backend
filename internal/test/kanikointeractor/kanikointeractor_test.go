@@ -1,6 +1,7 @@
 package kanikointeractor
 
 import (
+	"flag"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,6 +9,8 @@ import (
 	it "github.com/thecodeisalreadydeployed/kanikointeractor"
 	"github.com/thecodeisalreadydeployed/util"
 )
+
+var kubeconfig = flag.String("kubeconfig", "", "")
 
 func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
 	interactor := it.KanikoInteractor{
