@@ -3,6 +3,9 @@ package containerregistry
 type ContainerRegistryType string
 
 const (
+	// Local
+	LOCAL ContainerRegistryType = "LOCAL"
+
 	// Docker Hub
 	DH ContainerRegistryType = "DH"
 

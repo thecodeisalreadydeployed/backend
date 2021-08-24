@@ -2,6 +2,7 @@ package kanikointeractor
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/config"
@@ -12,13 +13,13 @@ import (
 )
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
-	workingDirectory := "__w"
+	workingDirectory := "working-directory"
 	workingDirectoryVolumeMount := apiv1.VolumeMount{
 		MountPath: config.DefaultKanikoWorkingDirectory,
 		Name:      workingDirectory,
 	}
 
-	dotSSH := ".ssh"
+	dotSSH := "ssh"
 
 	podLabel := map[string]string{
 		"codedeploy/component": "kaniko",
@@ -58,27 +59,25 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						MountPath: fmt.Sprintf("/%s", dotSSH),
 						Name:      dotSSH,
 					}},
+					Command: []string{
+						"sh",
+						"-c",
+						"echo '" + PresetNestJS("yarn install --frozen-lockfile", "yarn run build", "dist", "yarn run start:prod") + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"&&",
+						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+					},
 				},
 				{
-					Name:  "git",
-					Image: "alpine/git:v2.30.2",
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
-						MountPath: "/root/.ssh",
-						Name:      dotSSH,
-					}},
-					Command: []string{"clone", it.BuildContext},
+					Name:         "git",
+					Image:        "alpine/git:v2.30.2",
+					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, workingDirectoryVolumeMount.MountPath},
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
 			Containers: []apiv1.Container{
 				{
-					Name:  "kaniko",
-					Image: "gcr.io/kaniko-project/executor:v1.6.0",
-					Args: []string{
-						fmt.Sprintf("--dockerfile=%s", "codedeploy.Dockerfile"),
-						fmt.Sprintf("--context=dir://%s", workingDirectory),
-						fmt.Sprintf("--destination=%s", it.Destination),
-					},
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
+					Name:  "podinfo",
+					Image: "stefanprodan/podinfo:6.0.0",
 				},
 			},
 		},
