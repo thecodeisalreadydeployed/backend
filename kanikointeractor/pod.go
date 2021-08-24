@@ -60,12 +60,8 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					}},
 				},
 				{
-					Name:  "git",
-					Image: "alpine/git:v2.30.2",
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
-						MountPath: "/root/.ssh",
-						Name:      dotSSH,
-					}},
+					Name:    "git",
+					Image:   "alpine/git:v2.30.2",
 					Command: []string{"clone", it.BuildContext},
 				},
 			},
