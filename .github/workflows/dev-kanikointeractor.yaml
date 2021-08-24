@@ -32,4 +32,4 @@ jobs:
           sudo mkdir /__w
           sudo chmod -R a+rwX /__w
           ls -la /__w
-      - run: go test -v ./internal/test/kanikointeractor/
+      - run: go test -v ./internal/test/kanikointeractor/ --kubeconfig ~/.kube/config
