@@ -1,0 +1,32 @@
+name: dev/kanikointeractor
+on:
+  push:
+    paths:
+      - "go.mod"
+      - "go.sum"
+      - "kanikointeractor/**"
+      - "internal/test/kanikointeractor/**"
+      - ".github/workflows/dev-kanikointeractor.yaml"
+    branches:
+      - dev/kanikointeractor
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - run: |
+          sudo mkdir /__w
+          sudo chmod -R a+rwX /__w
+          ls -la /__w
+      - run: go test -v ./internal/test/kanikointeractor/
