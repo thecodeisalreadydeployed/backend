@@ -30,6 +30,17 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		panic(err)
 	}
 
+	buildScript, err := PresetNestJS(BuildOptions{
+		InstallCommand:  "yarn install",
+		BuildCommand:    "yarn run build",
+		OutputDirectory: "dist",
+		StartCommand:    "yarn run start:prod",
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   fmt.Sprintf("kaniko-%s", util.RandomString(5)),
@@ -62,7 +73,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						"echo '" + PresetNestJS("yarn install --frozen-lockfile", "yarn run build", "dist", "yarn run start:prod") + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"echo '" + buildScript + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
 						"&&",
 						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
 					},
