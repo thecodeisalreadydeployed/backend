@@ -30,6 +30,9 @@ func (it *KanikoInteractor) BuildContainerImage() error {
 	case containerregistry.ECR:
 		podSpec := it.ECRKanikoPodSpec()
 		k8s.CreatePod(&podSpec)
+	case containerregistry.LOCAL:
+		podSpec := it.baseKanikoPodSpec()
+		k8s.CreatePod(&podSpec)
 	}
 
 	return nil
