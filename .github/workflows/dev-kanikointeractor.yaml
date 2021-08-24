@@ -34,3 +34,5 @@ jobs:
           sudo chmod -R a+rwX /__w
           ls -la /__w
       - run: go test -v ./internal/test/kanikointeractor/ --kubeconfig ~/.kube/config
+      - run: sleep 15
+      - run: kubectl get pods --all-namespaces -o wide -l codedeploy/component=kaniko
