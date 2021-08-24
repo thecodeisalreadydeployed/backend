@@ -44,7 +44,7 @@ require (
 	gorm.io/driver/postgres v1.1.0 // indirect
 	gorm.io/gorm v1.21.13 // indirect
 	k8s.io/api v0.19.13 // indirect
-	k8s.io/apimachinery v0.19.13 // indirect
+	k8s.io/apimachinery v0.20.2 // indirect
 	k8s.io/client-go v0.19.13 // indirect
 	k8s.io/klog v0.3.1 // indirect
 )
