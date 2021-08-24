@@ -36,3 +36,4 @@ jobs:
       - run: go test -v ./internal/test/kanikointeractor/ --kubeconfig ~/.kube/config
       - run: sleep 15
       - run: kubectl get pods --all-namespaces -o wide -l codedeploy/component=kaniko
+      - run: kubectl logs --all-namespaces -o wide -l codedeploy/component=kaniko
