@@ -5,6 +5,7 @@ on:
       - "go.mod"
       - "go.sum"
       - "kanikointeractor/**"
+      - "util/**"
       - "internal/test/kanikointeractor/**"
       - ".github/workflows/dev-kanikointeractor.yaml"
     branches:
