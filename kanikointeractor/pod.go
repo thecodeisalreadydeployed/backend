@@ -12,7 +12,7 @@ import (
 )
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
-	workingDirectory := "workingDirectory"
+	workingDirectory := "working-directory"
 	workingDirectoryVolumeMount := apiv1.VolumeMount{
 		MountPath: config.DefaultKanikoWorkingDirectory,
 		Name:      workingDirectory,
