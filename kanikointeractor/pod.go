@@ -62,7 +62,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 				{
 					Name:         "git",
 					Image:        "alpine/git:v2.30.2",
-					Command:      []string{"clone", "--single-branch", "--", it.BuildContext, workingDirectoryVolumeMount.MountPath},
+					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, workingDirectoryVolumeMount.MountPath},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
