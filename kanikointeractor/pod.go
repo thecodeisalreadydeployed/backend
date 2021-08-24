@@ -18,7 +18,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		Name:      workingDirectory,
 	}
 
-	dotSSH := ".ssh"
+	dotSSH := "ssh"
 
 	podLabel := map[string]string{
 		"codedeploy/component": "kaniko",
