@@ -1,7 +1,7 @@
 package dto
 
 type Deployment struct {
-	ApiVersion    string
+	APIVersion    string
 	Name          string
 	Replicas      int
 	Labels        map[string]string

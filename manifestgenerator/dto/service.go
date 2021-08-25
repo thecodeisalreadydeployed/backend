@@ -1,7 +1,7 @@
 package dto
 
 type Service struct {
-	ApiVersion string
+	APIVersion string
 	Name       string
 	Labels     map[string]string
 	PortSpec   PortSpec
