@@ -101,7 +101,10 @@ func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
 		panic(err)
 	}
 
-	util.WriteFile(fs, fs.Join(path, name), data, 0644)
+	err = util.WriteFile(fs, fs.Join(path, name), data, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (it *GitInteractor) Log() []string {
