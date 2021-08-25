@@ -17,6 +17,7 @@ func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
 		Registry:     containerregistry.LOCAL,
 		BuildContext: "https://github.com/thecodeisalreadydeployed/fixture-nest.git",
 		DeploymentID: util.RandomString(5),
+		Destination:  "fixture-nest:dev",
 	}
 
 	err := interactor.BuildContainerImage()

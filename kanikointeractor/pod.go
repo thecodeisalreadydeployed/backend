@@ -30,6 +30,23 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		panic(err)
 	}
 
+	buildScript, err := PresetNestJS(BuildOptions{
+		InstallCommand:  "yarn install",
+		BuildCommand:    "yarn run build",
+		OutputDirectory: "dist",
+		StartCommand:    "yarn run start:prod",
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("buildScript: %v\n", buildScript)
+
+	buildScriptPath := filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")
+
+	fmt.Printf("buildScriptPath: %v\n", buildScriptPath)
+
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   fmt.Sprintf("kaniko-%s", util.RandomString(5)),
@@ -53,6 +70,27 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
+					Name:  "init-busybox",
+					Image: "busybox:1.33.1",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
+						MountPath: fmt.Sprintf("/%s", dotSSH),
+						Name:      dotSSH,
+					}},
+					Command: []string{
+						"sh",
+						"-c",
+						"echo \"" + buildScript + "\" > " + buildScriptPath,
+					},
+				},
+				{
+					Name:         "init-git",
+					Image:        "alpine/git:v2.30.2",
+					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
+				},
+			},
+			Containers: []apiv1.Container{
+				{
 					Name:  "busybox",
 					Image: "busybox:1.33.1",
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
@@ -62,22 +100,19 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						"echo '" + PresetNestJS("yarn install --frozen-lockfile", "yarn run build", "dist", "yarn run start:prod") + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
-						"&&",
-						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"cat " + buildScriptPath,
 					},
 				},
 				{
-					Name:         "git",
-					Image:        "alpine/git:v2.30.2",
-					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, workingDirectoryVolumeMount.MountPath},
+					Name:  "kaniko",
+					Image: "gcr.io/kaniko-project/executor:v1.6.0",
+					Args: []string{
+						fmt.Sprintf("--dockerfile=%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")),
+						fmt.Sprintf("--context=dir://%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "code")),
+						fmt.Sprintf("--destination=%s", it.Destination),
+						fmt.Sprintf("--no-push"),
+					},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
-				},
-			},
-			Containers: []apiv1.Container{
-				{
-					Name:  "podinfo",
-					Image: "stefanprodan/podinfo:6.0.0",
 				},
 			},
 		},
