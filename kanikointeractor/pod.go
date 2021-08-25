@@ -64,7 +64,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
-					Name:  "busybox",
+					Name:  "init-busybox",
 					Image: "busybox:1.33.1",
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
 						MountPath: fmt.Sprintf("/%s", dotSSH),
@@ -77,7 +77,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					},
 				},
 				{
-					Name:         "git",
+					Name:         "init-git",
 					Image:        "alpine/git:v2.30.2",
 					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
