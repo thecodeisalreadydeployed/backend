@@ -73,9 +73,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						"echo '" + buildScript + "' > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
-						"&&",
-						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"echo \"" + buildScript + "\" > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
 					},
 				},
 				{
