@@ -75,13 +75,13 @@ func absolutePath(path string) string {
 		return path
 	}
 
-	if strings.HasPrefix(path, string(0x7E)) {
+	if strings.HasPrefix(path, "~") {
 		home, err := homedir.Dir()
 		if err != nil {
 			panic(err)
 		}
 
-		return filepath.Join(home, strings.TrimPrefix(path, string(0x7E)))
+		return filepath.Join(home, strings.TrimPrefix(path, "~"))
 	}
 
 	return path
