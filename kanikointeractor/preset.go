@@ -32,7 +32,7 @@ CMD {{.StartCommand}}
 
 	var buffer bytes.Buffer
 	t := template.Must(template.New("Dockerfile").Parse(text))
-	err := t.Execute(&buffer, t)
+	err := t.Execute(&buffer, opts)
 
 	if err != nil {
 		return "", err
