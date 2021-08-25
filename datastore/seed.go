@@ -3,11 +3,12 @@ package datastore
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
+
 	faker "github.com/bxcodec/faker/v3"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/logger"
 	"github.com/thecodeisalreadydeployed/model"
-	"math/rand"
 )
 
 func seed() {
@@ -111,6 +112,9 @@ func getGitSource() string {
 		logger.Error(err.Error())
 	}
 	res, err := json.Marshal(gs)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	return string(res)
 }
 
@@ -121,6 +125,9 @@ func getCreator() string {
 		logger.Error(err.Error())
 	}
 	res, err := json.Marshal(c)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	return string(res)
 }
 
