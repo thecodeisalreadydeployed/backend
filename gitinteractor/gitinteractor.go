@@ -71,7 +71,10 @@ func (it *GitInteractor) Add(filePath string) {
 	if err != nil {
 		panic(err)
 	}
-	w.Add(filePath)
+	_, err = w.Add(filePath)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (it *GitInteractor) Commit(message string) {
@@ -79,7 +82,10 @@ func (it *GitInteractor) Commit(message string) {
 	if err != nil {
 		panic(err)
 	}
-	w.Commit(message, &git.CommitOptions{Author: config.DefaultGitSignature()})
+	_, err = w.Commit(message, &git.CommitOptions{Author: config.DefaultGitSignature()})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
@@ -95,7 +101,10 @@ func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
 		panic(err)
 	}
 
-	util.WriteFile(fs, fs.Join(path, name), data, 0644)
+	err = util.WriteFile(fs, fs.Join(path, name), data, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (it *GitInteractor) Log() []string {
@@ -105,7 +114,10 @@ func (it *GitInteractor) Log() []string {
 	if err != nil {
 		panic(err)
 	}
-	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+	cIter, logErr := r.Log(&git.LogOptions{From: ref.Hash()})
+	if logErr != nil {
+		panic(err)
+	}
 	err = cIter.ForEach(func(c *object.Commit) error {
 		fmt.Println(c)
 		messages = append(messages, c.Message)

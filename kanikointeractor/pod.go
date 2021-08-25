@@ -110,7 +110,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						fmt.Sprintf("--dockerfile=%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")),
 						fmt.Sprintf("--context=dir://%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "code")),
 						fmt.Sprintf("--destination=%s", it.Destination),
-						fmt.Sprintf("--no-push"),
+						"--no-push",
 					},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},

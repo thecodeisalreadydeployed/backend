@@ -16,9 +16,21 @@ func Init() {
 	}
 
 	DB = database
-	DB.AutoMigrate(&datamodel.Project{})
-	DB.AutoMigrate(&datamodel.App{})
-	DB.AutoMigrate(&datamodel.Deployment{})
+	err = DB.AutoMigrate(&datamodel.Project{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = DB.AutoMigrate(&datamodel.App{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = DB.AutoMigrate(&datamodel.Deployment{})
+	if err != nil {
+		panic(err)
+	}
+
 	seed()
 }
 

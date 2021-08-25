@@ -8,16 +8,16 @@ import (
 
 func CreateWorkload(w *apidto.CreateProjectRequest) string {
 	spec := manifestdto.ContainerSpec{
-		Name: "nginx-container",
+		Name:  "nginx-container",
 		Image: "nginx",
-		Port: 8000,
+		Port:  8000,
 	}
 
 	dpl := manifestdto.Deployment{
-		ApiVersion: "v1",
-		Name: "test-deploy",
-		Replicas: 3,
-		Labels: map[string]string{"app": "nginx"},
+		APIVersion:    "v1",
+		Name:          "test-deploy",
+		Replicas:      3,
+		Labels:        map[string]string{"app": "nginx"},
 		ContainerSpec: spec,
 	}
 
