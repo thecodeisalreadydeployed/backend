@@ -41,6 +41,12 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		panic(err)
 	}
 
+	fmt.Printf("buildScript: %v\n", buildScript)
+
+	buildScriptPath := filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")
+
+	fmt.Printf("buildScriptPath: %v\n", buildScriptPath)
+
 	podSpec := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   fmt.Sprintf("kaniko-%s", util.RandomString(5)),
@@ -73,7 +79,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						"echo \"" + buildScript + "\" > " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"echo \"" + buildScript + "\" > " + buildScriptPath,
 					},
 				},
 				{
@@ -94,7 +100,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+						"cat " + buildScriptPath,
 					},
 				},
 				{
