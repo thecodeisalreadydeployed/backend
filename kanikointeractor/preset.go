@@ -6,10 +6,11 @@ import (
 )
 
 type BuildOptions struct {
-	InstallCommand  string
-	BuildCommand    string
-	OutputDirectory string
-	StartCommand    string
+	InstallCommand   string
+	BuildCommand     string
+	WorkingDirectory string
+	OutputDirectory  string
+	StartCommand     string
 }
 
 func PresetNestJS(opts BuildOptions) (string, error) {
@@ -17,14 +18,15 @@ func PresetNestJS(opts BuildOptions) (string, error) {
 FROM node:14-alpine as build-env
 WORKDIR /app
 ADD . /app
+WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.InstallCommand}}
 RUN {{.BuildCommand}}
 
 FROM node:14-alpine
 WORKDIR /app
-COPY --from=build-env /app/package.json /app/yarn.lock ./
-COPY --from=build-env /app/node_modules ./node_modules
-COPY --from=build-env /app/{{.OutputDirectory}} ./{{.OutputDirectory}}
+COPY --from=build-env /app/{{.WorkingDirectory}}package.json /app/{{.WorkingDirectory}}yarn.lock ./
+COPY --from=build-env /app/{{.WorkingDirectory}}node_modules ./node_modules
+COPY --from=build-env /app/{{.WorkingDirectory}}{{.OutputDirectory}} ./{{.OutputDirectory}}
 CMD {{.StartCommand}}
 	`
 
