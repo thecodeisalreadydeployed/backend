@@ -114,7 +114,10 @@ func (it *GitInteractor) Log() []string {
 	if err != nil {
 		panic(err)
 	}
-	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+	cIter, logErr := r.Log(&git.LogOptions{From: ref.Hash()})
+	if logErr != nil {
+		panic(err)
+	}
 	err = cIter.ForEach(func(c *object.Commit) error {
 		fmt.Println(c)
 		messages = append(messages, c.Message)
