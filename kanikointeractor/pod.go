@@ -81,14 +81,20 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 				{
 					Name:         "git",
 					Image:        "alpine/git:v2.30.2",
-					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, workingDirectoryVolumeMount.MountPath},
+					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
 			Containers: []apiv1.Container{
 				{
-					Name:  "podinfo",
-					Image: "stefanprodan/podinfo:6.0.0",
+					Name:  "kaniko",
+					Image: "gcr.io/kaniko-project/executor:v1.6.0",
+					Args: []string{
+						fmt.Sprintf("--dockerfile=%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")),
+						fmt.Sprintf("--context=dir://%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "code")),
+						fmt.Sprintf("--destination=%s", it.Destination),
+					},
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
 		},
