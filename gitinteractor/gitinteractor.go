@@ -71,7 +71,10 @@ func (it *GitInteractor) Add(filePath string) {
 	if err != nil {
 		panic(err)
 	}
-	w.Add(filePath)
+	_, err = w.Add(filePath)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (it *GitInteractor) Commit(message string) {
@@ -79,7 +82,10 @@ func (it *GitInteractor) Commit(message string) {
 	if err != nil {
 		panic(err)
 	}
-	w.Commit(message, &git.CommitOptions{Author: config.DefaultGitSignature()})
+	_, err = w.Commit(message, &git.CommitOptions{Author: config.DefaultGitSignature()})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
