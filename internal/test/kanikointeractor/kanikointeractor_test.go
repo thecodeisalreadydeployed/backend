@@ -15,7 +15,7 @@ var kubeconfig = flag.String("kubeconfig", "", "")
 func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
 	interactor := it.KanikoInteractor{
 		Registry:     containerregistry.LOCAL,
-		BuildContext: "https://github.com/thecodeisalreadydeployed/fixture-nest.git",
+		BuildContext: "https://github.com/thecodeisalreadydeployed/fixture-monorepo.git",
 		DeploymentID: util.RandomString(5),
 		Destination:  "fixture-nest:dev",
 	}
