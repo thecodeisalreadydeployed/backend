@@ -85,6 +85,19 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			Containers: []apiv1.Container{
 				{
+					Name:  "busybox",
+					Image: "busybox:1.33.1",
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
+						MountPath: fmt.Sprintf("/%s", dotSSH),
+						Name:      dotSSH,
+					}},
+					Command: []string{
+						"sh",
+						"-c",
+						"cat " + filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile"),
+					},
+				},
+				{
 					Name:  "kaniko",
 					Image: "gcr.io/kaniko-project/executor:v1.6.0",
 					Args: []string{
