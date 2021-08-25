@@ -3,8 +3,6 @@ package kanikointeractor
 import (
 	"bytes"
 	"text/template"
-
-	"github.com/spf13/cast"
 )
 
 type BuildOptions struct {
@@ -38,5 +36,5 @@ CMD {{.StartCommand}}
 		return "", err
 	}
 
-	return cast.ToString(buffer), nil
+	return buffer.String(), nil
 }
