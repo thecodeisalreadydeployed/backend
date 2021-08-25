@@ -16,7 +16,7 @@ func CreateDeploymentYAML(dpl *dto.Deployment) string {
 	ctn.ContainerPorts = []json.Port{port}
 
 	var obj json.Deployment
-	obj.ApiVersion = dpl.APIVersion
+	obj.APIVersion = dpl.APIVersion
 	obj.Kind = "Deployment"
 	obj.Metadata.Name = dpl.Name
 	obj.Metadata.Labels = dpl.Labels
