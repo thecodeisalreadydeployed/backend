@@ -33,7 +33,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 	buildScript, err := PresetNestJS(BuildOptions{
 		InstallCommand:   "yarn install",
 		BuildCommand:     "yarn build a",
-		WorkingDirectory: "nx",
+		WorkingDirectory: "nx/",
 		OutputDirectory:  "dist/apps/a",
 		StartCommand:     "node main",
 	})
