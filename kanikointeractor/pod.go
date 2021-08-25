@@ -35,7 +35,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		BuildCommand:     "yarn build a",
 		WorkingDirectory: "nx/",
 		OutputDirectory:  "dist/apps/a",
-		StartCommand:     "node main",
+		StartCommand:     "node dist/apps/a/main",
 	})
 
 	if err != nil {
