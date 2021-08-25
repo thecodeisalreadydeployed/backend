@@ -10,7 +10,7 @@ import (
 	"github.com/thecodeisalreadydeployed/util"
 )
 
-var kubeconfig = flag.String("kubeconfig", "", "") //nolint:golint
+var kubeconfig = flag.String("kubeconfig", "", "") //nolint
 
 func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
 	interactor := it.KanikoInteractor{
