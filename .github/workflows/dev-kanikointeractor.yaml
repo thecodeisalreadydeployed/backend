@@ -36,5 +36,6 @@ jobs:
       - run: go test -v ./internal/test/kanikointeractor/ --kubeconfig ~/.kube/config
       - run: sleep 1m
       - run: kubectl get pods --all-namespaces -o wide -l codedeploy/component=kaniko
+      - run: kubectl logs -l codedeploy/component=kaniko -c init-busybox
       - run: kubectl logs -l codedeploy/component=kaniko -c busybox
       - run: kubectl logs -l codedeploy/component=kaniko -c kaniko
