@@ -2,6 +2,7 @@ package kanikointeractor
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"testing"
 
@@ -22,6 +23,8 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", *serviceAccountKey)
 	destination, err := gateway.RegistryFormat("fixture-monorepo", "dev")
 	assert.Nil(t, err)
+
+	fmt.Printf("destination: %v\n", destination)
 
 	interactor := it.KanikoInteractor{
 		Registry:     containerregistry.LOCAL,
