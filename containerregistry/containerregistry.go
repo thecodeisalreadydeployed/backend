@@ -20,5 +20,5 @@ const (
 )
 
 type ContainerRegistry interface {
-	RegistryFormat(repository string, tag string) string
+	RegistryFormat(repository string, tag string) (string, error)
 }
