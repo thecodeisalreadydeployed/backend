@@ -7,8 +7,8 @@ import (
 
 	faker "github.com/bxcodec/faker/v3"
 	"github.com/thecodeisalreadydeployed/datamodel"
-	"github.com/thecodeisalreadydeployed/logger"
 	"github.com/thecodeisalreadydeployed/model"
+	"go.uber.org/zap"
 )
 
 func seed() {
@@ -23,10 +23,10 @@ func checkSeedExists(name string) {
 	var existing int64
 	err := getDB().Table(name).Count(&existing).Error
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 		return
 	} else if existing > 0 {
-		logger.Info(fmt.Sprintf("Table %s already seeded.", name))
+		zap.L().Info(fmt.Sprintf("Table %s already seeded.", name))
 		return
 	}
 }
@@ -39,7 +39,7 @@ func seedProjects(size int) {
 		var datum datamodel.Project
 		err := faker.FakeData(&datum)
 		if err != nil {
-			logger.Error(err.Error())
+			zap.L().Error(err.Error())
 		}
 
 		datum.ID = getPrefix(datum.ID, "prj")
@@ -53,7 +53,7 @@ func seedApps(size int) {
 	var keys []string
 	err := getDB().Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 	}
 
 	var data []datamodel.App
@@ -61,7 +61,7 @@ func seedApps(size int) {
 		var datum datamodel.App
 		err := faker.FakeData(&datum)
 		if err != nil {
-			logger.Error(err.Error())
+			zap.L().Error(err.Error())
 		}
 
 		datum.ID = getPrefix(datum.ID, "app")
@@ -79,7 +79,7 @@ func seedDeployments(size int) {
 	var keys []string
 	err := getDB().Table("apps").Select("ID").Scan(&keys).Error
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 	}
 
 	var data []datamodel.Deployment
@@ -87,7 +87,7 @@ func seedDeployments(size int) {
 		var datum datamodel.Deployment
 		err := faker.FakeData(&datum)
 		if err != nil {
-			logger.Error(err.Error())
+			zap.L().Error(err.Error())
 		}
 
 		datum.ID = getPrefix(datum.ID, "dpl")
@@ -109,11 +109,11 @@ func getGitSource() string {
 	var gs model.GitSource
 	err := faker.FakeData(&gs)
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 	}
 	res, err := json.Marshal(gs)
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 	}
 	return string(res)
 }
@@ -122,11 +122,11 @@ func getCreator() string {
 	var c model.Actor
 	err := faker.FakeData(&c)
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 	}
 	res, err := json.Marshal(c)
 	if err != nil {
-		logger.Error(err.Error())
+		zap.L().Error(err.Error())
 	}
 	return string(res)
 }
