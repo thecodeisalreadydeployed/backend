@@ -26,7 +26,7 @@ func checkSeedExists(name string) {
 		zap.L().Error(err.Error())
 		return
 	} else if existing > 0 {
-		zap.L().Info(fmt.Sprintf("Table %s already seeded.", name))
+		zap.L().Info(fmt.Sprintf("Table '%s' already seeded.", name))
 		return
 	}
 }
