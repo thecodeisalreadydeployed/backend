@@ -15,14 +15,15 @@ import (
 const busyboxImage = "busybox:1.33.1"
 
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
-
-	workingDirectory := "working-directory"
 	workingDirectoryVolumeMount := apiv1.VolumeMount{
 		MountPath: config.DefaultKanikoWorkingDirectory,
-		Name:      workingDirectory,
+		Name:      "working-directory",
 	}
 
-	dotSSH := "ssh"
+	dotSSHVolumeMount := apiv1.VolumeMount{
+		MountPath: "/root/.ssh",
+		Name:      "dot-ssh",
+	}
 
 	podLabel := map[string]string{
 		"codedeploy/component": "kaniko",
@@ -60,13 +61,13 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			RestartPolicy: apiv1.RestartPolicyNever,
 			Volumes: []apiv1.Volume{
 				{
-					Name: workingDirectory,
+					Name: workingDirectoryVolumeMount.Name,
 					VolumeSource: apiv1.VolumeSource{
 						EmptyDir: &apiv1.EmptyDirVolumeSource{},
 					},
 				},
 				{
-					Name: dotSSH,
+					Name: dotSSHVolumeMount.Name,
 					VolumeSource: apiv1.VolumeSource{
 						EmptyDir: &apiv1.EmptyDirVolumeSource{},
 					},
@@ -74,12 +75,9 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
-					Name:  "init-busybox",
-					Image: busyboxImage,
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
-						MountPath: fmt.Sprintf("/%s", dotSSH),
-						Name:      dotSSH,
-					}},
+					Name:         "init-busybox",
+					Image:        busyboxImage,
+					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, dotSSHVolumeMount},
 					Command: []string{
 						"sh",
 						"-c",
