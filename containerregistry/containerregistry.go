@@ -18,3 +18,7 @@ const (
 	// Amazon Elastic Container Registry
 	ECR ContainerRegistryType = "ECR"
 )
+
+type ContainerRegistry interface {
+	RegistryFormat(repository string, tag string) (string, error)
+}
