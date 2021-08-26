@@ -92,19 +92,6 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			},
 			Containers: []apiv1.Container{
 				{
-					Name:  "busybox",
-					Image: "busybox:1.33.1",
-					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
-						MountPath: fmt.Sprintf("/%s", dotSSH),
-						Name:      dotSSH,
-					}},
-					Command: []string{
-						"sh",
-						"-c",
-						"cat " + buildScriptPath,
-					},
-				},
-				{
 					Name:  "kaniko",
 					Image: "gcr.io/kaniko-project/executor:v1.6.0",
 					Args: []string{
@@ -122,6 +109,35 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 
 func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 	podSpec := it.baseKanikoPodSpec()
+
+	kanikoSecretVolumeMount := apiv1.VolumeMount{
+		MountPath: "/kaniko",
+		Name:      "kaniko-secret",
+	}
+
+	podSpec.Spec.Volumes = append(podSpec.Spec.Volumes, apiv1.Volume{
+		Name: kanikoSecretVolumeMount.Name,
+		VolumeSource: apiv1.VolumeSource{
+			EmptyDir: &apiv1.EmptyDirVolumeSource{},
+		},
+	})
+
+	podSpec.Spec.Containers[0].Env = append(podSpec.Spec.Containers[0].Env, apiv1.EnvVar{
+		Name:  "GOOGLE_APPLICATION_CREDENTIALS",
+		Value: "/kaniko/config.json",
+	})
+
+	podSpec.Spec.InitContainers = append(podSpec.Spec.InitContainers, apiv1.Container{
+		Name:         "init-gcr-secret",
+		Image:        "busybox:1.33.1",
+		VolumeMounts: []apiv1.VolumeMount{kanikoSecretVolumeMount},
+		Command: []string{
+			"sh",
+			"-c",
+			"echo \"" + it.Registry.Secret() + "\" > " + "/kaniko/config.json",
+		},
+	})
+
 	return podSpec
 }
 
