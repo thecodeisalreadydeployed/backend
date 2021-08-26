@@ -12,7 +12,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const busyboxImage = "busybox:1.33.1"
+
 func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
+
 	workingDirectory := "working-directory"
 	workingDirectoryVolumeMount := apiv1.VolumeMount{
 		MountPath: config.DefaultKanikoWorkingDirectory,
@@ -72,7 +75,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 			InitContainers: []apiv1.Container{
 				{
 					Name:  "init-busybox",
-					Image: "busybox:1.33.1",
+					Image: busyboxImage,
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount, {
 						MountPath: fmt.Sprintf("/%s", dotSSH),
 						Name:      dotSSH,
@@ -131,7 +134,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 
 	podSpec.Spec.InitContainers = append(podSpec.Spec.InitContainers, apiv1.Container{
 		Name:         "init-gcr-secret",
-		Image:        "busybox:1.33.1",
+		Image:        busyboxImage,
 		VolumeMounts: []apiv1.VolumeMount{kanikoSecretVolumeMount},
 		Command: []string{
 			"sh",
