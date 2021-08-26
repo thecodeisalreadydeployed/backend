@@ -127,6 +127,8 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Value: "/kaniko/config.json",
 	})
 
+	podSpec.Spec.Containers[0].VolumeMounts = append(podSpec.Spec.Containers[0].VolumeMounts, kanikoSecretVolumeMount)
+
 	podSpec.Spec.InitContainers = append(podSpec.Spec.InitContainers, apiv1.Container{
 		Name:         "init-gcr-secret",
 		Image:        "busybox:1.33.1",
