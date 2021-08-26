@@ -10,6 +10,7 @@ on:
       - ".github/workflows/dev-kanikointeractor.yaml"
     branches:
       - dev/kanikointeractor
+      - test/kanikointeractor
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -34,7 +35,7 @@ jobs:
           sudo chmod -R a+rwX /__w
           ls -la /__w
       - run: go test -v ./internal/test/kanikointeractor/ --kubeconfig ~/.kube/config
-      - run: sleep 5m
+      - run: sleep 1m
       - run: kubectl get pods --all-namespaces -o wide -l codedeploy/component=kaniko
       - run: kubectl logs -l codedeploy/component=kaniko -c init-busybox
       - run: kubectl logs -l codedeploy/component=kaniko -c busybox

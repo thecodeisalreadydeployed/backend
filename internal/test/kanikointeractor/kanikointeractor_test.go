@@ -2,6 +2,7 @@ package kanikointeractor
 
 import (
 	"flag"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,10 @@ import (
 var kubeconfig = flag.String("kubeconfig", "", "") //nolint
 
 func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
+	if os.Getenv("GITHUB_REPOSITORY") != "thecodeisalreadydeployed/backend" {
+		t.Skip()
+	}
+
 	interactor := it.KanikoInteractor{
 		Registry:     containerregistry.LOCAL,
 		BuildContext: "https://github.com/thecodeisalreadydeployed/fixture-monorepo.git",
@@ -26,6 +31,10 @@ func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
 }
 
 func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
+	if os.Getenv("GITHUB_REPOSITORY") == "thecodeisalreadydeployed/backend" && os.Getenv("GITHUB_WORKFLOW") != "kaniko/gcr" {
+		t.Skip()
+	}
+
 	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains")
 	destination, err := gateway.RegistryFormat("fixture-monorepo", "dev")
 	assert.Nil(t, err)
