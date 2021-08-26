@@ -25,3 +25,7 @@ func (g *gcrGateway) RegistryFormat(repository string, tag string) (string, erro
 
 	return fmt.Sprintf("%s/%s/%s:%s", g.hostname, g.projectID, repository, tag), nil
 }
+
+func (g *gcrGateway) Secret() string {
+	return g.serviceAccountKey
+}
