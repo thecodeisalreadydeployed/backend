@@ -6,7 +6,7 @@ import (
 )
 
 type KanikoInteractor struct {
-	Registry     containerregistry.ContainerRegistryType
+	Registry     containerregistry.ContainerRegistry
 	BuildContext string
 	Destination  string
 	DeploymentID string
@@ -15,7 +15,7 @@ type KanikoInteractor struct {
 func (it *KanikoInteractor) BuildContainerImage() error {
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
 
-	switch it.Registry {
+	switch it.Registry.Type() {
 	case containerregistry.GCR:
 		podSpec := it.GCRKanikoPodSpec()
 		k8s.CreatePod(&podSpec)
