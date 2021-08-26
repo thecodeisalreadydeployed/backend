@@ -8,13 +8,14 @@ import (
 	"github.com/thecodeisalreadydeployed/containerregistry"
 )
 
-func NewGCRGateway(hostname string, projectID string) containerregistry.ContainerRegistry {
-	return &gcrGateway{hostname: hostname, projectID: projectID}
+func NewGCRGateway(hostname string, projectID string, serviceAccountKey string) containerregistry.ContainerRegistry {
+	return &gcrGateway{hostname: hostname, projectID: projectID, serviceAccountKey: serviceAccountKey}
 }
 
 type gcrGateway struct {
-	hostname  string
-	projectID string
+	hostname          string
+	projectID         string
+	serviceAccountKey string
 }
 
 func (g *gcrGateway) RegistryFormat(repository string, tag string) (string, error) {
