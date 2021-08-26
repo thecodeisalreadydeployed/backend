@@ -10,6 +10,7 @@ on:
       - ".github/workflows/dev-kanikointeractor.yaml"
     branches:
       - dev/kanikointeractor
+      - test/kanikointeractor
 jobs:
   test:
     runs-on: ubuntu-20.04
