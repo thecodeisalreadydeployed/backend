@@ -1,4 +1,4 @@
-package kanikointeractor_gcr
+package kanikointeractor
 
 import (
 	"flag"
@@ -12,7 +12,6 @@ import (
 	"github.com/thecodeisalreadydeployed/util"
 )
 
-var kubeconfig = flag.String("kubeconfig", "", "")                 //nolint
 var serviceAccountKey = flag.String("gcp-service-account", "", "") //nolint
 
 func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
