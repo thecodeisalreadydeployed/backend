@@ -1,4 +1,4 @@
-package kanikointeractor
+package kanikointeractor_gcr
 
 import (
 	"flag"
