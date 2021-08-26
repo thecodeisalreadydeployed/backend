@@ -2,6 +2,7 @@ package kanikointeractor
 
 import (
 	"flag"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,10 @@ func TestKanikoInteractor_BuildContainerImage(t *testing.T) {
 }
 
 func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
+	if os.Getenv("CI") == "true" && os.Getenv("GITHUB_REPOSITORY") == "thecodeisalreadydeployed/backend" {
+		t.Skip()
+	}
+
 	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains")
 	destination, err := gateway.RegistryFormat("fixture-monorepo", "dev")
 	assert.Nil(t, err)
