@@ -131,8 +131,6 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		SubPath:   "config.json",
 	})
 
-	fmt.Printf("it.Registry.Secret(): %v\n", it.Registry.Secret())
-
 	podSpec.Spec.InitContainers = append(podSpec.Spec.InitContainers, apiv1.Container{
 		Name:  "init-gcr-secret",
 		Image: busyboxImage,
