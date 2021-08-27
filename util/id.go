@@ -7,7 +7,7 @@ import (
 )
 
 func RandomString(length int) string {
-	id, err := gonanoid.Generate("-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", length)
+	id, err := gonanoid.Generate("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", length)
 	if err != nil {
 		panic(err)
 	}
