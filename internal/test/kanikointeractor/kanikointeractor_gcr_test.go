@@ -1,7 +1,6 @@
 package kanikointeractor
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"testing"
@@ -11,8 +10,6 @@ import (
 	it "github.com/thecodeisalreadydeployed/kanikointeractor"
 	"github.com/thecodeisalreadydeployed/util"
 )
-
-var serviceAccountKey = flag.String("gcp-service-account", "", "") //nolint
 
 func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 	if os.Getenv("GITHUB_REPOSITORY") == "thecodeisalreadydeployed/backend" && os.Getenv("GITHUB_WORKFLOW") != "kaniko/gcr" {
