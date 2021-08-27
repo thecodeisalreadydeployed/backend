@@ -46,7 +46,7 @@ func DeploymentState(deploymentID string) model.DeploymentState {
 	pod, podsErr := k8s.Clientset.CoreV1().Pods(namespace).Get(context.TODO(), podName, metav1.GetOptions{})
 
 	if podsErr != nil {
-		zap.L().Sugar().Errorf("Cannot find pod '%s' in namespace '%s'.", podName, namespace)
+		zap.L().Sugar().Errorf("Cannot find Pod '%s' in namespace '%s'.", podName, namespace)
 		return model.DeploymentStateError
 	}
 
