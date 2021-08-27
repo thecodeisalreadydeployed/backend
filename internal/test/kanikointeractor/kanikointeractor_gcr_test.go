@@ -17,7 +17,8 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 		t.Skip()
 	}
 
-	serviceAccountKey, decodeErr := base64.StdEncoding.DecodeString(os.Getenv("GCP_SERVICE_ACCOUNT_BASE64"))
+	env := os.Getenv("GCP_SERVICE_ACCOUNT_BASE64")
+	serviceAccountKey, decodeErr := base64.URLEncoding.DecodeString(env)
 	if decodeErr != nil {
 		fmt.Printf("decodeErr: %v\n", decodeErr)
 	}
