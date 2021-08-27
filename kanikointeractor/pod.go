@@ -130,6 +130,8 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 
 	podSpec.Spec.Containers[0].VolumeMounts = append(podSpec.Spec.Containers[0].VolumeMounts, kanikoSecretVolumeMount)
 
+	fmt.Printf("it.Registry.Secret(): %v\n", it.Registry.Secret())
+
 	podSpec.Spec.InitContainers = append(podSpec.Spec.InitContainers, apiv1.Container{
 		Name:         "init-gcr-secret",
 		Image:        busyboxImage,
