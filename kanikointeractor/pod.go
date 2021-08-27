@@ -112,11 +112,11 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 	podSpec := it.baseKanikoPodSpec()
 
 	kanikoSecretVolumeMount := apiv1.VolumeMount{
-		MountPath: "/kaniko",
+		MountPath: "/kaniko/config.json",
 		Name:      "kaniko-secret",
 	}
 
-	applicationCredentials := filepath.Join(kanikoSecretVolumeMount.MountPath, "config.json")
+	applicationCredentials := kanikoSecretVolumeMount.MountPath
 
 	podSpec.Spec.Volumes = append(podSpec.Spec.Volumes, apiv1.Volume{
 		Name: kanikoSecretVolumeMount.Name,
