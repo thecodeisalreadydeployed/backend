@@ -111,15 +111,10 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 	podSpec := it.baseKanikoPodSpec()
 
-	kanikoSecretVolumeMount := apiv1.VolumeMount{
-		MountPath: "/kaniko/config.json",
-		Name:      "kaniko-secret",
-	}
-
-	applicationCredentials := kanikoSecretVolumeMount.MountPath
+	applicationCredentials := "/kaniko/config.json"
 
 	podSpec.Spec.Volumes = append(podSpec.Spec.Volumes, apiv1.Volume{
-		Name: kanikoSecretVolumeMount.Name,
+		Name: "kaniko-secret",
 		VolumeSource: apiv1.VolumeSource{
 			EmptyDir: &apiv1.EmptyDirVolumeSource{},
 		},
@@ -130,14 +125,21 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Value: applicationCredentials,
 	})
 
-	podSpec.Spec.Containers[0].VolumeMounts = append(podSpec.Spec.Containers[0].VolumeMounts, kanikoSecretVolumeMount)
+	podSpec.Spec.Containers[0].VolumeMounts = append(podSpec.Spec.Containers[0].VolumeMounts, apiv1.VolumeMount{
+		Name:      "kaniko-secret",
+		MountPath: "/kaniko/config.json",
+		SubPath:   "config.json",
+	})
 
 	fmt.Printf("it.Registry.Secret(): %v\n", it.Registry.Secret())
 
 	podSpec.Spec.InitContainers = append(podSpec.Spec.InitContainers, apiv1.Container{
-		Name:         "init-gcr-secret",
-		Image:        busyboxImage,
-		VolumeMounts: []apiv1.VolumeMount{kanikoSecretVolumeMount},
+		Name:  "init-gcr-secret",
+		Image: busyboxImage,
+		VolumeMounts: []apiv1.VolumeMount{{
+			Name:      "kaniko-secret",
+			MountPath: "/kaniko",
+		}},
 		Command: []string{
 			"sh",
 			"-c",
