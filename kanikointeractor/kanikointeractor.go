@@ -1,6 +1,7 @@
 package kanikointeractor
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor"
 )
@@ -18,6 +19,7 @@ func (it *KanikoInteractor) BuildContainerImage() error {
 	switch it.Registry.Type() {
 	case containerregistry.GCR:
 		podSpec := it.GCRKanikoPodSpec()
+		spew.Dump(podSpec)
 		k8s.CreatePod(&podSpec)
 	case containerregistry.ECR:
 		podSpec := it.ECRKanikoPodSpec()
