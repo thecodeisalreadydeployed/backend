@@ -116,6 +116,8 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Name:      "kaniko-secret",
 	}
 
+	applicationCredentials := filepath.Join(kanikoSecretVolumeMount.MountPath, "config.json")
+
 	podSpec.Spec.Volumes = append(podSpec.Spec.Volumes, apiv1.Volume{
 		Name: kanikoSecretVolumeMount.Name,
 		VolumeSource: apiv1.VolumeSource{
@@ -125,7 +127,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 
 	podSpec.Spec.Containers[0].Env = append(podSpec.Spec.Containers[0].Env, apiv1.EnvVar{
 		Name:  "GOOGLE_APPLICATION_CREDENTIALS",
-		Value: "/kaniko/config.json",
+		Value: applicationCredentials,
 	})
 
 	podSpec.Spec.Containers[0].VolumeMounts = append(podSpec.Spec.Containers[0].VolumeMounts, kanikoSecretVolumeMount)
@@ -139,7 +141,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Command: []string{
 			"sh",
 			"-c",
-			"echo \"" + it.Registry.Secret() + "\" > " + "/kaniko/config.json",
+			"echo \"" + it.Registry.Secret() + "\" > " + applicationCredentials,
 		},
 	})
 
