@@ -55,5 +55,9 @@ func DeploymentState(deploymentID string) model.DeploymentState {
 		return model.DeploymentStateBuilding
 	}
 
+	if pod.Status.Phase == v1.PodPending || pod.Status.Phase == v1.PodRunning {
+		return model.DeploymentStateBuilding
+	}
+
 	return model.DeploymentStateError
 }
