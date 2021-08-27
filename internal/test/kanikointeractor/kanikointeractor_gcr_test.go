@@ -1,6 +1,7 @@
 package kanikointeractor
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"testing"
@@ -16,8 +17,10 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 		t.Skip()
 	}
 
-	serviceAccountKey := os.Getenv("GCP_SERVICE_ACCOUNT_BASE64")
-	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", serviceAccountKey)
+	serviceAccountKey, decodeErr := base64.StdEncoding.DecodeString(os.Getenv("GCP_SERVICE_ACCOUNT_BASE64"))
+	assert.Nil(t, decodeErr)
+
+	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", string(serviceAccountKey))
 	destination, err := gateway.RegistryFormat("fixture-monorepo", "dev")
 	assert.Nil(t, err)
 
