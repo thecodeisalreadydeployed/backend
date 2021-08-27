@@ -16,7 +16,8 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 		t.Skip()
 	}
 
-	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", *serviceAccountKey)
+	serviceAccountKey := os.Getenv("GCP_SERVICE_ACCOUNT_BASE64")
+	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", serviceAccountKey)
 	destination, err := gateway.RegistryFormat("fixture-monorepo", "dev")
 	assert.Nil(t, err)
 
