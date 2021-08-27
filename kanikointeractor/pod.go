@@ -143,7 +143,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Command: []string{
 			"sh",
 			"-c",
-			"echo \"" + it.Registry.Secret() + "\" > " + applicationCredentials,
+			"echo '" + it.Registry.Secret() + "' > " + applicationCredentials,
 		},
 	})
 
