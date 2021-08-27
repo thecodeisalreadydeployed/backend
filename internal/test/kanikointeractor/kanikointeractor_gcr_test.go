@@ -18,6 +18,9 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 	}
 
 	serviceAccountKey, decodeErr := base64.StdEncoding.DecodeString(os.Getenv("GCP_SERVICE_ACCOUNT_BASE64"))
+	if decodeErr != nil {
+		fmt.Printf("decodeErr: %v\n", decodeErr)
+	}
 	assert.Nil(t, decodeErr)
 
 	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", string(serviceAccountKey))
