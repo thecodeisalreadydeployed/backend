@@ -80,7 +80,10 @@ func APIServer(port int) {
 
 	// TODO: Jean will delete this. Don't delete it now.
 	app.Get("/test", func(c *fiber.Ctx) error {
-		_ = w.NewApp(&w.NewAppOptions{})
+		err := w.NewApp(&w.NewAppOptions{})
+		if err != nil {
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
 		return c.SendStatus(200)
 	})
 
