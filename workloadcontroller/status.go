@@ -17,6 +17,7 @@ func DeploymentState(deploymentID string) model.DeploymentState {
 
 func AddDeploymentToCheck(deploymentID string) {
 	deploymentsToCheck.Store(deploymentID, struct{}{})
+	zap.L().Sugar().Infof("Added deployment ID '%s' to deploymentsToCheck.", deploymentID)
 }
 
 func CheckDeployments() {
