@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/workloadcontroller"
 	"go.uber.org/zap"
 )
 
@@ -19,4 +20,5 @@ func main() {
 
 	datastore.Init()
 	apiserver.APIServer(3000)
+	workloadcontroller.CheckDeployments()
 }
