@@ -81,7 +81,9 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						fmt.Sprintf("cat << \"EOF\" >> %s\\%s\\EOF", buildScriptPath, buildScript),
+						fmt.Sprintf(`cat << \"EOF\" >> %s
+						%s
+						EOF`, buildScriptPath, buildScript),
 					},
 				},
 				{
@@ -141,7 +143,9 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Command: []string{
 			"sh",
 			"-c",
-			fmt.Sprintf("cat << \"EOF\" >> %s\\%s\\EOF", applicationCredentials, it.Registry.Secret()),
+			fmt.Sprintf(`cat << \"EOF\" >> %s
+			%s
+			EOF`, applicationCredentials, it.Registry.Secret()),
 		},
 	})
 
