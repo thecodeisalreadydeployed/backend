@@ -29,7 +29,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 	podLabel := map[string]string{
 		"codedeploy/component": "kaniko",
 	}
-	defaultPodLabel := model.PodLabel(it.DeploymentID)
+	defaultPodLabel := model.PodLabel(it.deploymentID)
 	err := mergo.Merge(&podLabel, defaultPodLabel)
 	if err != nil {
 		panic(err)
@@ -90,7 +90,7 @@ EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 				{
 					Name:         "init-git",
 					Image:        "alpine/git:v2.30.2",
-					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
+					Args:         []string{"clone", "--single-branch", "--", it.buildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
@@ -101,7 +101,7 @@ EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 					Args: []string{
 						fmt.Sprintf("--dockerfile=%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")),
 						fmt.Sprintf("--context=dir://%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "code")),
-						fmt.Sprintf("--destination=%s", it.Destination),
+						fmt.Sprintf("--destination=%s", it.Destination()),
 						"--log-format=json",
 						"--verbosity=debug",
 					},
@@ -148,7 +148,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 			"-c",
 			fmt.Sprintf(`cat << EOF >> %s
 %s
-EOF`, applicationCredentials, strings.TrimSpace(it.Registry.Secret())),
+EOF`, applicationCredentials, strings.TrimSpace(it.registry.Secret())),
 		},
 	})
 
