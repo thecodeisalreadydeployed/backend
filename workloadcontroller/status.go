@@ -22,10 +22,10 @@ func AddDeploymentToCheck(deploymentID string) {
 }
 
 func SetDeploymentState(deploymentID string, state model.DeploymentState) {
-	zap.L().Sugar().Infof("Updating status of deployment ID '%s' to '%s'.", deploymentID, state)
+	zap.L().Sugar().Infof("Updating state of deployment ID '%s' to '%s'.", deploymentID, state)
 	err := datastore.SetDeploymentState(deploymentID, state)
 	if err != nil {
-		zap.L().Sugar().Infof("Failed to set status of deployment ID '%s'.", deploymentID)
+		zap.L().Sugar().Infof("Failed to set state of deployment ID '%s'.", deploymentID)
 	}
 }
 
@@ -33,7 +33,7 @@ func CheckDeployments() {
 	for {
 		deploymentsToCheck.Range(func(key, value interface{}) bool {
 			deploymentID := key.(string)
-			zap.L().Sugar().Infof("Checking status of deployment ID '%s'.", deploymentID)
+			zap.L().Sugar().Infof("Checking state of deployment ID '%s'.", deploymentID)
 			state := DeploymentState(deploymentID)
 			if state == model.DeploymentStateBuildSucceeded {
 				deploymentsToCheck.Delete(key)
