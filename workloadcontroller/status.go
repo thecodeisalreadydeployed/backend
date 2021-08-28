@@ -2,6 +2,7 @@ package workloadcontroller
 
 import (
 	"sync"
+	"time"
 
 	"github.com/thecodeisalreadydeployed/kanikointeractor"
 	"github.com/thecodeisalreadydeployed/model"
@@ -23,5 +24,7 @@ func CheckDeployments() {
 			}
 			return true
 		})
+
+		time.Sleep(1 * time.Minute)
 	}
 }
