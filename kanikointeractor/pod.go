@@ -3,6 +3,7 @@ package kanikointeractor
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/config"
@@ -81,7 +82,9 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						"echo \"" + buildScript + "\" > " + buildScriptPath,
+						fmt.Sprintf(`cat << EOF >> %s
+%s
+EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 					},
 				},
 				{
@@ -99,6 +102,8 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						fmt.Sprintf("--dockerfile=%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")),
 						fmt.Sprintf("--context=dir://%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "code")),
 						fmt.Sprintf("--destination=%s", it.Destination),
+						"--log-format=json",
+						"--verbosity=debug",
 					},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
@@ -141,7 +146,9 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 		Command: []string{
 			"sh",
 			"-c",
-			"echo '" + it.Registry.Secret() + "' > " + applicationCredentials,
+			fmt.Sprintf(`cat << EOF >> %s
+%s
+EOF`, applicationCredentials, strings.TrimSpace(it.Registry.Secret())),
 		},
 	})
 
