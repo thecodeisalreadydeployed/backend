@@ -16,13 +16,15 @@ import (
 type KanikoInteractor struct {
 	registry     containerregistry.ContainerRegistry
 	buildContext string
+	appID        string
 	deploymentID string
 }
 
-func NewKanikoInteractor(registry containerregistry.ContainerRegistry, buildContext string, deploymentID string) *KanikoInteractor {
+func NewKanikoInteractor(registry containerregistry.ContainerRegistry, buildContext string, appID string, deploymentID string) *KanikoInteractor {
 	return &KanikoInteractor{
 		registry:     registry,
 		buildContext: buildContext,
+		appID:        appID,
 		deploymentID: deploymentID,
 	}
 }
@@ -44,6 +46,11 @@ func (it *KanikoInteractor) BuildContainerImage() error {
 	}
 
 	return nil
+}
+
+func (it *KanikoInteractor) Destination() string {
+	dst, _ := it.registry.RegistryFormat(it.appID, it.deploymentID)
+	return dst
 }
 
 func DeploymentState(deploymentID string) model.DeploymentState {
