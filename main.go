@@ -19,6 +19,6 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	datastore.Init()
+	go workloadcontroller.CheckDeployments()
 	apiserver.APIServer(3000)
-	workloadcontroller.CheckDeployments()
 }
