@@ -3,6 +3,7 @@ package kanikointeractor
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/config"
@@ -83,7 +84,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 						"-c",
 						fmt.Sprintf(`cat << EOF >> %s
 %s
-EOF`, buildScriptPath, buildScript),
+EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 					},
 				},
 				{
@@ -145,7 +146,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 			"-c",
 			fmt.Sprintf(`cat << EOF >> %s
 %s
-EOF`, applicationCredentials, it.Registry.Secret()),
+EOF`, applicationCredentials, strings.TrimSpace(it.Registry.Secret())),
 		},
 	})
 
