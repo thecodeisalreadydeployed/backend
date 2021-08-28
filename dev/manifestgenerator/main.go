@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/ghodss/yaml"
 	"github.com/thecodeisalreadydeployed/util"
 	appsv1 "k8s.io/api/apps/v1"
@@ -93,4 +94,8 @@ func main() {
 	}
 
 	fmt.Println(string(y))
+
+	var spec appsv1.Deployment
+	_ = yaml.Unmarshal(y, &spec)
+	spew.Dump(spec)
 }
