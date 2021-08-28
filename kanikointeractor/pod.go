@@ -81,7 +81,7 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 					Command: []string{
 						"sh",
 						"-c",
-						fmt.Sprintf("cat << \"EOF\" >> %s\\%s\\EOF", buildScript, buildScriptPath),
+						fmt.Sprintf("cat << \"EOF\" >> %s\\%s\\EOF", buildScriptPath, buildScript),
 					},
 				},
 				{
