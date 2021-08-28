@@ -28,6 +28,7 @@ func CheckDeployments() {
 			state := DeploymentState(deploymentID)
 			if state == model.DeploymentStateBuildSucceeded {
 				deploymentsToCheck.Delete(key)
+				zap.L().Sugar().Infof("Deleted deployment ID '%s' from deploymentsToCheck. (Reason: %s)", deploymentID, state)
 			}
 			return true
 		})
