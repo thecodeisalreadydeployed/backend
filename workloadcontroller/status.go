@@ -14,6 +14,10 @@ func DeploymentState(deploymentID string) model.DeploymentState {
 	return kanikointeractor.DeploymentState(deploymentID)
 }
 
+func AddDeploymentToCheck(deploymentID string) {
+	deploymentsToCheck.Store(deploymentID, struct{}{})
+}
+
 func CheckDeployments() {
 	for {
 		deploymentsToCheck.Range(func(key, value interface{}) bool {
