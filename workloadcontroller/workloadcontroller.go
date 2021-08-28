@@ -1,25 +1,19 @@
 package workloadcontroller
 
 import (
-	apidto "github.com/thecodeisalreadydeployed/apiserver/dto"
-	"github.com/thecodeisalreadydeployed/manifestgenerator"
-	manifestdto "github.com/thecodeisalreadydeployed/manifestgenerator/dto"
+	manifest "github.com/thecodeisalreadydeployed/manifestgenerator"
+	"github.com/thecodeisalreadydeployed/util"
 )
 
-func CreateWorkload(w *apidto.CreateProjectRequest) string {
-	spec := manifestdto.ContainerSpec{
-		Name:  "nginx-container",
-		Image: "nginx",
-		Port:  8000,
-	}
+type NewAppOptions struct{}
 
-	dpl := manifestdto.Deployment{
-		APIVersion:    "v1",
-		Name:          "test-deploy",
-		Replicas:      3,
-		Labels:        map[string]string{"app": "nginx"},
-		ContainerSpec: spec,
-	}
+func NewApp(opts *NewAppOptions) bool {
+	manifest.GenerateDeploymentYAML(&manifest.GenerateDeploymentOptions{
+		Name:           util.RandomString(5),
+		Namespace:      util.RandomString(5),
+		Labels:         map[string]string{},
+		ContainerImage: "k8s.gcr.io/ingress-nginx/controller:v1.0.0",
+	})
 
-	return manifestgenerator.CreateDeploymentYAML(&dpl)
+	return true
 }
