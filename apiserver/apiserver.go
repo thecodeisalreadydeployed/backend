@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
+	w "github.com/thecodeisalreadydeployed/workloadcontroller"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 
@@ -80,11 +80,11 @@ func APIServer(port int) {
 
 	// TODO: Jean will delete this. Don't delete it now.
 	app.Get("/test", func(c *fiber.Ctx) error {
-		payload := dto.CreateProjectRequest{
-			Name: "test",
+		err := w.NewApp(&w.NewAppOptions{})
+		if err != nil {
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		yaml := workloadcontroller.CreateWorkload(&payload)
-		return c.SendString(yaml)
+		return c.SendStatus(200)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))

@@ -1,25 +1,25 @@
 package workloadcontroller
 
 import (
-	apidto "github.com/thecodeisalreadydeployed/apiserver/dto"
-	"github.com/thecodeisalreadydeployed/manifestgenerator"
-	manifestdto "github.com/thecodeisalreadydeployed/manifestgenerator/dto"
+	manifest "github.com/thecodeisalreadydeployed/manifestgenerator"
+	"github.com/thecodeisalreadydeployed/util"
+	"go.uber.org/zap"
 )
 
-func CreateWorkload(w *apidto.CreateProjectRequest) string {
-	spec := manifestdto.ContainerSpec{
-		Name:  "nginx-container",
-		Image: "nginx",
-		Port:  8000,
+type NewAppOptions struct{}
+
+func NewApp(opts *NewAppOptions) error {
+	_, generateDeploymentErr := manifest.GenerateDeploymentYAML(&manifest.GenerateDeploymentOptions{
+		Name:           util.RandomString(5),
+		Namespace:      util.RandomString(5),
+		Labels:         map[string]string{},
+		ContainerImage: "k8s.gcr.io/ingress-nginx/controller:v1.0.0",
+	})
+
+	if generateDeploymentErr != nil {
+		zap.L().Error(generateDeploymentErr.Error())
+		return generateDeploymentErr
 	}
 
-	dpl := manifestdto.Deployment{
-		APIVersion:    "v1",
-		Name:          "test-deploy",
-		Replicas:      3,
-		Labels:        map[string]string{"app": "nginx"},
-		ContainerSpec: spec,
-	}
-
-	return manifestgenerator.CreateDeploymentYAML(&dpl)
+	return nil
 }
