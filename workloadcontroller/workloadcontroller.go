@@ -37,19 +37,9 @@ func NewDeployment(appID string) (string, error) {
 
 	deploymentID := util.RandomString(5)
 	containerRegistry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
-	destination, err := containerRegistry.RegistryFormat("fixture-monorepo", deploymentID)
-
-	if err != nil {
-		return "", err
-	}
 
 	// TODO: Rename KanikoInteractor to KanikoGateway
-	kaniko := kanikointeractor.KanikoInteractor{
-		Registry:     containerRegistry,
-		Destination:  destination,
-		BuildContext: buildContext,
-		DeploymentID: deploymentID,
-	}
+	kaniko := kanikointeractor.NewKanikoInteractor(containerRegistry, buildContext, deploymentID)
 
 	buildContainerImageErr := kaniko.BuildContainerImage()
 	if buildContainerImageErr != nil {
