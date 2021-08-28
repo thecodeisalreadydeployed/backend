@@ -6,6 +6,7 @@ import (
 
 	"github.com/thecodeisalreadydeployed/kanikointeractor"
 	"github.com/thecodeisalreadydeployed/model"
+	"go.uber.org/zap"
 )
 
 var deploymentsToCheck = sync.Map{} // [deploymentID]struct{}
@@ -22,6 +23,7 @@ func CheckDeployments() {
 	for {
 		deploymentsToCheck.Range(func(key, value interface{}) bool {
 			deploymentID := key.(string)
+			zap.L().Sugar().Infof("Checking status of deployment ID '%s'.", deploymentID)
 			state := DeploymentState(deploymentID)
 			if state == model.DeploymentStateBuildSucceeded {
 				deploymentsToCheck.Delete(key)
