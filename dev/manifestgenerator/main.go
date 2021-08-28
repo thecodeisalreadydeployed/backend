@@ -13,6 +13,10 @@ import (
 
 func main() {
 	dpl := appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "apps/v1",
+			Kind:       "Deployment",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "ingress-nginx-controller",
 			Namespace: "ingress-nginx",
