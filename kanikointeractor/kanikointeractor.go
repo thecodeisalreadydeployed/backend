@@ -51,8 +51,7 @@ func DeploymentState(deploymentID string) model.DeploymentState {
 	}
 
 	if pod.Status.Phase == v1.PodSucceeded {
-		// TODO: Replace with model.DeploymentStateBuildSucceeded
-		return model.DeploymentStateBuilding
+		return model.DeploymentStateBuildSucceeded
 	}
 
 	if pod.Status.Phase == v1.PodPending || pod.Status.Phase == v1.PodRunning {
