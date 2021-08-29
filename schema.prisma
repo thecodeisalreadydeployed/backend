@@ -10,42 +10,6 @@ generator db {
 model Project {
   id String @default(cuid()) @id
   name String
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  apps App[]
-}
-
-model App {
-  id String @default(cuid()) @id
-  name String
-
-  gitSource Json
-  installCommand string
-  buildCommand string
-  outputDirectory string
-  startCommand string
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  project Project @relation(field: [projectID], references: [id])
-  projectID String
-
-  deployments Deployment[]
-}
-
-model Deployment {
-  id String @default(cuid()) @id
-  name String
-
-  creator Json
-  meta Json
-  gitSource Json
-  buildScript String
-  state String
-
-  app App @relation(field: [appID], references: [id])
-  appID String
 }
