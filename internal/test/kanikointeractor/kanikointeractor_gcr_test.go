@@ -24,18 +24,11 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 	assert.Nil(t, decodeErr)
 
 	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", string(serviceAccountKey))
-	destination, err := gateway.RegistryFormat("fixture-monorepo", "dev")
-	assert.Nil(t, err)
 
-	fmt.Printf("destination: %v\n", destination)
+	appID := util.RandomString(5)
+	deploymentID := util.RandomString(5)
+	i := it.NewKanikoInteractor(gateway, "https://github.com/thecodeisalreadydeployed/fixture-monorepo.git", appID, deploymentID)
 
-	interactor := it.KanikoInteractor{
-		Registry:     gateway,
-		BuildContext: "https://github.com/thecodeisalreadydeployed/fixture-monorepo.git",
-		DeploymentID: util.RandomString(5),
-		Destination:  destination,
-	}
-
-	err = interactor.BuildContainerImage()
+	err := i.BuildContainerImage()
 	assert.Nil(t, err)
 }
