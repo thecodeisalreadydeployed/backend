@@ -1,4 +1,4 @@
-package kanikointeractor
+package kanikogateway
 
 import (
 	"bytes"

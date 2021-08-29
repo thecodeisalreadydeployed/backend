@@ -1,4 +1,4 @@
-package kanikointeractor
+package kanikogateway
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 
 const busyboxImage = "busybox:1.33.1"
 
-func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
+func (it *KanikoGateway) baseKanikoPodSpec() apiv1.Pod {
 	workingDirectoryVolumeMount := apiv1.VolumeMount{
 		MountPath: config.DefaultKanikoWorkingDirectory,
 		Name:      "working-directory",
@@ -108,7 +108,7 @@ EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 	return podSpec
 }
 
-func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
+func (it *KanikoGateway) GCRKanikoPodSpec() apiv1.Pod {
 	podSpec := it.baseKanikoPodSpec()
 
 	applicationCredentials := "/kaniko/config.json"
@@ -150,7 +150,7 @@ EOF`, applicationCredentials, strings.TrimSpace(it.registry.Secret())),
 	return podSpec
 }
 
-func (it *KanikoInteractor) ECRKanikoPodSpec() apiv1.Pod {
+func (it *KanikoGateway) ECRKanikoPodSpec() apiv1.Pod {
 	podSpec := it.baseKanikoPodSpec()
 	return podSpec
 }
