@@ -1,4 +1,4 @@
-package kanikointeractor
+package kanikogateway
 
 import (
 	"context"
@@ -13,15 +13,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type KanikoInteractor struct {
+type KanikoGateway struct {
 	registry     containerregistry.ContainerRegistry
 	buildContext string
 	appID        string
 	deploymentID string
 }
 
-func NewKanikoInteractor(registry containerregistry.ContainerRegistry, buildContext string, appID string, deploymentID string) *KanikoInteractor {
-	return &KanikoInteractor{
+func NewKanikoGateway(registry containerregistry.ContainerRegistry, buildContext string, appID string, deploymentID string) *KanikoGateway {
+	return &KanikoGateway{
 		registry:     registry,
 		buildContext: buildContext,
 		appID:        appID,
@@ -29,7 +29,7 @@ func NewKanikoInteractor(registry containerregistry.ContainerRegistry, buildCont
 	}
 }
 
-func (it *KanikoInteractor) BuildContainerImage() error {
+func (it *KanikoGateway) BuildContainerImage() error {
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
 
 	switch it.registry.Type() {
@@ -48,7 +48,7 @@ func (it *KanikoInteractor) BuildContainerImage() error {
 	return nil
 }
 
-func (it *KanikoInteractor) Destination() string {
+func (it *KanikoGateway) Destination() string {
 	dst, _ := it.registry.RegistryFormat(it.appID, it.deploymentID)
 	return dst
 }
