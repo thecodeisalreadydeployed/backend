@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/util"
@@ -26,14 +25,10 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		Name:      "dot-ssh",
 	}
 
-	podLabel := map[string]string{
-		"codedeploy/component": "kaniko",
-	}
 	defaultPodLabel := model.PodLabel(it.deploymentID)
-	err := mergo.Merge(&podLabel, defaultPodLabel)
-	if err != nil {
-		panic(err)
-	}
+	podLabel := util.MergeMaps(defaultPodLabel, map[string]string{
+		"codedeploy/component": "kaniko",
+	})
 
 	buildScript, err := PresetNestJS(BuildOptions{
 		InstallCommand:   "yarn install",
