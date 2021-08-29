@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/kanikointeractor"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 )
@@ -13,7 +13,7 @@ import (
 var deploymentsToCheck = sync.Map{} // [deploymentID]struct{}
 
 func DeploymentState(deploymentID string) model.DeploymentState {
-	return kanikointeractor.DeploymentState(deploymentID)
+	return kanikogateway.DeploymentState(deploymentID)
 }
 
 func AddDeploymentToCheck(deploymentID string) {
