@@ -49,3 +49,5 @@ require (
 	k8s.io/client-go v0.19.13 // indirect
 	k8s.io/klog v0.3.1 // indirect
 )
+
+replace github.com/nginxinc/kubernetes-ingress v1.12.0 => github.com/thecodeisalreadydeployed/kubernetes-ingress v1.12.0
