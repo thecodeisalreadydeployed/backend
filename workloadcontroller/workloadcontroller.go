@@ -3,7 +3,7 @@ package workloadcontroller
 import (
 	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
 	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/kanikointeractor"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 	manifest "github.com/thecodeisalreadydeployed/manifestgenerator"
 	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
@@ -39,7 +39,7 @@ func NewDeployment(appID string) (string, error) {
 	containerRegistry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
 
 	// TODO: Rename KanikoInteractor to KanikoGateway
-	kaniko := kanikointeractor.NewKanikoInteractor(containerRegistry, buildContext, app.ID, deploymentID)
+	kaniko := kanikogateway.NewKanikoGateway(containerRegistry, buildContext, app.ID, deploymentID)
 
 	buildContainerImageErr := kaniko.BuildContainerImage()
 	if buildContainerImageErr != nil {
