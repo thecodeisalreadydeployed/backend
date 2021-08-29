@@ -14,16 +14,25 @@ import (
 )
 
 type KanikoInteractor struct {
-	Registry     containerregistry.ContainerRegistry
-	BuildContext string
-	Destination  string
-	DeploymentID string
+	registry     containerregistry.ContainerRegistry
+	buildContext string
+	appID        string
+	deploymentID string
+}
+
+func NewKanikoInteractor(registry containerregistry.ContainerRegistry, buildContext string, appID string, deploymentID string) *KanikoInteractor {
+	return &KanikoInteractor{
+		registry:     registry,
+		buildContext: buildContext,
+		appID:        appID,
+		deploymentID: deploymentID,
+	}
 }
 
 func (it *KanikoInteractor) BuildContainerImage() error {
 	k8s := kubernetesinteractor.NewKubernetesInteractor()
 
-	switch it.Registry.Type() {
+	switch it.registry.Type() {
 	case containerregistry.GCR:
 		podSpec := it.GCRKanikoPodSpec()
 		spew.Dump(podSpec)
@@ -37,6 +46,11 @@ func (it *KanikoInteractor) BuildContainerImage() error {
 	}
 
 	return nil
+}
+
+func (it *KanikoInteractor) Destination() string {
+	dst, _ := it.registry.RegistryFormat(it.appID, it.deploymentID)
+	return dst
 }
 
 func DeploymentState(deploymentID string) model.DeploymentState {

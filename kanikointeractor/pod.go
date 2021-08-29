@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/imdario/mergo"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/util"
@@ -26,14 +25,10 @@ func (it *KanikoInteractor) baseKanikoPodSpec() apiv1.Pod {
 		Name:      "dot-ssh",
 	}
 
-	podLabel := map[string]string{
+	defaultPodLabel := model.PodLabel(it.deploymentID)
+	podLabel := util.MergeMaps(defaultPodLabel, map[string]string{
 		"codedeploy/component": "kaniko",
-	}
-	defaultPodLabel := model.PodLabel(it.DeploymentID)
-	err := mergo.Merge(&podLabel, defaultPodLabel)
-	if err != nil {
-		panic(err)
-	}
+	})
 
 	buildScript, err := PresetNestJS(BuildOptions{
 		InstallCommand:   "yarn install",
@@ -90,7 +85,7 @@ EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 				{
 					Name:         "init-git",
 					Image:        "alpine/git:v2.30.2",
-					Args:         []string{"clone", "--single-branch", "--", it.BuildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
+					Args:         []string{"clone", "--single-branch", "--", it.buildContext, filepath.Join(workingDirectoryVolumeMount.MountPath, "code")},
 					VolumeMounts: []apiv1.VolumeMount{workingDirectoryVolumeMount},
 				},
 			},
@@ -101,7 +96,7 @@ EOF`, buildScriptPath, strings.TrimSpace(buildScript)),
 					Args: []string{
 						fmt.Sprintf("--dockerfile=%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "codedeploy.Dockerfile")),
 						fmt.Sprintf("--context=dir://%s", filepath.Join(workingDirectoryVolumeMount.MountPath, "code")),
-						fmt.Sprintf("--destination=%s", it.Destination),
+						fmt.Sprintf("--destination=%s", it.Destination()),
 						"--log-format=json",
 						"--verbosity=debug",
 					},
@@ -148,7 +143,7 @@ func (it *KanikoInteractor) GCRKanikoPodSpec() apiv1.Pod {
 			"-c",
 			fmt.Sprintf(`cat << EOF >> %s
 %s
-EOF`, applicationCredentials, strings.TrimSpace(it.Registry.Secret())),
+EOF`, applicationCredentials, strings.TrimSpace(it.registry.Secret())),
 		},
 	})
 

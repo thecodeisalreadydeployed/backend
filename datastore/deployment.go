@@ -44,3 +44,17 @@ func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	ret := _data.ToModel()
 	return &ret, nil
 }
+
+func SetDeploymentState(deploymentID string, state model.DeploymentState) error {
+	dpl, getDeploymentErr := GetDeploymentByID(deploymentID)
+	if getDeploymentErr != nil {
+		return getDeploymentErr
+	}
+
+	tx := getDB().Model(&dpl).Update("state", state)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
