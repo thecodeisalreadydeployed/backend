@@ -1,4 +1,4 @@
-package kanikointeractor
+package kanikogateway
 
 import (
 	"encoding/base64"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	gcr "github.com/thecodeisalreadydeployed/containerregistry/gcr"
-	it "github.com/thecodeisalreadydeployed/kanikointeractor"
+	gw "github.com/thecodeisalreadydeployed/kanikogateway"
 	"github.com/thecodeisalreadydeployed/util"
 )
 
@@ -23,11 +23,11 @@ func TestKanikoInteractor_BuildContainerImageGCR(t *testing.T) {
 	}
 	assert.Nil(t, decodeErr)
 
-	gateway := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", string(serviceAccountKey))
+	containerRegistry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", string(serviceAccountKey))
 
 	appID := util.RandomString(5)
 	deploymentID := util.RandomString(5)
-	i := it.NewKanikoInteractor(gateway, "https://github.com/thecodeisalreadydeployed/fixture-monorepo.git", appID, deploymentID)
+	i := gw.NewKanikoGateway(containerRegistry, "https://github.com/thecodeisalreadydeployed/fixture-monorepo.git", appID, deploymentID)
 
 	err := i.BuildContainerImage()
 	assert.Nil(t, err)
