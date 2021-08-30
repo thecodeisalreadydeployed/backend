@@ -6,12 +6,13 @@ jobs:
     runs-on: ubuntu-20.04
     container: node:14
     services:
-      image: postgres:13.4
-      env:
+      postgres:
+        image: postgres:13.4
+        env:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: codedeploy
           POSTGRES_USER: user
-      options: >-
+        options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
