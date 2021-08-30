@@ -44,7 +44,9 @@ require (
 	gopkg.in/jcmturner/rpc.v1 v1.1.0 // indirect
 	gorm.io/driver/postgres v1.1.0 // indirect
 	gorm.io/gorm v1.21.13 // indirect
+	k8s.io/api v0.21.2 // indirect
 	k8s.io/apimachinery v0.21.2 // indirect
+	k8s.io/client-go v0.21.2 // indirect
 	k8s.io/klog v0.3.1 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
