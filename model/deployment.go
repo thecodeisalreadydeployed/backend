@@ -13,7 +13,7 @@ type Deployment struct {
 	Creator   Actor           `json:"creator"`
 	Meta      string          `json:"meta"`
 	GitSource GitSource       `json:"git_source"`
-	BuiltAt time.Time         `json:"builded_at"`
+	BuiltAt   time.Time       `json:"builded_at"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 	State     DeploymentState `json:"state"`
