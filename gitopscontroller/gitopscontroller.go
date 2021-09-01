@@ -13,8 +13,8 @@ type GitOpsController struct {
 }
 
 func (c *GitOpsController) Init() {
-	git := gitinteractor.NewGitInteractor(config.DefaultUserspaceRepository)
-	c.Userspace = &git
+	it := gitinteractor.NewGitInteractor(config.DefaultUserspaceRepository)
+	c.Userspace = &it
 }
 
 func SetupUserspace() error {

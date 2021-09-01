@@ -78,7 +78,7 @@ func APIServer(port int) {
 		return c.SendStatus(200)
 	})
 
-	// TODO: Jean will delete this. Don't delete it now.
+	// TODO: Delete this.
 	app.Get("/test", func(c *fiber.Ctx) error {
 		err := w.NewApp(&w.NewAppOptions{})
 		if err != nil {

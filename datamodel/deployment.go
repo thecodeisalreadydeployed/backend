@@ -15,7 +15,7 @@ type Deployment struct {
 	Creator   string
 	Meta      string
 	GitSource string
-	BuildedAt time.Time
+	BuiltAt   time.Time
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	State     model.DeploymentState
@@ -40,7 +40,7 @@ func (dpl *Deployment) ToModel() model.Deployment {
 		Creator:   creator,
 		Meta:      dpl.Meta,
 		GitSource: gitSource,
-		BuildedAt: dpl.BuildedAt,
+		BuiltAt:   dpl.BuiltAt,
 		CreatedAt: dpl.CreatedAt,
 		UpdatedAt: dpl.UpdatedAt,
 		State:     dpl.State,
