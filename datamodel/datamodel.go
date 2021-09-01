@@ -49,7 +49,7 @@ func NewDeploymentFromModel(dpl model.Deployment) Deployment {
 		State:     dpl.State,
 		GitSource: cast.ToString(gitSource),
 		Creator:   cast.ToString(creator),
-		BuildedAt: dpl.BuildedAt,
+		BuiltAt:   dpl.BuiltAt,
 		CreatedAt: dpl.CreatedAt,
 		UpdatedAt: dpl.UpdatedAt,
 	}
