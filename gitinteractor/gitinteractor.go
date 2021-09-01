@@ -2,15 +2,17 @@ package gitinteractor
 
 import (
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing"
+	"go.uber.org/zap"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/go-git/go-git/v5"
+	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/thecodeisalreadydeployed/config"
-	"go.uber.org/zap"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -59,7 +61,7 @@ func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
 func InitRepository(path string) error {
 	_, err := git.PlainInit(path, false)
 	if err != nil {
-		zap.L().Fatal(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
+		zap.L().Error(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
 		return err
 	}
 	return nil
@@ -126,4 +128,89 @@ func (it *GitInteractor) Log() []string {
 		panic(err)
 	}
 	return messages
+}
+
+func (it *GitInteractor) CreateBranch(name string) {
+	err := it.repository.CreateBranch(&gitconfig.Branch{Name: name})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (it *GitInteractor) Checkout(name string) {
+	w, err := it.repository.Worktree()
+	if err != nil {
+		panic(err)
+	}
+
+	branch := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", name))
+	err = w.Checkout(&git.CheckoutOptions{
+		Hash:   plumbing.Hash{},
+		Branch: branch,
+		Create: false,
+		Force:  false,
+		Keep:   false,
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (it *GitInteractor) GetCommitSHA() string {
+	ref, err := it.repository.Head()
+	if err != nil {
+		panic(err)
+	}
+
+	return ref.Hash().String()
+}
+
+func (it *GitInteractor) GetCommit(hash string) *object.Commit {
+	commit, err := it.repository.CommitObject(plumbing.NewHash(hash))
+	if err != nil {
+		panic(err)
+	}
+
+	return commit
+}
+
+func (it *GitInteractor) GetCurrentCommit() *object.Commit {
+	ref, err := it.repository.Head()
+	if err != nil {
+		panic(err)
+	}
+
+	commit, err := it.repository.CommitObject(ref.Hash())
+	if err != nil {
+		panic(err)
+	}
+
+	return commit
+}
+
+func diff(old *object.Commit, current *object.Commit) []string {
+	patch, err := old.Patch(current)
+	if err != nil {
+		panic(err)
+	}
+
+	stats := patch.Stats()
+	var files []string
+
+	for _, stat := range stats {
+		files = append(files, stat.Name)
+	}
+	return files
+}
+
+func HasProperDiff(old *object.Commit, current *object.Commit) bool {
+	files := diff(old, current)
+	for _, file := range files {
+		for _, ignore := range gitignore {
+			if file != ignore {
+				return true
+			}
+		}
+	}
+	return false
 }
