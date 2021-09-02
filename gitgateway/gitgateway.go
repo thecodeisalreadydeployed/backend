@@ -1,7 +1,8 @@
-package gitinteractor
+package gitgateway
 
 import (
 	"fmt"
+
 	"github.com/go-git/go-git/v5/plumbing"
 	"go.uber.org/zap"
 
@@ -16,12 +17,12 @@ import (
 	gossh "golang.org/x/crypto/ssh"
 )
 
-type GitInteractor struct {
+type GitGateway struct {
 	repository *git.Repository
 }
 
-func NewGitInteractor(path string) GitInteractor {
-	it := GitInteractor{}
+func NewGitGateway(path string) GitGateway {
+	it := GitGateway{}
 	repo, err := git.PlainOpen(path)
 	if err != nil {
 		panic(err)
@@ -30,7 +31,7 @@ func NewGitInteractor(path string) GitInteractor {
 	return it
 }
 
-func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
+func NewGitGatewaySSH(url string, privateKey string) GitGateway {
 	signer, parsePrivateKeyErr := gossh.ParsePrivateKey([]byte(privateKey))
 	if parsePrivateKeyErr != nil {
 		panic(parsePrivateKeyErr)
@@ -43,7 +44,7 @@ func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
 
 	auth.HostKeyCallback = gossh.InsecureIgnoreHostKey()
 
-	it := GitInteractor{}
+	it := GitGateway{}
 
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
 		URL:  url,
@@ -61,13 +62,13 @@ func NewGitInteractorSSH(url string, privateKey string) GitInteractor {
 func InitRepository(path string) error {
 	_, err := git.PlainInit(path, false)
 	if err != nil {
-		zap.L().Error(fmt.Sprintf("Failed to create Git repository at path: %s", path), zap.String("package", "gitinteractor"))
+		zap.L().Error(fmt.Sprintf("Failed to create Git repository at path: %s", path))
 		return err
 	}
 	return nil
 }
 
-func (it *GitInteractor) Add(filePath string) {
+func (it *GitGateway) Add(filePath string) {
 	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
@@ -78,7 +79,7 @@ func (it *GitInteractor) Add(filePath string) {
 	}
 }
 
-func (it *GitInteractor) Commit(message string) {
+func (it *GitGateway) Commit(message string) {
 	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
@@ -89,7 +90,7 @@ func (it *GitInteractor) Commit(message string) {
 	}
 }
 
-func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
+func (it *GitGateway) WriteFile(path string, name string, data []byte) {
 	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
@@ -108,7 +109,7 @@ func (it *GitInteractor) WriteFile(path string, name string, data []byte) {
 	}
 }
 
-func (it *GitInteractor) Log() []string {
+func (it *GitGateway) Log() []string {
 	messages := []string{}
 	r := it.repository
 	ref, err := r.Head()
@@ -130,14 +131,14 @@ func (it *GitInteractor) Log() []string {
 	return messages
 }
 
-func (it *GitInteractor) CreateBranch(name string) {
+func (it *GitGateway) CreateBranch(name string) {
 	err := it.repository.CreateBranch(&gitconfig.Branch{Name: name})
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (it *GitInteractor) Checkout(name string) {
+func (it *GitGateway) Checkout(name string) {
 	w, err := it.repository.Worktree()
 	if err != nil {
 		panic(err)
@@ -156,7 +157,7 @@ func (it *GitInteractor) Checkout(name string) {
 	}
 }
 
-func (it *GitInteractor) GetCommitSHA() string {
+func (it *GitGateway) GetCommitSHA() string {
 	ref, err := it.repository.Head()
 	if err != nil {
 		panic(err)
@@ -165,7 +166,7 @@ func (it *GitInteractor) GetCommitSHA() string {
 	return ref.Hash().String()
 }
 
-func (it *GitInteractor) GetCommit(hash string) *object.Commit {
+func (it *GitGateway) GetCommit(hash string) *object.Commit {
 	commit, err := it.repository.CommitObject(plumbing.NewHash(hash))
 	if err != nil {
 		panic(err)
@@ -174,7 +175,7 @@ func (it *GitInteractor) GetCommit(hash string) *object.Commit {
 	return commit
 }
 
-func (it *GitInteractor) GetCurrentCommit() *object.Commit {
+func (it *GitGateway) GetCurrentCommit() *object.Commit {
 	ref, err := it.repository.Head()
 	if err != nil {
 		panic(err)
