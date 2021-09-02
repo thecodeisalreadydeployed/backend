@@ -5,20 +5,20 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/thecodeisalreadydeployed/config"
-	"github.com/thecodeisalreadydeployed/gitinteractor"
+	gitgw "github.com/thecodeisalreadydeployed/gitgateway"
 )
 
 type GitOpsController struct {
-	Userspace *gitinteractor.GitInteractor
+	userspace *gitgw.GitGateway
 }
 
 func (c *GitOpsController) Init() {
-	it := gitinteractor.NewGitInteractor(config.DefaultUserspaceRepository)
-	c.Userspace = &it
+	gw := gitgw.NewGitGateway(config.DefaultUserspaceRepository)
+	c.userspace = &gw
 }
 
 func SetupUserspace() error {
-	err := gitinteractor.InitRepository(config.DefaultUserspaceRepository)
+	err := gitgw.InitRepository(config.DefaultUserspaceRepository)
 	if errors.Is(err, git.ErrRepositoryAlreadyExists) {
 		return nil
 	}
