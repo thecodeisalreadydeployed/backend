@@ -1,21 +1,21 @@
 package repositoryobserver
 
 import (
-	"github.com/thecodeisalreadydeployed/gitinteractor"
+	"github.com/thecodeisalreadydeployed/gitgateway"
 )
 
 type Repository struct {
-	SourceCode    *gitinteractor.GitInteractor
+	SourceCode    *gitgateway.GitGateway
 	LastCommitSHA string
 }
 
 func (r *Repository) Init(path string) {
-	it := gitinteractor.NewGitInteractor(path)
+	it := gitgateway.NewGitGateway(path)
 	r.SourceCode = &it
 }
 
 func (r *Repository) HasChanges() bool {
 	old := r.SourceCode.GetCommit(r.LastCommitSHA)
 	current := r.SourceCode.GetCurrentCommit()
-	return gitinteractor.HasProperDiff(old, current)
+	return gitgateway.HasProperDiff(old, current)
 }
