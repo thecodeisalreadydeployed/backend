@@ -1,4 +1,4 @@
-package gitinteractor
+package gitgateway
 
 var gitignore = []string{
 	"README.md",
