@@ -2,6 +2,7 @@ package gitopscontroller
 
 import (
 	"errors"
+	"path/filepath"
 	"sync"
 
 	"github.com/go-git/go-git/v5"
@@ -41,4 +42,17 @@ func (c *GitOpsController) SetupUserspace() error {
 		return nil
 	}
 	return err
+}
+
+func (c *GitOpsController) Write(path string, data string) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	dst := filepath.Join("/", path)
+
+	file := filepath.Base(dst)
+	dir := filepath.Dir(dst)
+	c.userspace.WriteFile(dir, file, []byte(data))
+	c.userspace.Add(dst)
+	c.userspace.Commit(dst)
 }
