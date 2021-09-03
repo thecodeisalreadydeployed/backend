@@ -14,7 +14,7 @@ func hasChanges(gs *model.GitSource) bool {
 	return gitgateway.HasProperDiff(old, current)
 }
 
-func Observe() {
+func ObserveGitSource() {
 	zap.L().Info("Observing source code...")
 
 	_, err := datastore.GetAllApps()
