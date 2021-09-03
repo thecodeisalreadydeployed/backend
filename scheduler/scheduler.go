@@ -11,7 +11,7 @@ func Watch() {
 
 	// Every 5 minutes
 	err := c.AddFunc("0 */5 * * * *", func() {
-		repositoryobserver.Observe()
+		repositoryobserver.ObserveGitSource()
 	})
 
 	if err != nil {
@@ -20,7 +20,7 @@ func Watch() {
 
 	// Every 30 seconds
 	err = c.AddFunc("*/30 * * * * *", func() {
-		workloadcontroller.CheckDeployments()
+		workloadcontroller.ObserveDeploymentState()
 	})
 
 	if err != nil {
