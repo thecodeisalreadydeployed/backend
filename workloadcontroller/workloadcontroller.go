@@ -1,8 +1,6 @@
 package workloadcontroller
 
 import (
-	"fmt"
-
 	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/kanikogateway"
@@ -51,7 +49,3 @@ func NewDeployment(appID string) (string, error) {
 }
 
 func OnGitSourceUpdate(shouldDeploy bool) {}
-
-func DeployNewRevision() {
-	fmt.Println("New revision deploying...")
-}
