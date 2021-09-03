@@ -3,8 +3,7 @@ package main
 import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/repositoryobserver"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
+	"github.com/thecodeisalreadydeployed/scheduler"
 	"go.uber.org/zap"
 )
 
@@ -20,8 +19,6 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	datastore.Init()
-	go workloadcontroller.CheckDeployments()
-
-	repositoryobserver.Observe()
+	scheduler.Watch()
 	apiserver.APIServer(3000)
 }
