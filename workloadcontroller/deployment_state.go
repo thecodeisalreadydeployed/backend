@@ -2,7 +2,6 @@ package workloadcontroller
 
 import (
 	"sync"
-	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/kanikogateway"
@@ -30,19 +29,15 @@ func SetDeploymentState(deploymentID string, state model.DeploymentState) {
 }
 
 func ObserveDeploymentState() {
-	for {
-		deploymentsToCheck.Range(func(key, value interface{}) bool {
-			deploymentID := key.(string)
-			zap.L().Sugar().Infof("Checking state of deployment ID '%s'.", deploymentID)
-			state := DeploymentState(deploymentID)
-			if state == model.DeploymentStateBuildSucceeded {
-				deploymentsToCheck.Delete(key)
-				zap.L().Sugar().Infof("Deleted deployment ID '%s' from deploymentsToCheck. (Reason: %s)", deploymentID, state)
-				SetDeploymentState(deploymentID, state)
-			}
-			return true
-		})
-
-		time.Sleep(1 * time.Minute)
-	}
+	deploymentsToCheck.Range(func(key, value interface{}) bool {
+		deploymentID := key.(string)
+		zap.L().Sugar().Infof("Checking state of deployment ID '%s'.", deploymentID)
+		state := DeploymentState(deploymentID)
+		if state == model.DeploymentStateBuildSucceeded {
+			deploymentsToCheck.Delete(key)
+			zap.L().Sugar().Infof("Deleted deployment ID '%s' from deploymentsToCheck. (Reason: %s)", deploymentID, state)
+			SetDeploymentState(deploymentID, state)
+		}
+		return true
+	})
 }
