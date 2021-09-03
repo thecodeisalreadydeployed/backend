@@ -17,6 +17,7 @@ require (
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nginxinc/kubernetes-ingress v1.12.0
+	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cast v1.4.0
 	github.com/spf13/pflag v1.0.5
