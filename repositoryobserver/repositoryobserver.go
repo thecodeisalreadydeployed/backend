@@ -8,9 +8,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func hasChanges(gs *model.GitSource) bool {
-	old := gs.SourceCode.GetCommit(gs.LastObservedCommitSHA)
-	current := gs.SourceCode.GetCurrentCommit()
+func hasChanges(gs *model.GitSource, gw *gitgateway.GitGateway) bool {
+	old := gw.GetCommit(gs.LastObservedCommitSHA)
+	current := gw.GetCurrentCommit()
 	return gitgateway.HasProperDiff(old, current)
 }
 
@@ -33,10 +33,9 @@ func ObserveGitSource() {
 		CommitAuthorName:      "",
 		RepositoryURL:         "",
 		LastObservedCommitSHA: "a1d95e5b2ac18b8e1ad713d39de6e57a2479d4e2",
-		SourceCode:            &sc,
 	}
 
-	if hasChanges(&gs) {
+	if hasChanges(&gs, &sc) {
 		zap.L().Info("Source code has changed. Deploying new revision...")
 		workloadcontroller.OnGitSourceUpdate(true)
 	}
