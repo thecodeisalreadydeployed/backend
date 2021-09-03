@@ -29,7 +29,7 @@ func SetDeploymentState(deploymentID string, state model.DeploymentState) {
 	}
 }
 
-func CheckDeployments() {
+func ObserveDeploymentState() {
 	for {
 		deploymentsToCheck.Range(func(key, value interface{}) bool {
 			deploymentID := key.(string)
