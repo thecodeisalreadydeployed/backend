@@ -64,46 +64,30 @@ func APIServer(port int) {
 		return c.SendString(event)
 	})
 
-	app.Post("/project/new", func(c *fiber.Ctx) error {
+	app.Post("/projects/save", func(c *fiber.Ctx) error {
 		payload := model.Project{}
 		if err := c.BodyParser(&payload); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest)
 		}
-		if err := datastore.CreateProject(&payload); err != nil {
+		if err := datastore.SaveProject(&payload); err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
-		return c.SendStatus(200)
+		return c.SendStatus(fiber.StatusOK)
 	})
 
-	app.Post("/app/new", func(c *fiber.Ctx) error {
+	app.Post("/apps/save", func(c *fiber.Ctx) error {
 		payload := model.App{}
 		if err := c.BodyParser(&payload); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest)
 		}
-		if err := datastore.CreateApp(&payload); err != nil {
+		if err := datastore.SaveApp(&payload); err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
-		return c.SendStatus(200)
-	})
-
-	app.Post("/project/update", func(c *fiber.Ctx) error {
-		payload := model.Project{}
-		if err := c.BodyParser(&payload); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest)
-		}
-		return c.SendStatus(200)
-	})
-
-	app.Post("/app/update", func(c *fiber.Ctx) error {
-		payload := model.App{}
-		if err := c.BodyParser(&payload); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest)
-		}
-		return c.SendStatus(200)
+		return c.SendStatus(fiber.StatusOK)
 	})
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
-		return fiber.NewError(fiber.StatusOK)
+		return c.SendStatus(fiber.StatusOK)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
