@@ -78,9 +78,7 @@ func APIServer(port int) {
 			return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
 		}
 
-		prj := model.Project{
-			Name: request.Name,
-		}
+		prj := request.ToModel()
 
 		if err := datastore.SaveProject(&prj); err != nil {
 			return fiber.NewError(mapStatusCode(err))
