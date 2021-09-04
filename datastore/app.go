@@ -68,17 +68,17 @@ func GetAppByID(appID string) (*model.App, error) {
 	return &ret, nil
 }
 
-func CreateApp(_a *model.App) error {
+func SaveApp(_a *model.App) error {
 	if !strings.HasPrefix(_a.ID, "app_") {
 		zap.L().Error(MsgAppPrefix)
 		return ErrInvalidArgument
 	}
 	a := datamodel.NewAppFromModel(_a)
-	err := getDB().Create(a).Error
+	err := getDB().Save(a).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return ErrCannotCreate
+		return ErrCannotSave
 	}
 	return nil
 }
