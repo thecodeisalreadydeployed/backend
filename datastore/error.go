@@ -7,7 +7,7 @@ var (
 	ErrNotFound           = errors.New("ErrNotFound")
 	ErrAlreadyExists      = errors.New("ErrAlreadyExists")
 	ErrInvalidArgument    = errors.New("ErrInvalidArgument")
-	ErrCannotCreate       = errors.New("ErrCannotCreate")
+	ErrCannotSave         = errors.New("ErrCannotSave")
 )
 
 var (
