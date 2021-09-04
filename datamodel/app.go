@@ -10,7 +10,7 @@ import (
 type App struct {
 	ID              string `gorm:"primaryKey"`
 	ProjectID       string
-	Project         Project
+	Project         Project `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name            string
 	GitSource       string
 	CreatedAt       time.Time `gorm:"autoCreateTime"`

@@ -10,7 +10,7 @@ import (
 type Deployment struct {
 	ID        string `gorm:"primaryKey"`
 	AppID     string
-	App       App
+	App       App `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Name      string
 	Creator   string
 	Meta      string
