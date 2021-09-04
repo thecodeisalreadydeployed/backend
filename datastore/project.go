@@ -40,3 +40,21 @@ func SaveProject(_p *model.Project) error {
 	}
 	return nil
 }
+
+func RemoveProject(id string) error {
+	if !strings.HasPrefix(id, "prj_") {
+		zap.L().Error(MsgProjectPrefix)
+		return ErrInvalidArgument
+	}
+	var p datamodel.Project
+	err := getDB().Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return ErrNotFound
+	}
+	if err := getDB().Delete(&p).Error; err != nil {
+		zap.L().Error(err.Error())
+		return ErrCannotDelete
+	}
+	return nil
+}
