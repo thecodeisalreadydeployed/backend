@@ -9,6 +9,7 @@ import (
 
 type Deployment struct {
 	ID        string          `json:"id"`
+	AppID     string          `json:"app_id"`
 	Name      string          `json:"name"`
 	Creator   Actor           `json:"creator"`
 	Meta      string          `json:"meta"`
