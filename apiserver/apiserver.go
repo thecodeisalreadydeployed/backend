@@ -2,14 +2,12 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"log"
-
-	w "github.com/thecodeisalreadydeployed/workloadcontroller"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/thecodeisalreadydeployed/apiserver/dto"
 )
 
 func APIServer(port int) {
@@ -67,24 +65,45 @@ func APIServer(port int) {
 	})
 
 	app.Post("/project/new", func(c *fiber.Ctx) error {
-		payload := dto.CreateProjectRequest{}
+		payload := model.Project{}
 		if err := c.BodyParser(&payload); err != nil {
-			return c.SendStatus(500)
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
+		if err := datastore.CreateProject(&payload); err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.SendStatus(200)
+	})
+
+	app.Post("/app/new", func(c *fiber.Ctx) error {
+		payload := model.App{}
+		if err := c.BodyParser(&payload); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
+		if err := datastore.CreateApp(&payload); err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.SendStatus(200)
+	})
+
+	app.Post("/project/update", func(c *fiber.Ctx) error {
+		payload := model.Project{}
+		if err := c.BodyParser(&payload); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
+		return c.SendStatus(200)
+	})
+
+	app.Post("/app/update", func(c *fiber.Ctx) error {
+		payload := model.App{}
+		if err := c.BodyParser(&payload); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
 		}
 		return c.SendStatus(200)
 	})
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
-		return c.SendStatus(200)
-	})
-
-	// TODO: Delete this.
-	app.Get("/test", func(c *fiber.Ctx) error {
-		err := w.NewApp(&w.NewAppOptions{})
-		if err != nil {
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-		return c.SendStatus(200)
+		return fiber.NewError(fiber.StatusOK)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
