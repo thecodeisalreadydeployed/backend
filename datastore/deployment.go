@@ -7,7 +7,7 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetDeploymentsByAppID(appID string) (*([]model.Deployment), error) {
+func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app_") {
 		return nil, ErrInvalidArgument
 	}
