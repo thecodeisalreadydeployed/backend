@@ -19,20 +19,23 @@ func seed() {
 	seedDeployments(500)
 }
 
-func checkSeedExists(name string) {
+func seedExists(name string) bool {
 	var existing int64
 	err := getDB().Table(name).Count(&existing).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return
+		return false
 	} else if existing > 0 {
 		zap.L().Info(fmt.Sprintf("Table '%s' already seeded.", name))
-		return
+		return true
 	}
+	return false
 }
 
 func seedProjects(size int) {
-	checkSeedExists("projects")
+	if seedExists("projects") {
+		return
+	}
 
 	var data []datamodel.Project
 	for i := 0; i < size; i++ {
@@ -49,7 +52,10 @@ func seedProjects(size int) {
 }
 
 func seedApps(size int) {
-	checkSeedExists("apps")
+	if seedExists("apps") {
+		return
+	}
+
 	var keys []string
 	err := getDB().Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
@@ -74,7 +80,9 @@ func seedApps(size int) {
 }
 
 func seedDeployments(size int) {
-	checkSeedExists("deployments")
+	if seedExists("deployments") {
+		return
+	}
 
 	var keys []string
 	err := getDB().Table("apps").Select("ID").Scan(&keys).Error
