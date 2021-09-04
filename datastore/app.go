@@ -61,3 +61,16 @@ func GetAppByID(appID string) (*model.App, error) {
 	ret := _data.ToModel()
 	return &ret, nil
 }
+
+func CreateApp(_a *model.App) error {
+	if !strings.HasPrefix(_a.ID, "app_") {
+		return ErrInvalidArgument
+	}
+	a := datamodel.NewAppFromModel(_a)
+	err := getDB().Create(a).Error
+
+	if err != nil {
+		return ErrCannotCreate
+	}
+	return nil
+}
