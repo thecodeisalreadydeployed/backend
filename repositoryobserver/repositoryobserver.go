@@ -14,37 +14,20 @@ func hasChanges(gs *model.GitSource, gw *gitgateway.GitGateway) bool {
 	return gitgateway.HasProperDiff(old, current)
 }
 
-func ObserveGitSource() {
-	zap.L().Info("Observing source code...")
-
-	_, err := datastore.GetAllApps()
+func ObserveGitSources() {
+	apps, err := datastore.GetAllApps()
 	if err != nil {
-		zap.L().Error("Error while observing apps. Cannot access database.")
+		zap.L().Error(err.Error())
 		return
 	}
 
-	sc := gitgateway.NewGitGateway("/home/jean/Desktop/gittest")
-
-	gs := model.GitSource{
-		Provider:              "",
-		Organization:          "",
-		CommitSHA:             "",
-		CommitMessage:         "",
-		CommitAuthorName:      "",
-		RepositoryURL:         "",
-		LastObservedCommitSHA: "a1d95e5b2ac18b8e1ad713d39de6e57a2479d4e2",
+	zap.L().Info("Observing source code...")
+	var changes []model.App
+	for _, app := range *apps {
+		gw := gitgateway.NewGitGateway(app.GitSource.RepositoryURL)
+		if hasChanges(&app.GitSource, &gw) {
+			changes = append(changes, app)
+		}
 	}
-
-	if hasChanges(&gs, &sc) {
-		zap.L().Info("Source code has changed. Deploying new revision...")
-		workloadcontroller.OnGitSourceUpdate(true)
-	}
-
-	// TODO: App's source code should be valid.
-	//for _, app := range *apps {
-	//	if hasChanges(&app.GitSource) {
-	//		zap.L().Info("Source code has changed. Deploying new revision...")
-	//		workloadcontroller.DeployNewRevision()
-	//	}
-	//}
+	workloadcontroller.DeployNewRevisions(&changes)
 }
