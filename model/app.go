@@ -9,6 +9,7 @@ import (
 
 type App struct {
 	ID              string    `json:"id"`
+	ProjectID       string    `json:"project_id"`
 	Name            string    `json:"name"`
 	GitSource       GitSource `json:"git_source"`
 	CreatedAt       time.Time `json:"created_at"`

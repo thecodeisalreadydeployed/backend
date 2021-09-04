@@ -10,6 +10,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 //ct
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/gofiber/fiber/v2 v2.16.0
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect

@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"log"
 
-	w "github.com/thecodeisalreadydeployed/workloadcontroller"
+	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/apiserver/validator"
+	"github.com/thecodeisalreadydeployed/model"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/thecodeisalreadydeployed/apiserver/dto"
 )
 
 func APIServer(port int) {
+	validator.Init()
 	app := fiber.New()
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
@@ -66,25 +68,54 @@ func APIServer(port int) {
 		return c.SendString(event)
 	})
 
-	app.Post("/project/new", func(c *fiber.Ctx) error {
-		payload := dto.CreateProjectRequest{}
-		if err := c.BodyParser(&payload); err != nil {
-			return c.SendStatus(500)
+	app.Post("/project", func(c *fiber.Ctx) error {
+		request := dto.CreateProjectRequest{}
+		if err := c.BodyParser(&request); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
 		}
-		return c.SendStatus(200)
+
+		if validationErrors := validator.Validate(request); len(validationErrors) > 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
+		}
+
+		prj := request.ToModel()
+
+		if err := datastore.SaveProject(&prj); err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+
+		return c.SendStatus(fiber.StatusOK)
+	})
+
+	app.Post("/app", func(c *fiber.Ctx) error {
+		payload := model.App{}
+		if err := c.BodyParser(&payload); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
+		if err := datastore.SaveApp(&payload); err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.SendStatus(fiber.StatusOK)
+	})
+
+	app.Delete("/project/:projectID", func(c *fiber.Ctx) error {
+		projectID := c.Params("projectID")
+		if err := datastore.RemoveProject(projectID); err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.SendStatus(fiber.StatusOK)
+	})
+
+	app.Delete("/app/:appID", func(c *fiber.Ctx) error {
+		appID := c.Params("appID")
+		if err := datastore.RemoveApp(appID); err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.SendStatus(fiber.StatusOK)
 	})
 
 	app.Get("/ping", func(c *fiber.Ctx) error {
-		return c.SendStatus(200)
-	})
-
-	// TODO: Delete this.
-	app.Get("/test", func(c *fiber.Ctx) error {
-		err := w.NewApp(&w.NewAppOptions{})
-		if err != nil {
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-		return c.SendStatus(200)
+		return c.SendStatus(fiber.StatusOK)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))

@@ -7,8 +7,8 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func NewProjectFromModel(prj model.Project) Project {
-	return Project{
+func NewProjectFromModel(prj *model.Project) *Project {
+	return &Project{
 		ID:        prj.ID,
 		Name:      prj.Name,
 		CreatedAt: prj.CreatedAt,
@@ -16,22 +16,26 @@ func NewProjectFromModel(prj model.Project) Project {
 	}
 }
 
-func NewAppFromModel(app model.App) App {
+func NewAppFromModel(app *model.App) *App {
 	gitSource, err := json.Marshal(app.GitSource)
 	if err != nil {
 		panic(err)
 	}
 
-	return App{
-		ID:        app.ID,
-		Name:      app.Name,
-		GitSource: cast.ToString(gitSource),
-		CreatedAt: app.CreatedAt,
-		UpdatedAt: app.UpdatedAt,
+	return &App{
+		ID:              app.ID,
+		ProjectID:       app.ProjectID,
+		Name:            app.Name,
+		GitSource:       cast.ToString(gitSource),
+		CreatedAt:       app.CreatedAt,
+		UpdatedAt:       app.UpdatedAt,
+		BuildCommand:    app.BuildCommand,
+		OutputDirectory: app.OutputDirectory,
+		InstallCommand:  app.InstallCommand,
 	}
 }
 
-func NewDeploymentFromModel(dpl model.Deployment) Deployment {
+func NewDeploymentFromModel(dpl *model.Deployment) *Deployment {
 	gitSource, err := json.Marshal(dpl.GitSource)
 	if err != nil {
 		panic(err)
@@ -42,8 +46,9 @@ func NewDeploymentFromModel(dpl model.Deployment) Deployment {
 		panic(err)
 	}
 
-	return Deployment{
+	return &Deployment{
 		ID:        dpl.ID,
+		AppID:     dpl.AppID,
 		Name:      dpl.Name,
 		Meta:      dpl.Meta,
 		State:     dpl.State,

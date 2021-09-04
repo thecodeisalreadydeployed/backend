@@ -1,14 +1,16 @@
 package datastore
 
 import (
+	"go.uber.org/zap"
 	"strings"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetDeploymentsByAppID(appID string) (*([]model.Deployment), error) {
+func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app_") {
+		zap.L().Error(MsgAppPrefix)
 		return nil, ErrInvalidArgument
 	}
 
@@ -16,6 +18,7 @@ func GetDeploymentsByAppID(appID string) (*([]model.Deployment), error) {
 	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
 
 	if err != nil {
+		zap.L().Error(err.Error())
 		return nil, ErrNotFound
 	}
 
@@ -31,13 +34,15 @@ func GetDeploymentsByAppID(appID string) (*([]model.Deployment), error) {
 
 func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	if !strings.HasPrefix(deploymentID, "dpl_") {
+		zap.L().Error(MsgDeploymentPrefix)
 		return nil, ErrInvalidArgument
 	}
 
 	var _data datamodel.Deployment
-	err := getDB().First(&_data, "id = ?", deploymentID)
+	err := getDB().First(&_data, "id = ?", deploymentID).Error
 
 	if err != nil {
+		zap.L().Error(err.Error())
 		return nil, ErrNotFound
 	}
 
@@ -51,9 +56,9 @@ func SetDeploymentState(deploymentID string, state model.DeploymentState) error 
 		return getDeploymentErr
 	}
 
-	tx := getDB().Model(&dpl).Update("state", state)
-	if tx.Error != nil {
-		return tx.Error
+	err := getDB().Model(&dpl).Update("state", state).Error
+	if err != nil {
+		return err
 	}
 
 	return nil
