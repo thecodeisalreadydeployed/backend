@@ -26,17 +26,17 @@ func GetProjectByID(projectID string) (*model.Project, error) {
 	return &ret, nil
 }
 
-func CreateProject(_p *model.Project) error {
+func SaveProject(_p *model.Project) error {
 	if !strings.HasPrefix(_p.ID, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
 		return ErrInvalidArgument
 	}
 	p := datamodel.NewProjectFromModel(_p)
-	err := getDB().Create(p).Error
+	err := getDB().Save(p).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return ErrCannotCreate
+		return ErrCannotSave
 	}
 	return nil
 }
