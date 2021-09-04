@@ -82,3 +82,21 @@ func SaveApp(_a *model.App) error {
 	}
 	return nil
 }
+
+func RemoveApp(id string) error {
+	if !strings.HasPrefix(id, "app_") {
+		zap.L().Error(MsgAppPrefix)
+		return ErrInvalidArgument
+	}
+	var a datamodel.App
+	err := getDB().Table("apps").Where(datamodel.App{ID: id}).First(&a).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return ErrNotFound
+	}
+	if err := getDB().Delete(&a).Error; err != nil {
+		zap.L().Error(err.Error())
+		return ErrCannotDelete
+	}
+	return nil
+}
