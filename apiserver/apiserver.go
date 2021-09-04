@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/model"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -12,6 +14,7 @@ import (
 )
 
 func APIServer(port int) {
+	validator.Init()
 	app := fiber.New()
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
@@ -66,13 +69,23 @@ func APIServer(port int) {
 	})
 
 	app.Post("/project", func(c *fiber.Ctx) error {
-		payload := model.Project{}
-		if err := c.BodyParser(&payload); err != nil {
+		request := dto.CreateProjectRequest{}
+		if err := c.BodyParser(&request); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest)
 		}
-		if err := datastore.SaveProject(&payload); err != nil {
+
+		if validationErrors := validator.Validate(request); len(validationErrors) > 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
+		}
+
+		prj := model.Project{
+			Name: request.Name,
+		}
+
+		if err := datastore.SaveProject(&prj); err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
+
 		return c.SendStatus(fiber.StatusOK)
 	})
 
