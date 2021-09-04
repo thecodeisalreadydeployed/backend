@@ -45,7 +45,7 @@ func seedProjects(size int) {
 			zap.L().Error(err.Error())
 		}
 
-		datum.ID = getPrefix(datum.ID, "prj")
+		datum.ID = withPrefix(datum.ID, "prj")
 		data = append(data, datum)
 	}
 	if err := getDB().Create(&data).Error; err != nil {
@@ -73,7 +73,7 @@ func seedApps(size int) {
 			zap.L().Error(err.Error())
 		}
 
-		datum.ID = getPrefix(datum.ID, "app")
+		datum.ID = withPrefix(datum.ID, "app")
 		datum.ProjectID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
 
@@ -103,7 +103,7 @@ func seedDeployments(size int) {
 			zap.L().Error(err.Error())
 		}
 
-		datum.ID = getPrefix(datum.ID, "dpl")
+		datum.ID = withPrefix(datum.ID, "dpl")
 		datum.AppID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
 		datum.Creator = getCreator()
@@ -147,7 +147,7 @@ func getCreator() string {
 	return string(res)
 }
 
-func getPrefix(body string, prefix string) string {
+func withPrefix(body string, prefix string) string {
 	return fmt.Sprintf("%s_%s", prefix, body)
 }
 
