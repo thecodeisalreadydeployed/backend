@@ -8,6 +8,7 @@ var (
 	ErrAlreadyExists      = errors.New("ErrAlreadyExists")
 	ErrInvalidArgument    = errors.New("ErrInvalidArgument")
 	ErrCannotSave         = errors.New("ErrCannotSave")
+	ErrCannotDelete       = errors.New("ErrCannotDelete")
 )
 
 var (
