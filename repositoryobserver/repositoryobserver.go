@@ -9,7 +9,7 @@ import (
 )
 
 func hasChanges(gs *model.GitSource, gw *gitgateway.GitGateway) bool {
-	old := gw.GetCommit(gs.LastObservedCommitSHA)
+	old := gw.GetCommit(gs.CommitSHA)
 	current := gw.GetCurrentCommit()
 	return gitgateway.HasProperDiff(old, current)
 }
@@ -22,12 +22,12 @@ func ObserveGitSources() {
 	}
 
 	zap.L().Info("Observing source code...")
-	var changes []model.App
+	changes := make(map[string]string)
 	for _, app := range *apps {
 		gw := gitgateway.NewGitGateway(app.GitSource.RepositoryURL)
 		if hasChanges(&app.GitSource, &gw) {
-			changes = append(changes, app)
+			changes[app.ID] = app.GitSource.CommitSHA
 		}
 	}
-	workloadcontroller.DeployNewRevisions(&changes)
+	workloadcontroller.OnGitSourceUpdate(&changes)
 }

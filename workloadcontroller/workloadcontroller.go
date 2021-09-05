@@ -5,7 +5,6 @@ import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/kanikogateway"
 	manifest "github.com/thecodeisalreadydeployed/manifestgenerator"
-	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 )
@@ -49,6 +48,6 @@ func NewDeployment(appID string) (string, error) {
 	return deploymentID, nil
 }
 
-func DeployNewRevisions(apps *[]model.App) {
+func OnGitSourceUpdate(apps *map[string]string) {
 	zap.L().Info("Deploying new revisions...")
 }
