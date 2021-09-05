@@ -4,6 +4,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/scheduler"
+	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
 
