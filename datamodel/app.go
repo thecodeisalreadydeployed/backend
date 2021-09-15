@@ -15,6 +15,7 @@ type App struct {
 	GitSource       string
 	CreatedAt       time.Time `gorm:"autoCreateTime"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
+	BuildScript     string
 	BuildCommand    string
 	OutputDirectory string
 	InstallCommand  string
@@ -32,6 +33,7 @@ func (app *App) ToModel() model.App {
 		GitSource:       gitSource,
 		CreatedAt:       app.CreatedAt,
 		UpdatedAt:       app.UpdatedAt,
+		BuildScript:     app.BuildScript,
 		BuildCommand:    app.BuildCommand,
 		OutputDirectory: app.OutputDirectory,
 		InstallCommand:  app.InstallCommand,

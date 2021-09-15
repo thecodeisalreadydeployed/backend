@@ -29,6 +29,7 @@ func NewAppFromModel(app *model.App) *App {
 		GitSource:       cast.ToString(gitSource),
 		CreatedAt:       app.CreatedAt,
 		UpdatedAt:       app.UpdatedAt,
+		BuildScript:     app.BuildScript,
 		BuildCommand:    app.BuildCommand,
 		OutputDirectory: app.OutputDirectory,
 		InstallCommand:  app.InstallCommand,
@@ -47,15 +48,17 @@ func NewDeploymentFromModel(dpl *model.Deployment) *Deployment {
 	}
 
 	return &Deployment{
-		ID:        dpl.ID,
-		AppID:     dpl.AppID,
-		Name:      dpl.Name,
-		Meta:      dpl.Meta,
-		State:     dpl.State,
-		GitSource: cast.ToString(gitSource),
-		Creator:   cast.ToString(creator),
-		BuiltAt:   dpl.BuiltAt,
-		CreatedAt: dpl.CreatedAt,
-		UpdatedAt: dpl.UpdatedAt,
+		ID:          dpl.ID,
+		AppID:       dpl.AppID,
+		Meta:        dpl.Meta,
+		State:       dpl.State,
+		GitSource:   cast.ToString(gitSource),
+		Creator:     cast.ToString(creator),
+		BuildScript: dpl.BuildScript,
+		BuiltAt:     dpl.BuiltAt,
+		CommittedAt: dpl.CommittedAt,
+		DeployedAt:  dpl.DeployedAt,
+		CreatedAt:   dpl.CreatedAt,
+		UpdatedAt:   dpl.UpdatedAt,
 	}
 }
