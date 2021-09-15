@@ -6,7 +6,7 @@ const (
 	DeploymentStateQueueing       DeploymentState = "DeploymentStateQueueing"
 	DeploymentStateBuilding       DeploymentState = "DeploymentStateBuilding"
 	DeploymentStateBuildSucceeded DeploymentState = "DeploymentStateBuildSucceeded"
-	DeploymentStateCommited       DeploymentState = "DeploymentStateCommited"
+	DeploymentStateCommitted      DeploymentState = "DeploymentStateCommitted"
 	DeploymentStateReady          DeploymentState = "DeploymentStateReady"
 	DeploymentStateError          DeploymentState = "DeploymentStateError"
 )
