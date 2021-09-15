@@ -26,7 +26,7 @@ type Deployment struct {
 	DeployedAt time.Time `json:"deployed_at"`
 
 	// The Dockerfile instructions that is used to build the container image.
-	BuildScript string
+	BuildScript string `json:"build_script"`
 
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
