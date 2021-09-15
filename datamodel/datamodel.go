@@ -1,6 +1,7 @@
 package datamodel
 
 import (
+	"encoding/base64"
 	"encoding/json"
 
 	"github.com/spf13/cast"
@@ -22,17 +23,21 @@ func NewAppFromModel(app *model.App) *App {
 		panic(err)
 	}
 
+	buildConfiguration, err := json.Marshal(app.BuildConfiguration)
+	if err != nil {
+		panic(err)
+	}
+
+	buildConfiguration64 := base64.StdEncoding.EncodeToString(buildConfiguration)
+
 	return &App{
-		ID:              app.ID,
-		ProjectID:       app.ProjectID,
-		Name:            app.Name,
-		GitSource:       cast.ToString(gitSource),
-		CreatedAt:       app.CreatedAt,
-		UpdatedAt:       app.UpdatedAt,
-		BuildScript:     app.BuildScript,
-		BuildCommand:    app.BuildCommand,
-		OutputDirectory: app.OutputDirectory,
-		InstallCommand:  app.InstallCommand,
+		ID:                 app.ID,
+		ProjectID:          app.ProjectID,
+		Name:               app.Name,
+		GitSource:          cast.ToString(gitSource),
+		CreatedAt:          app.CreatedAt,
+		UpdatedAt:          app.UpdatedAt,
+		BuildConfiguration: buildConfiguration64,
 	}
 }
 
@@ -47,18 +52,25 @@ func NewDeploymentFromModel(dpl *model.Deployment) *Deployment {
 		panic(err)
 	}
 
+	buildConfiguration, err := json.Marshal(dpl.BuildConfiguration)
+	if err != nil {
+		panic(err)
+	}
+
+	buildConfiguration64 := base64.StdEncoding.EncodeToString(buildConfiguration)
+
 	return &Deployment{
-		ID:          dpl.ID,
-		AppID:       dpl.AppID,
-		Meta:        dpl.Meta,
-		State:       dpl.State,
-		GitSource:   cast.ToString(gitSource),
-		Creator:     cast.ToString(creator),
-		BuildScript: dpl.BuildScript,
-		BuiltAt:     dpl.BuiltAt,
-		CommittedAt: dpl.CommittedAt,
-		DeployedAt:  dpl.DeployedAt,
-		CreatedAt:   dpl.CreatedAt,
-		UpdatedAt:   dpl.UpdatedAt,
+		ID:                 dpl.ID,
+		AppID:              dpl.AppID,
+		Meta:               dpl.Meta,
+		State:              dpl.State,
+		GitSource:          cast.ToString(gitSource),
+		Creator:            cast.ToString(creator),
+		BuildConfiguration: buildConfiguration64,
+		BuiltAt:            dpl.BuiltAt,
+		CommittedAt:        dpl.CommittedAt,
+		DeployedAt:         dpl.DeployedAt,
+		CreatedAt:          dpl.CreatedAt,
+		UpdatedAt:          dpl.UpdatedAt,
 	}
 }
