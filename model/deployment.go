@@ -22,8 +22,11 @@ type Deployment struct {
 	// The time that Deployment.State transitioned to DeploymentStateCommited.
 	CommitedAt time.Time `json:"commited_at"`
 
-	// The time that Deployment.State transitioned to DeploymentStateReady
+	// The time that Deployment.State transitioned to DeploymentStateReady.
 	DeployedAt time.Time `json:"deployed_at"`
+
+	// The Dockerfile instructions that is used to build the container image.
+	BuildScript string
 
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
