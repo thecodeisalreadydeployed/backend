@@ -19,8 +19,8 @@ type Deployment struct {
 	// The time that Deployment.State transitioned to DeploymentStateBuildSucceeded.
 	BuiltAt time.Time `json:"built_at"`
 
-	// The time that Deployment.State transitioned to DeploymentStateCommited.
-	CommitedAt time.Time `json:"commited_at"`
+	// The time that Deployment.State transitioned to DeploymentStateCommitted.
+	CommittedAt time.Time `json:"committed_at"`
 
 	// The time that Deployment.State transitioned to DeploymentStateReady.
 	DeployedAt time.Time `json:"deployed_at"`
