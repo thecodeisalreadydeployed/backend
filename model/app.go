@@ -14,6 +14,7 @@ type App struct {
 	GitSource       GitSource `json:"git_source"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
+	BuildScript     string    `json:"build_script"`
 	BuildCommand    string    `json:"build_command"`
 	OutputDirectory string    `json:"output_directory"`
 	InstallCommand  string    `json:"install_command"`
