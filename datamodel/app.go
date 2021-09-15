@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
@@ -40,5 +41,29 @@ func (app *App) ToModel() model.App {
 		CreatedAt:          app.CreatedAt,
 		UpdatedAt:          app.UpdatedAt,
 		BuildConfiguration: buildConfiguration,
+	}
+}
+
+func NewAppFromModel(app *model.App) *App {
+	gitSource, err := json.Marshal(app.GitSource)
+	if err != nil {
+		panic(err)
+	}
+
+	buildConfiguration, err := json.Marshal(app.BuildConfiguration)
+	if err != nil {
+		panic(err)
+	}
+
+	buildConfiguration64 := base64.StdEncoding.EncodeToString(buildConfiguration)
+
+	return &App{
+		ID:                 app.ID,
+		ProjectID:          app.ProjectID,
+		Name:               app.Name,
+		GitSource:          cast.ToString(gitSource),
+		CreatedAt:          app.CreatedAt,
+		UpdatedAt:          app.UpdatedAt,
+		BuildConfiguration: buildConfiguration64,
 	}
 }

@@ -21,3 +21,12 @@ func (p *Project) ToModel() model.Project {
 		UpdatedAt: p.UpdatedAt,
 	}
 }
+
+func NewProjectFromModel(prj *model.Project) *Project {
+	return &Project{
+		ID:        prj.ID,
+		Name:      prj.Name,
+		CreatedAt: prj.CreatedAt,
+		UpdatedAt: prj.UpdatedAt,
+	}
+}
