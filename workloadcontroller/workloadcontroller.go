@@ -38,7 +38,6 @@ func NewDeployment(appID string) (string, error) {
 	deploymentID := util.RandomString(5)
 	containerRegistry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
 
-	// TODO: Rename KanikoInteractor to KanikoGateway
 	kaniko := kanikogateway.NewKanikoGateway(containerRegistry, buildContext, app.ID, deploymentID)
 
 	buildContainerImageErr := kaniko.BuildContainerImage()
@@ -47,4 +46,8 @@ func NewDeployment(appID string) (string, error) {
 	}
 
 	return deploymentID, nil
+}
+
+func OnGitSourceUpdate(apps *map[string]string) {
+	zap.L().Info("Deploying new revisions...")
 }

@@ -19,20 +19,23 @@ func seed() {
 	seedDeployments(500)
 }
 
-func checkSeedExists(name string) {
+func seedExists(name string) bool {
 	var existing int64
 	err := getDB().Table(name).Count(&existing).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return
+		return false
 	} else if existing > 0 {
 		zap.L().Info(fmt.Sprintf("Table '%s' already seeded.", name))
-		return
+		return true
 	}
+	return false
 }
 
 func seedProjects(size int) {
-	checkSeedExists("projects")
+	if seedExists("projects") {
+		return
+	}
 
 	var data []datamodel.Project
 	for i := 0; i < size; i++ {
@@ -42,14 +45,20 @@ func seedProjects(size int) {
 			zap.L().Error(err.Error())
 		}
 
-		datum.ID = getPrefix(datum.ID, "prj")
+		datum.ID = withPrefix(datum.ID, "prj")
 		data = append(data, datum)
 	}
-	getDB().Create(&data)
+	if err := getDB().Create(&data).Error; err != nil {
+		zap.L().Error("Failed to seed projects.")
+	}
+
 }
 
 func seedApps(size int) {
-	checkSeedExists("apps")
+	if seedExists("apps") {
+		return
+	}
+
 	var keys []string
 	err := getDB().Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
@@ -64,17 +73,21 @@ func seedApps(size int) {
 			zap.L().Error(err.Error())
 		}
 
-		datum.ID = getPrefix(datum.ID, "app")
+		datum.ID = withPrefix(datum.ID, "app")
 		datum.ProjectID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
 
 		data = append(data, datum)
 	}
-	getDB().Omit("Project").Create(&data)
+	if err := getDB().Omit("Project").Create(&data).Error; err != nil {
+		zap.L().Error("Failed to seed apps.")
+	}
 }
 
 func seedDeployments(size int) {
-	checkSeedExists("deployments")
+	if seedExists("deployments") {
+		return
+	}
 
 	var keys []string
 	err := getDB().Table("apps").Select("ID").Scan(&keys).Error
@@ -90,7 +103,7 @@ func seedDeployments(size int) {
 			zap.L().Error(err.Error())
 		}
 
-		datum.ID = getPrefix(datum.ID, "dpl")
+		datum.ID = withPrefix(datum.ID, "dpl")
 		datum.AppID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
 		datum.Creator = getCreator()
@@ -98,7 +111,10 @@ func seedDeployments(size int) {
 
 		data = append(data, datum)
 	}
-	getDB().Omit("App").Create(&data)
+	if err := getDB().Omit("App").Create(&data).Error; err != nil {
+		zap.L().Error("Failed to seed deployments.")
+	}
+
 }
 
 func getForeignKey(keys []string) string {
@@ -131,7 +147,7 @@ func getCreator() string {
 	return string(res)
 }
 
-func getPrefix(body string, prefix string) string {
+func withPrefix(body string, prefix string) string {
 	return fmt.Sprintf("%s_%s", prefix, body)
 }
 

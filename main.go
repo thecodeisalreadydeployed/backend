@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
+	"github.com/thecodeisalreadydeployed/scheduler"
+	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
 
@@ -19,6 +20,6 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	datastore.Init()
-	go workloadcontroller.CheckDeployments()
+	scheduler.Watch()
 	apiserver.APIServer(3000)
 }
