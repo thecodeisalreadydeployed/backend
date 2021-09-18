@@ -40,6 +40,10 @@ func (dpl *Deployment) ToModel() model.Deployment {
 
 	buildConfiguration := model.BuildConfiguration{}
 	_buildConfiguration, err := base64.StdEncoding.DecodeString(dpl.BuildConfiguration)
+	if err != nil {
+		panic(err)
+	}
+
 	err = json.Unmarshal(_buildConfiguration, &buildConfiguration)
 	if err != nil {
 		panic(err)
