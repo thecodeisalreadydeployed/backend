@@ -1,6 +1,8 @@
 FROM golang:1.16 as build-env
 WORKDIR /__w
-ADD . /__w
+ADD go.mod go.sum ./
+ADD . .
+RUN go mod download
 RUN go build main.go
 
 FROM gcr.io/distroless/base
