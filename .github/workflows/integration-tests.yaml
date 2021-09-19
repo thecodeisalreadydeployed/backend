@@ -10,7 +10,8 @@ jobs:
       - run: docker build -t thecodeisalreadydeployed/backend:dev .
       - run: kind load docker-image thecodeisalreadydeployed/backend:dev
       - run: sh hack/1-kubectl-apply-argocd.sh
-      - run: kubectl -n argocd wait deploy/argocd-server --for condition=available
+      - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: kubectl -n argocd port-forward svc/argocd-server -n argocd 8080:443
       - run: ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+      - run: curl --insecure -sSL -o /usr/local/bin/argocd http://localhost:8080/download/argocd-linux-amd64
