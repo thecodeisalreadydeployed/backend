@@ -15,7 +15,7 @@ jobs:
           tags: thecodeisalreadydeployed/backend:dev
           context: .
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
       - run: kind load docker-image thecodeisalreadydeployed/backend:dev
       - run: sh hack/1-kubectl-apply-argocd.sh
       - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
