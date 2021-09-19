@@ -33,6 +33,5 @@ jobs:
       - run: argocd app sync codedeploy
       - run: argocd app wait codedeploy --timeout 300
         timeout-minutes: 5
-      - run: kubectl -n default apply -f hack/ci/backend.yaml
-      - run: kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
+      - run: kubectl -n default wait deploy/gitserver --for condition=available --timeout 5m
         timeout-minutes: 5
