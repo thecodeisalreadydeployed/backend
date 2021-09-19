@@ -13,3 +13,31 @@ spec:
     port: 443
   - name: git
     port: 9418
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitserver
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: gitserver
+  template:
+    metadata:
+      labels:
+        app: gitserver
+    spec:
+      containers:
+      - name: git
+        image: alpine/git:v2.26.2
+        command: ["/bin/sh", "-c"]
+        args:
+        - apk add -u git-daemon && git daemon --reuseaddr --base-path=/git --enable=receive-pack --export-all
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        - name: git
+          containerPort: 9418
