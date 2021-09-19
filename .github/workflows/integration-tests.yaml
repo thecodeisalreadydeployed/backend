@@ -23,4 +23,6 @@ jobs:
       - uses: docker/setup-buildx-action@v1
         with:
           install: true
+      - run: sh hack/0-kind-create-cluster.sh
       - run: docker build -t thecodeisalreadydeployed/backend:dev .
+      - run: kind load docker-image thecodeisalreadydeployed/backend:dev
