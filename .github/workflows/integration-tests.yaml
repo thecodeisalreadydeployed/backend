@@ -24,5 +24,5 @@ jobs:
         with:
           install: true
       - run: sh hack/0-kind-create-cluster.sh
-      - run: docker build -t thecodeisalreadydeployed/backend:dev .
+      - run: docker build -t thecodeisalreadydeployed/backend:dev . --push
       - run: kind load docker-image thecodeisalreadydeployed/backend:dev
