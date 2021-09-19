@@ -26,3 +26,6 @@ jobs:
       - run: sh hack/0-kind-create-cluster.sh
       - run: docker build -t thecodeisalreadydeployed/backend:dev . --push
       - run: kind load docker-image thecodeisalreadydeployed/backend:dev
+      - run: sh hack/1-kubectl-apply-argocd.sh
+      - run: kubectl -n argocd wait deploy/argocd-server --for condition=available
+        timeout-minutes: 5
