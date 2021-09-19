@@ -30,3 +30,9 @@ jobs:
           sudo chmod +x /usr/local/bin/argocd
           argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
       - run: argocd version
+      - run: argocd app sync codedeploy
+      - run: argocd app wait codedeploy --timeout 300
+        timeout-minutes: 5
+      - run: kubectl -n default apply -f hack/ci/backend.yaml
+      - run: kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
+        timeout-minutes: 5
