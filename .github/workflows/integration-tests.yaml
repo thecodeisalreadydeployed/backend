@@ -14,9 +14,9 @@ jobs:
         timeout-minutes: 5
       - run: kubectl -n argocd port-forward svc/argocd-server -n argocd 8080:443 &
       - run: |
-          export ARGOCD_SERVER=http://localhost:8080
-          export ARGOCD_USERNAME=admin
-          export ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-      - run: curl --insecure -sSL -o /usr/local/bin/argocd $ARGOCD_SERVER/download/argocd-linux-amd64
-      - run: argocd login --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD
+          ARGOCD_SERVER=http://localhost:8080
+          ARGOCD_USERNAME=admin
+          ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+          curl --insecure -sSL -o /usr/local/bin/argocd $ARGOCD_SERVER/download/argocd-linux-amd64
+          argocd login --username $ARGOCD_USERNAME --password $ARGOCD_PASSWORD
       - run: argocd version
