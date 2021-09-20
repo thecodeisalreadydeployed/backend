@@ -37,6 +37,6 @@ jobs:
           kubectl -n kubegres-system wait deploy/kubegres-controller-manager --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: |
+          sleep 15
           kubectl -n default wait pod/postgres-1-0 --for condition=Ready --timeout 5m
-          kubectl -n default wait pod/postgres-2-0 --for condition=Ready --timeout 5m
         timeout-minutes: 5
