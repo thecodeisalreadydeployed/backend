@@ -1,6 +1,6 @@
 apiVersion: kubegres.reactive-tech.io/v1
 kind: Kubegres
-meatadata:
+metadata:
   name: postgres
   namespace: default
 spec:
