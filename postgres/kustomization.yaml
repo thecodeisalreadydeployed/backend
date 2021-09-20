@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - https://raw.githubusercontent.com/thecodeisalreadydeployed/kubegres/v1.9/kubegres.yaml
   - secret.yaml
+  - postgres.yaml
