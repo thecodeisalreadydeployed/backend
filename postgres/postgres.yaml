@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   replicas: 2
-  image: postgres:13.2
+  image: postgres:13.4
   database:
     size: 200Mi
   env:
