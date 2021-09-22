@@ -3,12 +3,21 @@ version: '3.7'
 services:
   backend:
     image: thecodeisalreadydeployed/backend:dev
+    build: .
+    depends_on:
+      - database
     restart: unless-stopped
     environment:
-      POSTGRES_HOST: database
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: codedeploy
-      POSTGRES_PORT: "5432"
+      DATABASE_HOST: database
+      DATABASE_USERNAME: user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: codedeploy
+      DATABASE_PORT: "5432"
     ports:
       - 3000:3000
+    networks:
+      - codedeploy
+
+networks:
+  codedeploy:
+    name: codedeploy

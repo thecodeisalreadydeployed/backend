@@ -1,3 +1,0 @@
-#!/bin/sh
-printf '%s\n' "thecodeisalreadydeployed/gitserver:dev"
-exit 128

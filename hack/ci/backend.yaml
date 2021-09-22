@@ -38,4 +38,15 @@ spec:
             - containerPort: 3000
               name: http
           resources: {}
+          env:
+            - name: DATABASE_HOST
+              value: postgres.default.svc.cluster.local
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_USERNAME
+              value: postgres
+            - name: DATABASE_PASSWORD
+              value: password
+            - name: DATABASE_NAME
+              value: codedeploy
 status: {}

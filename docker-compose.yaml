@@ -10,3 +10,9 @@ services:
       POSTGRES_USER: user
     ports:
       - 5432:5432
+    networks:
+      - codedeploy
+
+networks:
+  codedeploy:
+    name: codedeploy

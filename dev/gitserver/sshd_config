@@ -1,5 +1,0 @@
-RSAAuthentication yes
-PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
-PasswordAuthentication no
-Subsystem sftp /usr/lib/ssh/sftp-server
