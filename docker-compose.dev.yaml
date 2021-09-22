@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  backend:
+    image: thecodeisalreadydeployed/backend:dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: codedeploy
+      POSTGRES_PORT: "5432"
+    ports:
+      - 3000:3000
