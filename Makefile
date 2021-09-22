@@ -2,7 +2,10 @@ api:
 	APP_ENV=DEV go run main.go
 
 dev-image:
-	docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up --force-recreate -- backend
+	DOCKER_BUILDKIT=1 docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build -- backend
+
+dev-image-detach:
+	DOCKER_BUILDKIT=1 docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build --detach -- backend
 
 kind:
 	sh hack/0-kind-create-cluster.sh
