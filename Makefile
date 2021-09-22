@@ -1,4 +1,4 @@
-dev:
+api:
 	APP_ENV=DEV go run main.go
 
 kind:
