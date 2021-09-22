@@ -17,7 +17,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=min
       - run: kind load docker-image thecodeisalreadydeployed/backend:dev
-      - run: kubectl -n argocd wait pod/argocd-server --for condition=Ready --timeout 5m
+      - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: kubectl -n argocd port-forward svc/argocd-server -n argocd 8080:443 &
       - run: |
