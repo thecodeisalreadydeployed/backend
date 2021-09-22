@@ -1,6 +1,12 @@
 api:
 	APP_ENV=DEV go run main.go
 
+dev-image-build:
+	DOCKER_BUILDKIT=1 docker build . -t thecodeisalreadydeployed/backend:dev
+
+dev-image-run: dev-image-build
+	docker run thecodeisalreadydeployed/backend:dev
+
 kind:
 	sh hack/0-kind-create-cluster.sh
 	sh hack/1-kubectl-apply-argocd.sh
