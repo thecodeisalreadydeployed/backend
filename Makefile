@@ -9,6 +9,7 @@ dev-image-run: dev-image-build
 	DATABASE_USERNAME=user && \
 	DATABASE_PASSWORD=password && \
 	DATABASE_NAME=codedeploy && \
+	DATABASE_PORT=5432 && \
 	docker run thecodeisalreadydeployed/backend:dev
 
 kind:
