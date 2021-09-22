@@ -1,4 +1,5 @@
 api:
+	docker compose -f docker-compose.yaml up -d
 	APP_ENV=DEV go run main.go
 
 dev-image:
