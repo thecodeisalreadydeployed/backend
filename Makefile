@@ -5,6 +5,10 @@ dev-image-build:
 	DOCKER_BUILDKIT=1 docker build . -t thecodeisalreadydeployed/backend:dev
 
 dev-image-run: dev-image-build
+	DATABASE_HOST=localhost && \
+	DATABASE_USERNAME=user && \
+	DATABASE_PASSWORD=password && \
+	DATABASE_NAME=codedeploy && \
 	docker run thecodeisalreadydeployed/backend:dev
 
 kind:
