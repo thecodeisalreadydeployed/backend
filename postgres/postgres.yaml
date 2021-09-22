@@ -1,21 +1,19 @@
-apiVersion: kubegres.reactive-tech.io/v1
-kind: Kubegres
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
 metadata:
   name: postgres
   namespace: default
 spec:
-  replicas: 2
-  image: postgres:13.4
-  database:
-    size: 200Mi
-  env:
-    - name: POSTGRES_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: postgres-secret
-          key: superUserPassword
-    - name: POSTGRES_REPLICATION_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: postgres-secret
-          key: replicationUserPassword
+  teamId: "codedeploy"
+  volume:
+    size: 1Gi
+  numberOfInstances: 2
+  users:
+    user:
+    - superuser
+    - createdb
+  databases:
+    codedeploy: user
+  preparedDatabases:
+  postgresql:
+    version: "13.4"
