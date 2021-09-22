@@ -13,4 +13,5 @@ kind:
 	sh hack/1-kubectl-apply-argocd.sh
 
 port-forward:
-	kubectl -n argocd port-forward svc/argocd-server -n argocd 8080:443 &
+	@kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+	kubectl -n argocd port-forward svc/argocd-server -n argocd 8080:443
