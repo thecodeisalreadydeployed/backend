@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/model"
@@ -16,6 +17,11 @@ import (
 func APIServer(port int) {
 	validator.Init()
 	app := fiber.New()
+
+	app.Get("/health", func(c *fiber.Ctx) error {
+		ok := datastore.IsReady()
+		return c.JSON(map[string]string{"ok": cast.ToString(ok)})
+	})
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
 		projectID := c.Params("projectID")
