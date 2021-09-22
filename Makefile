@@ -1,11 +1,8 @@
 api:
 	APP_ENV=DEV go run main.go
 
-dev-image-build:
-	DOCKER_BUILDKIT=1 docker build . -t thecodeisalreadydeployed/backend:dev
-
-dev-image-run: dev-image-build
-	docker-compose up -f docker-compose.dev.yaml
+dev-image:
+	docker-compose -f docker-compose.yaml -f docker-compose.dev.yaml up --force-recreate -- backend
 
 kind:
 	sh hack/0-kind-create-cluster.sh
