@@ -19,7 +19,7 @@ jobs:
       - run: kind load docker-image thecodeisalreadydeployed/backend:dev
       - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
         timeout-minutes: 5
-      - run: kubectl -n argocd port-forward svc/argocd-server -n argocd 8080:443 &
+      - run: kubectl -n argocd port-forward svc/argocd-server 8080:443 &
       - run: |
           ARGOCD_HOST=localhost:8080
           ARGOCD_SERVER=http://$ARGOCD_HOST
@@ -44,3 +44,5 @@ jobs:
       - run: |
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
+      - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
+      - run: curl -k "http://localhost:3000/health"
