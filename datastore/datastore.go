@@ -49,3 +49,17 @@ func Init() {
 func getDB() *gorm.DB {
 	return DB
 }
+
+func IsReady() bool {
+	_sql, err := getDB().DB()
+	if err != nil {
+		return false
+	}
+
+	err = _sql.Ping()
+	if err != nil {
+		return false
+	}
+
+	return true
+}
