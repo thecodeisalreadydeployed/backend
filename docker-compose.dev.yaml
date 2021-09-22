@@ -4,6 +4,8 @@ services:
   backend:
     image: thecodeisalreadydeployed/backend:dev
     build: .
+    depends_on:
+      - database
     restart: unless-stopped
     environment:
       DATABASE_HOST: database
@@ -13,3 +15,9 @@ services:
       DATABASE_PORT: "5432"
     ports:
       - 3000:3000
+    networks:
+      - codedeploy
+
+networks:
+  codedeploy:
+    name: codedeploy
