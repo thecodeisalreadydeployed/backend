@@ -5,12 +5,7 @@ dev-image-build:
 	DOCKER_BUILDKIT=1 docker build . -t thecodeisalreadydeployed/backend:dev
 
 dev-image-run: dev-image-build
-	DATABASE_HOST=localhost && \
-	DATABASE_USERNAME=user && \
-	DATABASE_PASSWORD=password && \
-	DATABASE_NAME=codedeploy && \
-	DATABASE_PORT=5432 && \
-	docker run thecodeisalreadydeployed/backend:dev
+	docker-compose up -f docker-compose.dev.yaml
 
 kind:
 	sh hack/0-kind-create-cluster.sh
