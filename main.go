@@ -12,7 +12,10 @@ import (
 
 func main() {
 	if util.IsDevEnvironment() {
-		gotenv.Load(".env.development")
+		err := gotenv.Load(".env.development")
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	config := zap.NewProductionConfig()
