@@ -7,6 +7,8 @@ require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/davecgh/go-spew v1.1.1
+	github.com/fasthttp/websocket v1.4.3 // indirect
+	github.com/gavv/httpexpect/v2 v2.3.1 // indirect
 	github.com/ghodss/yaml v1.0.0 //ct
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
@@ -15,6 +17,7 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/compress v1.13.3 // indirect
+	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nginxinc/kubernetes-ingress v1.12.0
