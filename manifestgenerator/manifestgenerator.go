@@ -2,12 +2,12 @@ package manifestgenerator
 
 import "go.uber.org/zap"
 
-func GenerateManifests() ([]string, error) {
+func GenerateManifests() (map[string]string, error) {
 	deploymentYAML, err := GenerateDeploymentYAML(&GenerateDeploymentOptions{
-		Name:           "",
-		Namespace:      "",
-		Labels:         nil,
-		ContainerImage: "",
+		Name:           "DeploymentName",
+		Namespace:      "DeploymentNamespace",
+		Labels:         map[string]string{"DeploymentLabelKey": "DeploymentLabelValue"},
+		ContainerImage: "DeploymentContainerImage",
 	})
 
 	if err != nil {
@@ -16,10 +16,9 @@ func GenerateManifests() ([]string, error) {
 	}
 
 	serviceYAML, err := GenerateServiceYAML(&GenerateServiceOptions{
-		Name:           "",
-		Namespace:      "",
-		Labels:         nil,
-		ContainerImage: "",
+		Name:      "ServiceName",
+		Namespace: "ServiceNamespace",
+		Labels:    map[string]string{"ServiceLabelKey": "ServiceLabelValue"},
 	})
 
 	if err != nil {
@@ -28,9 +27,9 @@ func GenerateManifests() ([]string, error) {
 	}
 
 	virtualServerYAML, err := GenerateVirtualServerYAML(&GenerateVirtualServerOptions{
-		Labels:    nil,
-		ProjectID: "",
-		AppID:     "",
+		Labels:    map[string]string{"VirtualServerLabelKey": "VirtualServerLabelValue"},
+		ProjectID: "ProjectID",
+		AppID:     "AppID",
 	})
 
 	if err != nil {
@@ -38,5 +37,9 @@ func GenerateManifests() ([]string, error) {
 		return nil, err
 	}
 
-	return []string{deploymentYAML, serviceYAML, virtualServerYAML}, nil
+	return map[string]string{
+		"deploymentYAML":    deploymentYAML,
+		"serviceYAML":       serviceYAML,
+		"virtualServerYAML": virtualServerYAML,
+	}, nil
 }
