@@ -7,10 +7,9 @@ import (
 )
 
 type GenerateServiceOptions struct {
-	Name           string
-	Namespace      string
-	Labels         map[string]string
-	ContainerImage string
+	Name      string
+	Namespace string
+	Labels    map[string]string
 }
 
 func GenerateServiceYAML(opts *GenerateServiceOptions) (string, error) {
