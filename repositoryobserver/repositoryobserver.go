@@ -15,9 +15,15 @@ func hasChanges(gs *model.GitSource, gw *gitgateway.GitGateway) bool {
 }
 
 func ObserveGitSources() {
-	apps, err := datastore.GetAllApps()
+	apps, err := datastore.GetObservableApps()
+
 	if err != nil {
 		zap.L().Error(err.Error())
+		return
+	}
+
+	if apps != nil && len(*apps) == 0 {
+		zap.L().Info("No apps to be observed.")
 		return
 	}
 
