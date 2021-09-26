@@ -76,6 +76,7 @@ func seedApps(size int) {
 		datum.ID = withPrefix(datum.ID, "app")
 		datum.ProjectID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
+		datum.Observable = false
 
 		data = append(data, datum)
 	}
