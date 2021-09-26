@@ -15,6 +15,7 @@ type App struct {
 	CreatedAt          time.Time          `json:"created_at"`
 	UpdatedAt          time.Time          `json:"updated_at"`
 	BuildConfiguration BuildConfiguration `json:"build_configuration"`
+	Observable         bool               `json:"observable"`
 }
 
 func GenerateAppID() string {
