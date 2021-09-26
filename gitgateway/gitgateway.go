@@ -110,7 +110,7 @@ func (it *GitGateway) WriteFile(path string, name string, data []byte) {
 }
 
 func (it *GitGateway) Log() []string {
-	messages := []string{}
+	var messages []string
 	r := it.repository
 	ref, err := r.Head()
 	if err != nil {
