@@ -57,9 +57,5 @@ func IsReady() bool {
 	}
 
 	err = _sql.Ping()
-	if err != nil {
-		return false
-	}
-
-	return true
+	return err == nil
 }
