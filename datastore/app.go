@@ -26,6 +26,24 @@ func GetAllApps() (*[]model.App, error) {
 	return ret, nil
 }
 
+func GetObservableApps() (*[]model.App, error) {
+	var _data []datamodel.App
+	err := getDB().Table("apps").Where("observable = ?", true).Scan(&_data).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, ErrNotFound
+	}
+
+	var _ret []model.App
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
+}
+
 func GetAppsByProjectID(projectID string) (*[]model.App, error) {
 	if !strings.HasPrefix(projectID, "prj_") {
 		zap.L().Error(MsgProjectPrefix)

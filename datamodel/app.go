@@ -18,6 +18,7 @@ type App struct {
 	CreatedAt          time.Time `gorm:"autoCreateTime"`
 	UpdatedAt          time.Time `gorm:"autoUpdateTime"`
 	BuildConfiguration string
+	Observable         bool
 }
 
 func (app *App) ToModel() model.App {
@@ -45,6 +46,7 @@ func (app *App) ToModel() model.App {
 		CreatedAt:          app.CreatedAt,
 		UpdatedAt:          app.UpdatedAt,
 		BuildConfiguration: buildConfiguration,
+		Observable:         app.Observable,
 	}
 }
 
@@ -69,5 +71,6 @@ func NewAppFromModel(app *model.App) *App {
 		CreatedAt:          app.CreatedAt,
 		UpdatedAt:          app.UpdatedAt,
 		BuildConfiguration: buildConfiguration64,
+		Observable:         app.Observable,
 	}
 }
