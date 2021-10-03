@@ -37,3 +37,13 @@ func IsAlreadyExists(err error) bool {
 func IsFailedPrecondition(err error) bool {
 	return errors.Is(err, ErrFailedPrecondition)
 }
+
+// IsUnavilable returns true if the error is due to a resource being unavailable.
+func IsUnavilable(err error) bool {
+	return errors.Is(err, ErrUnavailable)
+}
+
+// IsNotImplemented returns true if the error is due to not being implemented.
+func IsNotImplemented(err error) bool {
+	return errors.Is(err, ErrNotImplemented)
+}
