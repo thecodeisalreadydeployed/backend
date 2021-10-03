@@ -16,3 +16,24 @@ var (
 	ErrUnavailable        = errors.New("unavailable")
 	ErrNotImplemented     = errors.New("not implemented")
 )
+
+// IsInvalidArgument returns true if the error is due to an invalid argument.
+func IsInvalidArgument(err error) bool {
+	return errors.Is(err, ErrInvalidArgument)
+}
+
+// IsNotFound returns true if the error is due to a missing object.
+func IsNotFound(err error) bool {
+	return errors.Is(err, ErrNotFound)
+}
+
+// IsAlreadyExists returns true if the error is due to an already existing item.
+func IsAlreadyExists(err error) bool {
+	return errors.Is(err, ErrAlreadyExists)
+}
+
+// IsFailedPrecondition returns true if an operation could not proceed due to
+// the lack of a particular condition.
+func IsFailedPrecondition(err error) bool {
+	return errors.Is(err, ErrFailedPrecondition)
+}
