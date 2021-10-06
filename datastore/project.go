@@ -1,10 +1,12 @@
 package datastore
 
 import (
+	"strings"
+
 	"github.com/thecodeisalreadydeployed/datamodel"
+	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
-	"strings"
 )
 
 func GetAllProjects() (*[]model.Project, error) {
@@ -12,7 +14,7 @@ func GetAllProjects() (*[]model.Project, error) {
 	err := getDB().Table("projects").Scan(&_data).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.Project
@@ -28,7 +30,7 @@ func GetAllProjects() (*[]model.Project, error) {
 func GetProjectByID(id string) (*model.Project, error) {
 	if !strings.HasPrefix(id, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
-		return nil, ErrInvalidArgument
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.Project
@@ -37,7 +39,7 @@ func GetProjectByID(id string) (*model.Project, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	ret := _data.ToModel()
@@ -47,14 +49,14 @@ func GetProjectByID(id string) (*model.Project, error) {
 func SaveProject(_p *model.Project) error {
 	if !strings.HasPrefix(_p.ID, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
-		return ErrInvalidArgument
+		return errutil.ErrInvalidArgument
 	}
 	p := datamodel.NewProjectFromModel(_p)
 	err := getDB().Save(p).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return ErrCannotSave
+		return errutil.ErrUnknown
 	}
 	return nil
 }
@@ -62,17 +64,17 @@ func SaveProject(_p *model.Project) error {
 func RemoveProject(id string) error {
 	if !strings.HasPrefix(id, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
-		return ErrInvalidArgument
+		return errutil.ErrInvalidArgument
 	}
 	var p datamodel.Project
 	err := getDB().Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return ErrNotFound
+		return errutil.ErrNotFound
 	}
 	if err := getDB().Delete(&p).Error; err != nil {
 		zap.L().Error(err.Error())
-		return ErrCannotDelete
+		return errutil.ErrUnknown
 	}
 	return nil
 }
@@ -84,7 +86,7 @@ func GetProjectsByName(name string) (*[]model.Project, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.Project

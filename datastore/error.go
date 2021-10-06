@@ -1,18 +1,7 @@
 package datastore
 
-import "errors"
-
 var (
-	ErrFailedPrecondition = errors.New("ErrFailedPrecondition")
-	ErrNotFound           = errors.New("ErrNotFound")
-	ErrAlreadyExists      = errors.New("ErrAlreadyExists")
-	ErrInvalidArgument    = errors.New("ErrInvalidArgument")
-	ErrCannotSave         = errors.New("ErrCannotSave")
-	ErrCannotDelete       = errors.New("ErrCannotDelete")
-)
-
-var (
-	MsgProjectPrefix    = "Project must have a prj_ prefix."
-	MsgAppPrefix        = "App must have an app_ prefix."
-	MsgDeploymentPrefix = "Deployment must have a dpl_ prefix."
+	MsgProjectPrefix    = "Project must have the prj_ prefix."
+	MsgAppPrefix        = "App must have the app_ prefix."
+	MsgDeploymentPrefix = "Deployment must have the dpl_ prefix."
 )

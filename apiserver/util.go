@@ -2,20 +2,29 @@ package apiserver
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/errutil"
 )
 
-func mapStatusCode(datastoreError error) int {
-	switch datastoreError {
-	case datastore.ErrAlreadyExists:
-		return fiber.StatusConflict
-	case datastore.ErrInvalidArgument:
-		return fiber.StatusUnprocessableEntity
-	case datastore.ErrFailedPrecondition:
+func mapStatusCode(err error) int {
+	if errutil.IsAlreadyExists(err) {
 		return fiber.StatusBadRequest
-	case datastore.ErrNotFound:
-		return fiber.StatusNotFound
-	default:
-		return fiber.StatusInternalServerError
 	}
+
+	if errutil.IsFailedPrecondition(err) {
+		return fiber.StatusPreconditionFailed
+	}
+
+	if errutil.IsInvalidArgument(err) {
+		return fiber.StatusBadRequest
+	}
+
+	if errutil.IsNotFound(err) {
+		return fiber.StatusNotFound
+	}
+
+	if errutil.IsNotImplemented(err) {
+		return fiber.StatusNotImplemented
+	}
+
+	return fiber.StatusInternalServerError
 }

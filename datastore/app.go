@@ -1,11 +1,15 @@
 package datastore
 
 import (
-	"go.uber.org/zap"
+	"errors"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"github.com/thecodeisalreadydeployed/datamodel"
+	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
+	"gorm.io/gorm"
 )
 
 func GetAllApps() (*[]model.App, error) {
@@ -13,7 +17,7 @@ func GetAllApps() (*[]model.App, error) {
 	err := getDB().Table("apps").Scan(&_data).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.App
@@ -31,7 +35,7 @@ func GetObservableApps() (*[]model.App, error) {
 	err := getDB().Table("apps").Where("observable = ?", true).Scan(&_data).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.App
@@ -47,7 +51,7 @@ func GetObservableApps() (*[]model.App, error) {
 func GetAppsByProjectID(projectID string) (*[]model.App, error) {
 	if !strings.HasPrefix(projectID, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
-		return nil, ErrInvalidArgument
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data []datamodel.App
@@ -55,7 +59,7 @@ func GetAppsByProjectID(projectID string) (*[]model.App, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.App
@@ -71,7 +75,7 @@ func GetAppsByProjectID(projectID string) (*[]model.App, error) {
 func GetAppByID(appID string) (*model.App, error) {
 	if !strings.HasPrefix(appID, "app_") {
 		zap.L().Error(MsgAppPrefix)
-		return nil, ErrInvalidArgument
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.App
@@ -79,7 +83,7 @@ func GetAppByID(appID string) (*model.App, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	ret := _data.ToModel()
@@ -89,14 +93,23 @@ func GetAppByID(appID string) (*model.App, error) {
 func SaveApp(_a *model.App) error {
 	if !strings.HasPrefix(_a.ID, "app_") {
 		zap.L().Error(MsgAppPrefix)
-		return ErrInvalidArgument
+		return errutil.ErrInvalidArgument
 	}
 	a := datamodel.NewAppFromModel(_a)
 	err := getDB().Save(a).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return ErrCannotSave
+
+		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
+			return errutil.ErrInvalidArgument
+		}
+
+		if errors.Is(err, gorm.ErrMissingWhereClause) {
+			return errutil.ErrFailedPrecondition
+		}
+
+		return errutil.ErrUnknown
 	}
 	return nil
 }
@@ -104,17 +117,17 @@ func SaveApp(_a *model.App) error {
 func RemoveApp(id string) error {
 	if !strings.HasPrefix(id, "app_") {
 		zap.L().Error(MsgAppPrefix)
-		return ErrInvalidArgument
+		return errutil.ErrInvalidArgument
 	}
 	var a datamodel.App
 	err := getDB().Table("apps").Where(datamodel.App{ID: id}).First(&a).Error
 	if err != nil {
 		zap.L().Error(err.Error())
-		return ErrNotFound
+		return errutil.ErrNotFound
 	}
 	if err := getDB().Delete(&a).Error; err != nil {
 		zap.L().Error(err.Error())
-		return ErrCannotDelete
+		return errutil.ErrUnknown
 	}
 	return nil
 }
@@ -126,7 +139,7 @@ func GetAppsByName(name string) (*[]model.App, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.App
