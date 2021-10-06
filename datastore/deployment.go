@@ -1,17 +1,19 @@
 package datastore
 
 import (
-	"go.uber.org/zap"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"github.com/thecodeisalreadydeployed/datamodel"
+	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
 func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app_") {
 		zap.L().Error(MsgAppPrefix)
-		return nil, ErrInvalidArgument
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data []datamodel.Deployment
@@ -19,7 +21,7 @@ func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.Deployment
@@ -35,7 +37,7 @@ func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	if !strings.HasPrefix(deploymentID, "dpl_") {
 		zap.L().Error(MsgDeploymentPrefix)
-		return nil, ErrInvalidArgument
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.Deployment
@@ -43,7 +45,7 @@ func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	ret := _data.ToModel()

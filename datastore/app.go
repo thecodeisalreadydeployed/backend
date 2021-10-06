@@ -139,7 +139,7 @@ func GetAppsByName(name string) (*[]model.App, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return nil, ErrNotFound
+		return nil, errutil.ErrNotFound
 	}
 
 	var _ret []model.App
