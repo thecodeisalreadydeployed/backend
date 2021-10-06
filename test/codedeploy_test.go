@@ -99,8 +99,8 @@ func TestIntegration(t *testing.T) {
 		Expect().Status(http.StatusOK)
 
 	expect.GET(fmt.Sprintf("/project/%s", projectID)).
-		Expect().Status(http.StatusNotFound).JSON().Null()
+		Expect().Status(http.StatusNotFound)
 
 	expect.GET(fmt.Sprintf("/app/%s", appID)).
-		Expect().Status(http.StatusNotFound).JSON().Null()
+		Expect().Status(http.StatusNotFound)
 }
