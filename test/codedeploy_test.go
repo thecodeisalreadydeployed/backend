@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
+	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 )
 
@@ -51,6 +52,8 @@ func TestIntegration(t *testing.T) {
 
 	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
 
+	assert.NotEmpty(t, projectID)
+
 	expect.POST("/app").
 		WithForm(dto.CreateAppRequest{
 			ProjectID:       projectID,
@@ -72,6 +75,8 @@ func TestIntegration(t *testing.T) {
 
 	appID := apps.Array().Element(0).Object().Value("id").String().Raw()
 
+	assert.NotEmpty(t, projectID)
+
 	expect.GET(fmt.Sprintf("/project/%s", projectID)).
 		Expect().Status(http.StatusOK).JSON().
 		Object().
@@ -80,7 +85,7 @@ func TestIntegration(t *testing.T) {
 	expect.GET(fmt.Sprintf("/app/%s", appID)).
 		Expect().Status(http.StatusOK).JSON().
 		Object().
-		ContainsKey("projectID").ValueEqual("projectID", projectID).
+		ContainsKey("project_id").ValueEqual("project_id", projectID).
 		ContainsKey("name").ValueEqual("name", appName)
 
 	expect.GET(fmt.Sprintf("/app/%s/deployments", appID)).
@@ -94,8 +99,8 @@ func TestIntegration(t *testing.T) {
 		Expect().Status(http.StatusOK)
 
 	expect.GET(fmt.Sprintf("/project/%s", projectID)).
-		Expect().Status(http.StatusOK).JSON().Null()
+		Expect().Status(http.StatusNotFound).JSON().Null()
 
 	expect.GET(fmt.Sprintf("/app/%s", appID)).
-		Expect().Status(http.StatusOK).JSON().Null()
+		Expect().Status(http.StatusNotFound).JSON().Null()
 }
