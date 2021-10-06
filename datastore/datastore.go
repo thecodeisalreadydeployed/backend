@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
+	"github.com/thecodeisalreadydeployed/util"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -43,7 +44,9 @@ func Init() {
 		panic(err)
 	}
 
-	seed()
+	if util.IsDevEnvironment() {
+		seed()
+	}
 }
 
 func getDB() *gorm.DB {
