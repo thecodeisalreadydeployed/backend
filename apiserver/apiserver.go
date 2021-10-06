@@ -3,9 +3,6 @@ package apiserver
 import (
 	"fmt"
 	"log"
-	"net/http"
-
-	"net/url"
 
 	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
@@ -26,14 +23,6 @@ func APIServer(port int) {
 
 	app.Get("/projects", func(c *fiber.Ctx) error {
 		result, err := datastore.GetAllProjects()
-		if err != nil {
-			return fiber.NewError(mapStatusCode(err))
-		}
-		return c.JSON(result)
-	})
-
-	app.Get("/apps", func(c *fiber.Ctx) error {
-		result, err := datastore.GetAllApps()
 		if err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
@@ -89,34 +78,6 @@ func APIServer(port int) {
 			return fiber.NewError(mapStatusCode(err))
 		}
 		return c.SendString(event)
-	})
-
-	app.Get("/project/name/:projectName", func(c *fiber.Ctx) error {
-		projectName, err := url.QueryUnescape(c.Params("projectName"))
-
-		if err != nil {
-			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
-		}
-
-		result, err := datastore.GetProjectsByName(projectName)
-		if err != nil {
-			return fiber.NewError(mapStatusCode(err))
-		}
-		return c.JSON(result)
-	})
-
-	app.Get("/app/name/:appName", func(c *fiber.Ctx) error {
-		appName, err := url.QueryUnescape(c.Params("appName"))
-
-		if err != nil {
-			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
-		}
-
-		result, err := datastore.GetAppsByName(appName)
-		if err != nil {
-			return fiber.NewError(mapStatusCode(err))
-		}
-		return c.JSON(result)
 	})
 
 	app.Post("/project", func(c *fiber.Ctx) error {

@@ -2,7 +2,6 @@ package dto
 
 import (
 	"github.com/thecodeisalreadydeployed/model"
-	"time"
 )
 
 type CreateAppRequest struct {
@@ -18,7 +17,6 @@ type CreateAppRequest struct {
 
 func (req *CreateAppRequest) ToModel() model.App {
 	return model.App{
-		ID:        model.GenerateAppID(),
 		ProjectID: req.ProjectID,
 		Name:      req.Name,
 		BuildConfiguration: model.BuildConfiguration{
@@ -32,8 +30,6 @@ func (req *CreateAppRequest) ToModel() model.App {
 		GitSource: model.GitSource{
 			RepositoryURL: req.RepositoryURL,
 		},
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
 		Observable: false,
 	}
 }

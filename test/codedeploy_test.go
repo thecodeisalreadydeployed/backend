@@ -1,14 +1,13 @@
 package test
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/gavv/httpexpect/v2"
-	"github.com/thecodeisalreadydeployed/apiserver/dto"
-	"github.com/thecodeisalreadydeployed/model"
-	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/gavv/httpexpect/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/thecodeisalreadydeployed/apiserver/dto"
 )
 
 func setup(t *testing.T) *httpexpect.Expect {
@@ -19,26 +18,6 @@ func setup(t *testing.T) *httpexpect.Expect {
 	})
 
 	return e
-}
-
-func httpRequest(path string, t *testing.T) []byte {
-	resp, err := http.Get(fmt.Sprintf("http://localhost:3000%s", path))
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if resp.Status != "200 OK" {
-		t.Error(fmt.Sprintf("Non-200 status code while requesting %s.", path))
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	return body
 }
 
 func TestHealth(t *testing.T) {
@@ -52,7 +31,7 @@ func TestHealth(t *testing.T) {
 		ValueEqual("ok", "true")
 }
 
-func TestFlow(t *testing.T) {
+func TestIntegration(t *testing.T) {
 	projectName := "Test Project"
 	appName := "Test App"
 	fake := "Fake Data"
@@ -64,22 +43,20 @@ func TestFlow(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	var projects []model.Project
-	bytes := httpRequest(fmt.Sprintf("/project/name/%s", projectName), t)
-	err := json.Unmarshal(bytes, &projects)
+	projects := expect.GET("/projects").
+		Expect().
+		Status(http.StatusOK).
+		JSON()
 
-	if err != nil {
-		t.Error(err)
-	}
+	projects.Array().Length().Equal(1)
 
-	if len(projects) == 0 {
-		t.Fatal("Test project was not created.")
-	}
-	project := projects[0]
+	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
+
+	assert.NotEmpty(t, projectID)
 
 	expect.POST("/app").
 		WithForm(dto.CreateAppRequest{
-			ProjectID:       project.ID,
+			ProjectID:       projectID,
 			Name:            appName,
 			RepositoryURL:   fake,
 			BuildScript:     fake,
@@ -89,45 +66,41 @@ func TestFlow(t *testing.T) {
 			StartCommand:    fake,
 		}).Expect().Status(http.StatusOK)
 
-	var apps []model.App
-	bytes = httpRequest(fmt.Sprintf("/app/name/%s", appName), t)
-	err = json.Unmarshal(bytes, &apps)
-	if err != nil {
-		t.Error(err)
-	}
+	apps := expect.GET("/project/" + projectID + "/apps").
+		Expect().
+		Status(http.StatusOK).
+		JSON()
 
-	if len(apps) == 0 {
-		t.Fatal("Test app was not created.")
-	}
-	app := apps[0]
+	apps.Array().Length().Equal(1)
 
-	expect.GET(fmt.Sprintf("/project/%s", project.ID)).
-		Expect().Status(http.StatusOK).JSON().Object().ContainsMap(project)
+	appID := apps.Array().Element(0).Object().Value("id").String().Raw()
 
-	expect.GET(fmt.Sprintf("/app/%s", app.ID)).
-		Expect().Status(http.StatusOK).JSON().Object().ContainsMap(app)
+	assert.NotEmpty(t, appID)
 
-	expect.GET(fmt.Sprintf("/project/%s/apps", project.ID)).
-		Expect().Status(http.StatusOK).JSON().Array().Contains(app)
+	expect.GET(fmt.Sprintf("/project/%s", projectID)).
+		Expect().Status(http.StatusOK).JSON().
+		Object().
+		ContainsKey("name").ValueEqual("name", projectName)
 
-	expect.GET(fmt.Sprintf("/app/%s/deployments", app.ID)).
-		Expect().Status(http.StatusOK).JSON().Null()
+	expect.GET(fmt.Sprintf("/app/%s", appID)).
+		Expect().Status(http.StatusOK).JSON().
+		Object().
+		ContainsKey("project_id").ValueEqual("project_id", projectID).
+		ContainsKey("name").ValueEqual("name", appName)
 
-	expect.GET(fmt.Sprintf("/project/name/%s", projectName)).
-		Expect().Status(http.StatusOK).JSON().Array().ContainsOnly(project)
+	expect.GET(fmt.Sprintf("/app/%s/deployments", appID)).
+		Expect().Status(http.StatusOK).JSON().
+		Null()
 
-	expect.GET(fmt.Sprintf("/app/name/%s", appName)).
-		Expect().Status(http.StatusOK).JSON().Array().ContainsOnly(app)
-
-	expect.DELETE(fmt.Sprintf("/app/%s", app.ID)).
+	expect.DELETE(fmt.Sprintf("/app/%s", appID)).
 		Expect().Status(http.StatusOK)
 
-	expect.DELETE(fmt.Sprintf("/project/%s", project.ID)).
+	expect.DELETE(fmt.Sprintf("/project/%s", projectID)).
 		Expect().Status(http.StatusOK)
 
-	expect.GET(fmt.Sprintf("/project/name/%s", projectName)).
-		Expect().Status(http.StatusOK).JSON().Null()
+	expect.GET(fmt.Sprintf("/project/%s", projectID)).
+		Expect().Status(http.StatusNotFound)
 
-	expect.GET(fmt.Sprintf("/app/name/%s", appName)).
-		Expect().Status(http.StatusOK).JSON().Null()
+	expect.GET(fmt.Sprintf("/app/%s", appID)).
+		Expect().Status(http.StatusNotFound)
 }
