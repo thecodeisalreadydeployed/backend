@@ -19,5 +19,5 @@ type App struct {
 }
 
 func GenerateAppID() string {
-	return fmt.Sprintf("app_%s", util.RandomString(5))
+	return fmt.Sprintf("app_%s", util.RandomString(25))
 }
