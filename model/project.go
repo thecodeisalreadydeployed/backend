@@ -15,5 +15,5 @@ type Project struct {
 }
 
 func GenerateProjectID() string {
-	return fmt.Sprintf("prj_%s", util.RandomString(5))
+	return fmt.Sprintf("prj_%s", util.RandomString(25))
 }
