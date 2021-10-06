@@ -3,6 +3,10 @@ dev:
 	docker compose -f docker-compose.yaml up -d
 	APP_ENV=DEV go run main.go
 
+.PHONY: lint
+lint:
+	golangci-lint run
+
 .PHONY: e2e
 e2e:
 	go test -v ./test
