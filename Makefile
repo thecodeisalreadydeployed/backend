@@ -11,6 +11,7 @@ prod: dcp
 	DATABASE_HOST=localhost \
 	DATABASE_USERNAME=user \
 	DATABASE_PASSWORD=password \
+	DATABASE_NAME=codedeploy \
 	DATABASE_PORT=5432 \
 	APP_ENV=PROD \
 	go run main.go
