@@ -21,7 +21,7 @@ func setup(t *testing.T) *httpexpect.Expect {
 	return e
 }
 
-func httpRequest(path string, obj interface{}, t *testing.T) interface{} {
+func httpRequest(path string, t *testing.T) []byte {
 	resp, err := http.Get(fmt.Sprintf("http://localhost:3000%s", path))
 
 	if err != nil {
@@ -38,13 +38,7 @@ func httpRequest(path string, obj interface{}, t *testing.T) interface{} {
 		t.Error(err)
 	}
 
-	err = json.Unmarshal(body, obj)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	return obj
+	return body
 }
 
 func TestHealth(t *testing.T) {
@@ -59,22 +53,61 @@ func TestHealth(t *testing.T) {
 }
 
 func TestFlow(t *testing.T) {
+
 	projectName := "Test Project"
 	appName := "Test App"
 	fake := "Fake Data"
 
 	expect := setup(t)
 
+	var initialProjects []model.Project
+	bytes := httpRequest(fmt.Sprintf("/project/name/%s", projectName), t)
+	err := json.Unmarshal(bytes, &initialProjects)
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, _project := range initialProjects {
+		if _project.Name == projectName {
+			t.Fatal(`Cannot test if there is a project(s) named "Test Project".`)
+		}
+	}
+
+	var initialApps []model.App
+	bytes = httpRequest(fmt.Sprintf("/app/name/%s", appName), t)
+	err = json.Unmarshal(bytes, &initialApps)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, _app := range initialApps {
+		if _app.Name == appName {
+			t.Fatal(`Cannot test if there is an app(s) named "Test App".`)
+		}
+	}
+
 	expect.POST("/project").
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
 		Expect().
 		Status(http.StatusOK)
 
-	prj := httpRequest(fmt.Sprintf("/project/name/%s", projectName), model.Project{}, t).(model.Project)
+	var projects []model.Project
+	bytes = httpRequest(fmt.Sprintf("/project/name/%s", projectName), t)
+	err = json.Unmarshal(bytes, &projects)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(projects) == 0 {
+		t.Fatal("Test project was not created.")
+	}
+	project := projects[0]
 
 	expect.POST("/app").
 		WithForm(dto.CreateAppRequest{
-			ProjectID:       prj.ID,
+			ProjectID:       project.ID,
 			Name:            appName,
 			RepositoryURL:   fake,
 			BuildScript:     fake,
@@ -82,11 +115,26 @@ func TestFlow(t *testing.T) {
 			BuildCommand:    fake,
 			OutputDirectory: fake,
 			StartCommand:    fake,
-		}).Expect().
-		Status(http.StatusOK)
+		}).Expect().Status(http.StatusOK)
 
-	app := httpRequest(fmt.Sprintf())
+	var apps []model.App
+	bytes = httpRequest(fmt.Sprintf("/app/name/%s", appName), t)
+	err = json.Unmarshal(bytes, &apps)
+	if err != nil {
+		t.Error(err)
+	}
 
-	expect.GET(fmt.Sprintf("/project/%s", prj.ID)).
-		Expect().Status(http.StatusOK).JSON().Object().ContainsMap(prj)
+	if len(apps) == 0 {
+		t.Fatal("Test app was not created.")
+	}
+	app := apps[0]
+
+	expect.GET(fmt.Sprintf("/project/%s", project.ID)).
+		Expect().Status(http.StatusOK).JSON().Object().ContainsMap(project)
+
+	expect.GET(fmt.Sprintf("/app/%s", app.ID)).
+		Expect().Status(http.StatusOK).JSON().Object().ContainsMap(app)
+
+	expect.GET(fmt.Sprintf("/project/%s/apps", project.ID)).
+		Expect().Status(http.StatusOK).JSON().Array().Contains(app)
 }
