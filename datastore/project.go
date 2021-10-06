@@ -46,12 +46,16 @@ func GetProjectByID(id string) (*model.Project, error) {
 	return &ret, nil
 }
 
-func SaveProject(_p *model.Project) error {
-	if !strings.HasPrefix(_p.ID, "prj_") {
-		zap.L().Error(MsgProjectPrefix)
-		return errutil.ErrInvalidArgument
+func SaveProject(project *model.Project) error {
+	if project.ID != "" {
+		if !strings.HasPrefix(project.ID, "prj_") {
+			zap.L().Error(MsgProjectPrefix)
+			return errutil.ErrInvalidArgument
+		}
+	} else {
+		project.ID = model.GenerateProjectID()
 	}
-	p := datamodel.NewProjectFromModel(_p)
+	p := datamodel.NewProjectFromModel(project)
 	err := getDB().Save(p).Error
 
 	if err != nil {
