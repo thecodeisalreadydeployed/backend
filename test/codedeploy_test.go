@@ -75,7 +75,7 @@ func TestIntegration(t *testing.T) {
 
 	appID := apps.Array().Element(0).Object().Value("id").String().Raw()
 
-	assert.NotEmpty(t, projectID)
+	assert.NotEmpty(t, appID)
 
 	expect.GET(fmt.Sprintf("/project/%s", projectID)).
 		Expect().Status(http.StatusOK).JSON().
