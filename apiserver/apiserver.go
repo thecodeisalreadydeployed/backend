@@ -24,6 +24,22 @@ func APIServer(port int) {
 		return c.JSON(map[string]string{"ok": cast.ToString(ok)})
 	})
 
+	app.Get("/projects", func(c *fiber.Ctx) error {
+		result, err := datastore.GetAllProjects()
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
+	})
+
+	app.Get("/apps", func(c *fiber.Ctx) error {
+		result, err := datastore.GetAllApps()
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
+	})
+
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
 		projectID := c.Params("projectID")
 		result, err := datastore.GetProjectByID(projectID)
@@ -82,7 +98,7 @@ func APIServer(port int) {
 			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
 		}
 
-		result, err := datastore.GetProjectByName(projectName)
+		result, err := datastore.GetProjectsByName(projectName)
 		if err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
@@ -96,7 +112,7 @@ func APIServer(port int) {
 			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
 		}
 
-		result, err := datastore.GetProjectByName(appName)
+		result, err := datastore.GetAppsByName(appName)
 		if err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
