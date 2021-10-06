@@ -8,6 +8,7 @@ lint:
 	golangci-lint run
 
 .PHONY: lint-ci
+lint-ci:
 	sh hack/lint.sh
 
 .PHONY: e2e
