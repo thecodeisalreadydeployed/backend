@@ -7,6 +7,24 @@ import (
 	"strings"
 )
 
+func GetAllProjects() (*[]model.Project, error) {
+	var _data []datamodel.Project
+	err := getDB().Table("projects").Scan(&_data).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, ErrNotFound
+	}
+
+	var _ret []model.Project
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
+}
+
 func GetProjectByID(id string) (*model.Project, error) {
 	if !strings.HasPrefix(id, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
@@ -59,16 +77,22 @@ func RemoveProject(id string) error {
 	return nil
 }
 
-func GetProjectByName(name string) (*model.Project, error) {
-	var _data datamodel.Project
+func GetProjectsByName(name string) (*[]model.Project, error) {
+	var _data []datamodel.Project
 
-	err := getDB().Table("projects").Where(datamodel.Project{Name: name}).First(&_data).Error
+	err := getDB().Table("projects").Where(datamodel.Project{Name: name}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, ErrNotFound
 	}
 
-	ret := _data.ToModel()
-	return &ret, nil
+	var _ret []model.Project
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
 }
