@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-func GetProjectByID(projectID string) (*model.Project, error) {
-	if !strings.HasPrefix(projectID, "prj_") {
+func GetProjectByID(id string) (*model.Project, error) {
+	if !strings.HasPrefix(id, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
 		return nil, ErrInvalidArgument
 	}
 
 	var _data datamodel.Project
 
-	err := getDB().First(&_data, "id = ?", projectID).Error
+	err := getDB().Table("projects").First(&_data, "id = ?", id).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -57,4 +57,18 @@ func RemoveProject(id string) error {
 		return ErrCannotDelete
 	}
 	return nil
+}
+
+func GetProjectByName(name string) (*model.Project, error) {
+	var _data datamodel.Project
+
+	err := getDB().Table("projects").Where(datamodel.Project{Name: name}).First(&_data).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, ErrNotFound
+	}
+
+	ret := _data.ToModel()
+	return &ret, nil
 }
