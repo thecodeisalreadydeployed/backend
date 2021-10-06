@@ -41,6 +41,7 @@ func (app *App) ToModel() model.App {
 
 	return model.App{
 		ID:                 app.ID,
+		ProjectID:          app.ProjectID,
 		Name:               app.Name,
 		GitSource:          gitSource,
 		CreatedAt:          app.CreatedAt,
