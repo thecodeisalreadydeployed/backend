@@ -15,7 +15,6 @@ jobs:
             ~/.cache/go-build
             ~/go/pkg/mod
           key: go-${{ hashFiles('**/go.sum') }}
-      - run: make lint-ci
       - run: make kind
       - uses: docker/setup-buildx-action@v1
       - uses: docker/build-push-action@v2
