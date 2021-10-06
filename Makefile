@@ -3,7 +3,7 @@ api:
 	APP_ENV=DEV go run main.go
 
 e2e:
-	go test -v ./tests/e2e
+	go test -v ./tests
 
 dev-image:
 	DOCKER_BUILDKIT=1 docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build -- backend
