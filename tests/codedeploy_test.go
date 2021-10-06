@@ -53,39 +53,14 @@ func TestHealth(t *testing.T) {
 }
 
 func TestFlow(t *testing.T) {
-
 	projectName := "Test Project"
 	appName := "Test App"
 	fake := "Fake Data"
 
 	expect := setup(t)
 
-	var initialProjects []model.Project
-	bytes := httpRequest(fmt.Sprintf("/project/name/%s", projectName), t)
-	err := json.Unmarshal(bytes, &initialProjects)
-	if err != nil {
-		t.Error(err)
-	}
-
-	for _, _project := range initialProjects {
-		if _project.Name == projectName {
-			t.Fatal(`Cannot test if there is a project(s) named "Test Project".`)
-		}
-	}
-
-	var initialApps []model.App
-	bytes = httpRequest(fmt.Sprintf("/app/name/%s", appName), t)
-	err = json.Unmarshal(bytes, &initialApps)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	for _, _app := range initialApps {
-		if _app.Name == appName {
-			t.Fatal(`Cannot test if there is an app(s) named "Test App".`)
-		}
-	}
+	expect.GET("/projects").Expect().Status(http.StatusOK).JSON().Null()
+	expect.GET("/apps").Expect().Status(http.StatusOK).JSON().Null()
 
 	expect.POST("/project").
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
@@ -93,8 +68,8 @@ func TestFlow(t *testing.T) {
 		Status(http.StatusOK)
 
 	var projects []model.Project
-	bytes = httpRequest(fmt.Sprintf("/project/name/%s", projectName), t)
-	err = json.Unmarshal(bytes, &projects)
+	bytes := httpRequest(fmt.Sprintf("/project/name/%s", projectName), t)
+	err := json.Unmarshal(bytes, &projects)
 
 	if err != nil {
 		t.Error(err)
@@ -137,4 +112,25 @@ func TestFlow(t *testing.T) {
 
 	expect.GET(fmt.Sprintf("/project/%s/apps", project.ID)).
 		Expect().Status(http.StatusOK).JSON().Array().Contains(app)
+
+	expect.GET(fmt.Sprintf("/app/%s/deployments", app.ID)).
+		Expect().Status(http.StatusOK).JSON().Null()
+
+	expect.GET(fmt.Sprintf("/project/name/%s", projectName)).
+		Expect().Status(http.StatusOK).JSON().Array().ContainsOnly(project)
+
+	expect.GET(fmt.Sprintf("/app/name/%s", appName)).
+		Expect().Status(http.StatusOK).JSON().Array().ContainsOnly(app)
+
+	expect.DELETE(fmt.Sprintf("/app/%s", app.ID)).
+		Expect().Status(http.StatusOK)
+
+	expect.DELETE(fmt.Sprintf("/project/%s", project.ID)).
+		Expect().Status(http.StatusOK)
+
+	expect.GET(fmt.Sprintf("/project/name/%s", projectName)).
+		Expect().Status(http.StatusOK).JSON().Null()
+
+	expect.GET(fmt.Sprintf("/app/name/%s", appName)).
+		Expect().Status(http.StatusOK).JSON().Null()
 }
