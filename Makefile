@@ -5,7 +5,7 @@ dev:
 
 .PHONY: e2e
 e2e:
-	go test -v ./tests/e2e
+	go test -v ./test
 
 .PHONY: dev-image
 dev-image:

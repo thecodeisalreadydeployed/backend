@@ -3,12 +3,13 @@ package apiserver
 import (
 	"fmt"
 	"log"
+	"net/http"
+
+	"net/url"
 
 	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
-	"github.com/thecodeisalreadydeployed/model"
-
 	"github.com/thecodeisalreadydeployed/datastore"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,6 +22,22 @@ func APIServer(port int) {
 	app.Get("/health", func(c *fiber.Ctx) error {
 		ok := datastore.IsReady()
 		return c.JSON(map[string]string{"ok": cast.ToString(ok)})
+	})
+
+	app.Get("/projects", func(c *fiber.Ctx) error {
+		result, err := datastore.GetAllProjects()
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
+	})
+
+	app.Get("/apps", func(c *fiber.Ctx) error {
+		result, err := datastore.GetAllApps()
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
 	})
 
 	app.Get("/project/:projectID", func(c *fiber.Ctx) error {
@@ -74,6 +91,34 @@ func APIServer(port int) {
 		return c.SendString(event)
 	})
 
+	app.Get("/project/name/:projectName", func(c *fiber.Ctx) error {
+		projectName, err := url.QueryUnescape(c.Params("projectName"))
+
+		if err != nil {
+			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
+		}
+
+		result, err := datastore.GetProjectsByName(projectName)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
+	})
+
+	app.Get("/app/name/:appName", func(c *fiber.Ctx) error {
+		appName, err := url.QueryUnescape(c.Params("appName"))
+
+		if err != nil {
+			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
+		}
+
+		result, err := datastore.GetAppsByName(appName)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
+	})
+
 	app.Post("/project", func(c *fiber.Ctx) error {
 		request := dto.CreateProjectRequest{}
 		if err := c.BodyParser(&request); err != nil {
@@ -94,13 +139,22 @@ func APIServer(port int) {
 	})
 
 	app.Post("/app", func(c *fiber.Ctx) error {
-		payload := model.App{}
-		if err := c.BodyParser(&payload); err != nil {
+		request := dto.CreateAppRequest{}
+
+		if err := c.BodyParser(&request); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest)
 		}
-		if err := datastore.SaveApp(&payload); err != nil {
+
+		if validationErrors := validator.Validate(request); len(validationErrors) > 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
+		}
+
+		app := request.ToModel()
+
+		if err := datastore.SaveApp(&app); err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
+
 		return c.SendStatus(fiber.StatusOK)
 	})
 
@@ -117,10 +171,6 @@ func APIServer(port int) {
 		if err := datastore.RemoveApp(appID); err != nil {
 			return fiber.NewError(mapStatusCode(err))
 		}
-		return c.SendStatus(fiber.StatusOK)
-	})
-
-	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusOK)
 	})
 

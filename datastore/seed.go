@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -12,8 +13,6 @@ import (
 )
 
 func seed() {
-	//TODO: Updated at may come before created at
-
 	seedProjects(20)
 	seedApps(100)
 	seedDeployments(500)
@@ -76,6 +75,7 @@ func seedApps(size int) {
 		datum.ID = withPrefix(datum.ID, "app")
 		datum.ProjectID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
+		datum.BuildConfiguration = getBuildConfiguration()
 		datum.Observable = false
 
 		data = append(data, datum)
@@ -133,6 +133,20 @@ func getGitSource() string {
 		zap.L().Error(err.Error())
 	}
 	return string(res)
+}
+
+func getBuildConfiguration() string {
+	var bc model.BuildConfiguration
+	err := faker.FakeData(&bc)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
+	_res, err := json.Marshal(bc)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
+	res := base64.StdEncoding.EncodeToString(_res)
+	return res
 }
 
 func getCreator() string {
