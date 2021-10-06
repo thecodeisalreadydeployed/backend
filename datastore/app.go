@@ -119,16 +119,22 @@ func RemoveApp(id string) error {
 	return nil
 }
 
-func GetAppByName(name string) (*model.Project, error) {
-	var _data datamodel.Project
+func GetAppsByName(name string) (*[]model.App, error) {
+	var _data []datamodel.App
 
-	err := getDB().Table("apps").Where(datamodel.App{Name: name}).First(&_data).Error
+	err := getDB().Table("apps").Where(datamodel.App{Name: name}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, ErrNotFound
 	}
 
-	ret := _data.ToModel()
-	return &ret, nil
+	var _ret []model.App
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
 }
