@@ -7,6 +7,9 @@ dev:
 lint:
 	golangci-lint run
 
+.PHONY: lint-ci
+	sh hack/lint.sh
+
 .PHONY: e2e
 e2e:
 	go test -v ./test
