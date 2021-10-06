@@ -1,4 +1,4 @@
-name: dev/integration-tests
+name: dev/integration-test
 on:
   push:
 jobs:
