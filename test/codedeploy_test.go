@@ -3,12 +3,13 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gavv/httpexpect/v2"
-	"github.com/thecodeisalreadydeployed/apiserver/dto"
-	"github.com/thecodeisalreadydeployed/model"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/gavv/httpexpect/v2"
+	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/model"
 )
 
 func setup(t *testing.T) *httpexpect.Expect {
@@ -52,7 +53,7 @@ func TestHealth(t *testing.T) {
 		ValueEqual("ok", "true")
 }
 
-func TestFlow(t *testing.T) {
+func TestIntegration(t *testing.T) {
 	projectName := "Test Project"
 	appName := "Test App"
 	fake := "Fake Data"
