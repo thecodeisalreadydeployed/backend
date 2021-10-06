@@ -59,9 +59,6 @@ func TestFlow(t *testing.T) {
 
 	expect := setup(t)
 
-	expect.GET("/projects").Expect().Status(http.StatusOK).JSON().Null()
-	expect.GET("/apps").Expect().Status(http.StatusOK).JSON().Null()
-
 	expect.POST("/project").
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
 		Expect().
