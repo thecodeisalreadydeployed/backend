@@ -1,7 +1,19 @@
-.PHONY: dev
-dev:
+.PHONY: dcp
+dcp:
 	docker compose -f docker-compose.yaml up -d
+
+.PHONY: dev
+dev: dcp
 	APP_ENV=DEV go run main.go
+
+.PHONY: dev
+prod: dcp
+	DATABASE_HOST=localhost \
+	DATABASE_USERNAME=user \
+	DATABASE_PASSWORD=password \
+	DATABASE_PORT=5432 \
+	APP_ENV=PROD \
+	go run main.go
 
 .PHONY: lint
 lint:
