@@ -12,8 +12,6 @@ import (
 )
 
 func seed() {
-	//TODO: Updated at may come before created at
-
 	seedProjects(20)
 	seedApps(100)
 	seedDeployments(500)
