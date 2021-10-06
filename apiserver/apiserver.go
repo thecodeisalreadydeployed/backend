@@ -89,6 +89,20 @@ func APIServer(port int) {
 		return c.JSON(result)
 	})
 
+	app.Get("/app/name/:appName", func(c *fiber.Ctx) error {
+		appName, err := url.QueryUnescape(c.Params("appName"))
+
+		if err != nil {
+			return fiber.NewError(http.StatusBadRequest, "Cannot parse URL.")
+		}
+
+		result, err := datastore.GetProjectByName(appName)
+		if err != nil {
+			return fiber.NewError(mapStatusCode(err))
+		}
+		return c.JSON(result)
+	})
+
 	app.Post("/project", func(c *fiber.Ctx) error {
 		request := dto.CreateProjectRequest{}
 		if err := c.BodyParser(&request); err != nil {
