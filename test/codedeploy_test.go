@@ -10,7 +10,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 )
 
-func setup(t *testing.T) *httpexpect.Expect {
+func Setup(t *testing.T) *httpexpect.Expect {
 
 	e := httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  "http://localhost:3000",
@@ -21,7 +21,7 @@ func setup(t *testing.T) *httpexpect.Expect {
 }
 
 func TestHealth(t *testing.T) {
-	expect := setup(t)
+	expect := Setup(t)
 
 	expect.GET("/health").
 		Expect().
@@ -36,7 +36,7 @@ func TestIntegration(t *testing.T) {
 	appName := "Test App"
 	fake := "Fake Data"
 
-	expect := setup(t)
+	expect := Setup(t)
 
 	expect.POST("/project").
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
