@@ -24,9 +24,17 @@ lint:
 lint-ci:
 	sh hack/lint.sh
 
-.PHONY: e2e
-e2e:
+.PHONY: test
+test:
 	go test -v ./test
+
+.PHONY: gitgateway
+test-gitgateway:
+	go test -v ./gitgateway
+
+.PHONY: gitopscontroller
+test-gitgateway:
+	go test -v ./gitopscontroller
 
 .PHONY: dev-image
 dev-image:
