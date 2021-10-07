@@ -6,7 +6,7 @@ dcp:
 dev: dcp
 	APP_ENV=DEV go run main.go
 
-.PHONY: dev
+.PHONY: prod
 prod: dcp
 	DATABASE_HOST=localhost \
 	DATABASE_USERNAME=user \
