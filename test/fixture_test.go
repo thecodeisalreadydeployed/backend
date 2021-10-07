@@ -29,15 +29,17 @@ func testFixture(t *testing.T, fixtureRepo string) {
 
 func TestFixture(t *testing.T) {
 	testSuites := []*struct {
-		repoURL         string
-		buildScript     string
-		installCommand  string
-		buildCommand    string
-		outputDirectory string
-		startCommand    string
+		repoURL          string
+		buildScript      string
+		installCommand   string
+		buildCommand     string
+		outputDirectory  string
+		startCommand     string
+		currentCommitSHA string
 	}{
 		{
-			repoURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
+			repoURL:          "https://github.com/thecodeisalreadydeployed/fixture-nest",
+			currentCommitSHA: "62139be31792ab4a43c00eadcc8af6cadd90ee66", // v1
 		},
 		{
 			repoURL: "https://github.com/thecodeisalreadydeployed/fixture-monorepo",
