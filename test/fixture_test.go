@@ -27,7 +27,7 @@ func testFixture(t *testing.T, fixtureRepo string) {
 		Status(http.StatusOK)
 }
 
-func TestFixtureNestJS(t *testing.T) {
+func TestFixture(t *testing.T) {
 	testSuites := []*struct {
 		repoURL         string
 		buildScript     string
@@ -42,5 +42,11 @@ func TestFixtureNestJS(t *testing.T) {
 		{
 			repoURL: "https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		},
+	}
+
+	for _, tt := range testSuites {
+		t.Run(tt.repoURL, func(t *testing.T) {
+			testFixture(t, tt.repoURL)
+		})
 	}
 }
