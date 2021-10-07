@@ -26,3 +26,18 @@ func testFixture(t *testing.T, fixtureRepo string) {
 		Expect().
 		Status(http.StatusOK)
 }
+
+func TestFixtureNestJS(t *testing.T) {
+	testSuites := []*struct {
+		repoURL         string
+		buildScript     string
+		installCommand  string
+		buildCommand    string
+		outputDirectory string
+		startCommand    string
+	}{
+		{
+			repoURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
+		},
+	}
+}
