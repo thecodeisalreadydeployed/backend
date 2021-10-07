@@ -54,4 +54,4 @@ jobs:
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
-      - run: make e2e
+      - run: make test

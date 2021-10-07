@@ -46,11 +46,11 @@ func GetProjectByID(id string) (*model.Project, error) {
 	return &ret, nil
 }
 
-func SaveProject(project *model.Project) error {
+func SaveProject(project *model.Project) (*model.Project, error) {
 	if project.ID != "" {
 		if !strings.HasPrefix(project.ID, "prj_") {
 			zap.L().Error(MsgProjectPrefix)
-			return errutil.ErrInvalidArgument
+			return nil, errutil.ErrInvalidArgument
 		}
 	} else {
 		project.ID = model.GenerateProjectID()
@@ -60,9 +60,10 @@ func SaveProject(project *model.Project) error {
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return errutil.ErrUnknown
+		return nil, errutil.ErrUnknown
 	}
-	return nil
+
+	return GetProjectByID(project.ID)
 }
 
 func RemoveProject(id string) error {

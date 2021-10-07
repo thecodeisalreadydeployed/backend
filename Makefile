@@ -6,7 +6,7 @@ dcp:
 dev: dcp
 	APP_ENV=DEV go run main.go
 
-.PHONY: dev
+.PHONY: prod
 prod: dcp
 	DATABASE_HOST=localhost \
 	DATABASE_USERNAME=user \
@@ -24,9 +24,17 @@ lint:
 lint-ci:
 	sh hack/lint.sh
 
-.PHONY: e2e
-e2e:
+.PHONY: test
+test:
 	go test -v ./test
+
+.PHONY: gitgateway
+test-gitgateway:
+	go test -v ./gitgateway
+
+.PHONY: gitopscontroller
+test-gitgateway:
+	go test -v ./gitopscontroller
 
 .PHONY: dev-image
 dev-image:

@@ -92,11 +92,13 @@ func APIServer(port int) {
 
 		prj := request.ToModel()
 
-		if err := datastore.SaveProject(&prj); err != nil {
-			return fiber.NewError(mapStatusCode(err))
+		project, projectErr := datastore.SaveProject(&prj)
+
+		if projectErr != nil {
+			return fiber.NewError(mapStatusCode(projectErr))
 		}
 
-		return c.SendStatus(fiber.StatusOK)
+		return c.JSON(project)
 	})
 
 	app.Post("/app", func(c *fiber.Ctx) error {
