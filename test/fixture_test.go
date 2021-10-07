@@ -39,5 +39,8 @@ func TestFixtureNestJS(t *testing.T) {
 		{
 			repoURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
 		},
+		{
+			repoURL: "https://github.com/thecodeisalreadydeployed/fixture-monorepo",
+		},
 	}
 }
