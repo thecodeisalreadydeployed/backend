@@ -37,6 +37,12 @@ func TestGitGateway(t *testing.T) {
 	git, err := NewGitGatewayLocal(path)
 	assert.Nil(t, err)
 
+	err = git.WriteFile(".thecodeisalreadydeployed", "")
+	assert.Nil(t, err)
+
+	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, "Initial commit")
+	assert.Nil(t, err)
+
 	err = git.Checkout("deploy")
 	assert.Nil(t, err)
 
