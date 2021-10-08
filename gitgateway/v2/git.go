@@ -1,14 +1,19 @@
 package gitgateway
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/errutil"
 )
 
 type GitGateway interface {
 	Checkout(branch string) error
-	OpenFile(filePath string) error
+	OpenFile(filePath string) (string, error)
 	WriteFile(filePath string, data string) error
 	Commit(files []string, message string) (string, error)
 	Pull() error
@@ -42,11 +47,41 @@ func NewGitGatewayRemote(url string) (GitGateway, error) {
 }
 
 func (g *gitGateway) Checkout(branch string) error {
-	return errutil.ErrNotImplemented
+	w, worktreeErr := g.repo.Worktree()
+	if worktreeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	checkoutErr := w.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.NewBranchReferenceName(branch),
+	})
+
+	if checkoutErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	return nil
 }
 
-func (g *gitGateway) OpenFile(filePath string) error {
-	return errutil.ErrNotImplemented
+func (g *gitGateway) OpenFile(filePath string) (string, error) {
+	defaultMode := os.FileMode(0666)
+
+	w, worktreeErr := g.repo.Worktree()
+	if worktreeErr != nil {
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	f, openErr := w.Filesystem.OpenFile(filePath, os.O_RDONLY, defaultMode)
+	if openErr != nil {
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	read, readErr := ioutil.ReadAll(f)
+	if readErr != nil {
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	return cast.ToString(read), nil
 }
 
 func (g *gitGateway) WriteFile(filePath string, data string) error {
