@@ -77,4 +77,7 @@ func TestGitGateway(t *testing.T) {
 
 	diff, err := git.Diff(b, c)
 	assert.Equal(t, ".thecodeisalreadydeployed", diff[0])
+
+	err = git.Log()
+	assert.Nil(t, err)
 }

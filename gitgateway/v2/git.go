@@ -22,6 +22,7 @@ type GitGateway interface {
 	WriteFile(filePath string, data string) error
 	Commit(files []string, message string) (string, error)
 	Pull() error
+	Log() error
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 }
 
