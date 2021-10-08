@@ -8,7 +8,9 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cast"
+	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/errutil"
+	"go.uber.org/zap"
 )
 
 type GitGateway interface {
@@ -105,8 +107,31 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 	return nil
 }
 
-func (g *gitGateway) Commit(files []string, message string) (string, error) {
-	return "", errutil.ErrNotImplemented
+func (g *gitGateway) Commit(files []string, message string) error {
+	w, worktreeErr := g.repo.Worktree()
+	if worktreeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	for _, f := range files {
+		_, addErr := w.Add(f)
+		if addErr != nil {
+			return errutil.ErrFailedPrecondition
+		}
+	}
+
+	commit, commitErr := w.Commit(message, &git.CommitOptions{
+		Author: config.DefaultGitSignature(),
+	})
+
+	if commitErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	commitHash := commit.String()
+	zap.L().Info(commitHash)
+
+	return nil
 }
 
 func (g *gitGateway) Pull() error {
