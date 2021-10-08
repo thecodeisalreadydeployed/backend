@@ -18,7 +18,7 @@ type GitGateway interface {
 	Checkout(branch string) error
 	OpenFile(filePath string) (string, error)
 	WriteFile(filePath string, data string) error
-	Commit(files []string, message string) error
+	Commit(files []string, message string) (string, error)
 	Pull() error
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 }
@@ -123,16 +123,16 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 	return nil
 }
 
-func (g *gitGateway) Commit(files []string, message string) error {
+func (g *gitGateway) Commit(files []string, message string) (string, error) {
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
-		return errutil.ErrFailedPrecondition
+		return "", errutil.ErrFailedPrecondition
 	}
 
 	for _, f := range files {
 		_, addErr := w.Add(f)
 		if addErr != nil {
-			return errutil.ErrFailedPrecondition
+			return "", errutil.ErrFailedPrecondition
 		}
 	}
 
@@ -141,13 +141,13 @@ func (g *gitGateway) Commit(files []string, message string) error {
 	})
 
 	if commitErr != nil {
-		return errutil.ErrFailedPrecondition
+		return "", errutil.ErrFailedPrecondition
 	}
 
 	commitHash := commit.String()
 	zap.L().Info(commitHash)
 
-	return nil
+	return commitHash, nil
 }
 
 func (g *gitGateway) Pull() error {
