@@ -7,7 +7,9 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/memory"
+	"github.com/go-git/go-git/v5/utils/merkletrie"
 	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/errutil"
@@ -157,6 +159,50 @@ func (g *gitGateway) Pull() error {
 	return errutil.ErrNotImplemented
 }
 
-func (g *gitGateway) Diff(oldCommit string, currentCommit string) ([]string, error) {
-	return []string{}, errutil.ErrNotImplemented
+func (g *gitGateway) Diff(fromHash string, toHash string) ([]string, error) {
+	from := plumbing.NewHash(fromHash)
+	to := plumbing.NewHash(toHash)
+
+	fromCommit, err := g.repo.CommitObject(from)
+	if err != nil {
+		return []string{}, errutil.ErrFailedPrecondition
+	}
+
+	toCommit, err := g.repo.CommitObject(to)
+	if err != nil {
+		return []string{}, errutil.ErrFailedPrecondition
+	}
+
+	fromTree, err := fromCommit.Tree()
+	if err != nil {
+		return []string{}, errutil.ErrFailedPrecondition
+	}
+
+	toTree, err := toCommit.Tree()
+	if err != nil {
+		return []string{}, errutil.ErrFailedPrecondition
+	}
+
+	diff, err := object.DiffTree(fromTree, toTree)
+	if err != nil {
+		return []string{}, errutil.ErrFailedPrecondition
+	}
+
+	paths := []string{}
+	for _, d := range diff {
+		action, actionErr := d.Action()
+		if actionErr != nil {
+			return []string{}, errutil.ErrFailedPrecondition
+		}
+
+		if action == merkletrie.Delete || action == merkletrie.Modify {
+			paths = append(paths, d.From.Name)
+		}
+
+		if action == merkletrie.Insert {
+			paths = append(paths, d.To.Name)
+		}
+	}
+
+	return paths, nil
 }
