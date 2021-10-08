@@ -85,7 +85,24 @@ func (g *gitGateway) OpenFile(filePath string) (string, error) {
 }
 
 func (g *gitGateway) WriteFile(filePath string, data string) error {
-	return errutil.ErrNotImplemented
+	defaultMode := os.FileMode(0666)
+
+	w, worktreeErr := g.repo.Worktree()
+	if worktreeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	f, openErr := w.Filesystem.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, defaultMode)
+	if openErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	_, writeErr := f.Write([]byte(data))
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	return nil
 }
 
 func (g *gitGateway) Commit(files []string, message string) (string, error) {
