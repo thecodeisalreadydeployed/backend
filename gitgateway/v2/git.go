@@ -2,6 +2,7 @@ package gitgateway
 
 import (
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/thecodeisalreadydeployed/errutil"
 )
 
@@ -15,11 +16,29 @@ type GitGateway interface {
 }
 
 type gitGateway struct {
-	repo git.Repository
+	repo *git.Repository
 }
 
-func NewGitGateway() (GitGateway, error) {
-	return &gitGateway{}, nil
+func NewGitGatewayLocal(path string) (GitGateway, error) {
+	repo, openErr := git.PlainOpen(path)
+
+	if openErr != nil {
+		return nil, errutil.ErrFailedPrecondition
+	}
+
+	return &gitGateway{repo: repo}, nil
+}
+
+func NewGitGatewayRemote(url string) (GitGateway, error) {
+	repo, cloneErr := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+		URL: url,
+	})
+
+	if cloneErr != nil {
+		return nil, errutil.ErrFailedPrecondition
+	}
+
+	return &gitGateway{repo: repo}, nil
 }
 
 func (g *gitGateway) Checkout(branch string) error {
