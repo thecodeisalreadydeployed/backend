@@ -57,6 +57,7 @@ func (g *gitGateway) Checkout(branch string) error {
 
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch),
+		Create: true,
 	})
 
 	if checkoutErr != nil {
