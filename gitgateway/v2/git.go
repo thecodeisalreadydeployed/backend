@@ -17,7 +17,7 @@ type GitGateway interface {
 	Checkout(branch string) error
 	OpenFile(filePath string) (string, error)
 	WriteFile(filePath string, data string) error
-	Commit(files []string, message string) (string, error)
+	Commit(files []string, message string) error
 	Pull() error
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 }
