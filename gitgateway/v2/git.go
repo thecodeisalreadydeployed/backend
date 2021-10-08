@@ -97,6 +97,15 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 		return errutil.ErrFailedPrecondition
 	}
 
+	_, statErr := w.Filesystem.Stat(filePath)
+	if os.IsNotExist(statErr) {
+		_, createErr := w.Filesystem.Create(filePath)
+		if createErr != nil {
+			fmt.Printf("createErr: %v\n", createErr)
+			return errutil.ErrFailedPrecondition
+		}
+	}
+
 	f, openErr := w.Filesystem.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, defaultMode)
 	if openErr != nil {
 		fmt.Printf("openErr: %v\n", openErr)
