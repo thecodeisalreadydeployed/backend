@@ -49,4 +49,20 @@ func TestGitGateway(t *testing.T) {
 	data, err := git.OpenFile(".thecodeisalreadydeployed")
 	assert.Nil(t, err)
 	assert.Equal(t, "B", data)
+
+	b, err := git.Commit([]string{".thecodeisalreadydeployed"}, "B")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, b)
+
+	err = git.WriteFile(".thecodeisalreadydeployed", "C")
+	assert.Nil(t, err)
+
+	data, err = git.OpenFile(".thecodeisalreadydeployed")
+	assert.Nil(t, err)
+	assert.Equal(t, "C", data)
+
+	c, err := git.Commit([]string{".thecodeisalreadydeployed"}, "C")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, c)
+	assert.NotEqual(t, b, c)
 }
