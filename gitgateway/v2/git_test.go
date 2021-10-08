@@ -17,7 +17,10 @@ func temporalDir() (path string, clean func()) {
 		panic(err)
 	}
 	return fs.Join(fs.Root(), path), func() {
-		util.RemoveAll(fs, path)
+		err := util.RemoveAll(fs, path)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
