@@ -91,16 +91,19 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
+		zap.L().Error(worktreeErr.Error())
 		return errutil.ErrFailedPrecondition
 	}
 
 	f, openErr := w.Filesystem.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, defaultMode)
 	if openErr != nil {
+		zap.L().Error(openErr.Error())
 		return errutil.ErrFailedPrecondition
 	}
 
 	_, writeErr := f.Write([]byte(data))
 	if writeErr != nil {
+		zap.L().Error(writeErr.Error())
 		return errutil.ErrFailedPrecondition
 	}
 
