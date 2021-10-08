@@ -2,10 +2,12 @@ package gitgateway
 
 import (
 	"os"
+	"testing"
 
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-billy/v5/util"
 	"github.com/go-git/go-git/v5"
+	"github.com/stretchr/testify/assert"
 )
 
 func temporalDir() (path string, clean func()) {
@@ -26,4 +28,18 @@ func initRepository() (path string, clean func()) {
 		panic(initErr)
 	}
 	return dir, clean
+}
+
+func TestGitGateway(t *testing.T) {
+	path, clean := initRepository()
+	defer clean()
+
+	git, err := NewGitGatewayLocal(path)
+	assert.Nil(t, err)
+
+	err = git.Checkout("deploy")
+	assert.Nil(t, err)
+
+	err = git.WriteFile(".thecodeisalreadydeployed", "")
+	assert.Nil(t, err)
 }
