@@ -206,3 +206,27 @@ func (g *gitGateway) Diff(fromHash string, toHash string) ([]string, error) {
 
 	return paths, nil
 }
+
+func (g *gitGateway) Log() error {
+	ref, refErr := g.repo.Head()
+	if refErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	cIter, logErr := g.repo.Log(&git.LogOptions{From: ref.Hash()})
+	if logErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	err := cIter.ForEach(func(c *object.Commit) error {
+		fmt.Println(c)
+		return nil
+	})
+
+	if err != nil {
+		return errutil.ErrUnknown
+	}
+
+	return nil
+
+}
