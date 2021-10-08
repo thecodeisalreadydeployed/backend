@@ -52,6 +52,7 @@ func NewGitGatewayRemote(url string) (GitGateway, error) {
 func (g *gitGateway) Checkout(branch string) error {
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
+		fmt.Printf("worktreeErr: %v\n", worktreeErr)
 		return errutil.ErrFailedPrecondition
 	}
 
@@ -61,6 +62,7 @@ func (g *gitGateway) Checkout(branch string) error {
 	})
 
 	if checkoutErr != nil {
+		fmt.Printf("checkoutErr: %v\n", checkoutErr)
 		return errutil.ErrFailedPrecondition
 	}
 
