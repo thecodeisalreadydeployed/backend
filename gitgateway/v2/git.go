@@ -1,6 +1,7 @@
 package gitgateway
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -91,18 +92,21 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
+		fmt.Printf("worktreeErr: %v\n", worktreeErr)
 		zap.L().Error(worktreeErr.Error())
 		return errutil.ErrFailedPrecondition
 	}
 
 	f, openErr := w.Filesystem.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, defaultMode)
 	if openErr != nil {
+		fmt.Printf("openErr: %v\n", openErr)
 		zap.L().Error(openErr.Error())
 		return errutil.ErrFailedPrecondition
 	}
 
 	_, writeErr := f.Write([]byte(data))
 	if writeErr != nil {
+		fmt.Printf("writeErr: %v\n", writeErr)
 		zap.L().Error(writeErr.Error())
 		return errutil.ErrFailedPrecondition
 	}
