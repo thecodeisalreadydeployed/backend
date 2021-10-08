@@ -25,6 +25,8 @@ func testFixture(t *testing.T, fixtureRepo string) {
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
 		Expect().
 		Status(http.StatusOK)
+
+	_ = appName
 }
 
 func TestFixture(t *testing.T) {
