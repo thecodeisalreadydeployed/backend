@@ -33,6 +33,14 @@ type gitGateway struct {
 	repo *git.Repository
 }
 
+func NewGitRepository(path string) (GitGateway, error) {
+	repo, initErr := git.PlainInit(path, false)
+	if initErr != nil {
+		return nil, errutil.ErrFailedPrecondition
+	}
+	return &gitGateway{repo: repo}, nil
+}
+
 func NewGitGatewayLocal(path string) (GitGateway, error) {
 	repo, openErr := git.PlainOpen(path)
 
