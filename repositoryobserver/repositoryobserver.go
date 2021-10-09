@@ -2,6 +2,7 @@ package repositoryobserver
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
@@ -14,11 +15,22 @@ func ObserveGitSources() {
 		return
 	}
 
-	for _, app := range *apps {
-		go func(gitSource model.GitSource) {
-			check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
-		}(app.GitSource)
+	_ = checkGitSources(*apps)
+}
+
+func checkGitSources(apps []model.App) sync.Map {
+	appsToUpdate := sync.Map{}
+
+	for _, app := range apps {
+		go func(appID string, gitSource model.GitSource) {
+			commit := check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
+			if commit != nil {
+				appsToUpdate.Store(appID, commit)
+			}
+		}(app.ID, app.GitSource)
 	}
+
+	return appsToUpdate
 }
 
 func check(repoURL string, branch string, currentCommitSHA string) *string {
