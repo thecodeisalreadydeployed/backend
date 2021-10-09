@@ -4,21 +4,24 @@ import (
 	"sync"
 
 	"github.com/thecodeisalreadydeployed/config"
+	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 )
 
 type GitOpsController interface {
-	SetupUserspace()
 	SetupProject(projectID string) error
 	SetupApp(projectID string, appID string) error
-	UpdateContainerImage(appID string, deploymentID string) error
+	UpdateContainerImage(projectID string, appID string, toDeploymentID string) error
 }
 
-type gitOpsController interface{}
+type gitOpsController struct {
+	userspace *gitgateway.GitGateway
+	mutex     sync.Mutex
+}
 
 var once sync.Once
 
-func SetupUserspace() {
+func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository
 		_, err := gitgateway.NewGitRepository(path)
@@ -26,4 +29,27 @@ func SetupUserspace() {
 			panic(err)
 		}
 	})
+}
+
+func newGitOpsController() GitOpsController {
+	setupUserspace()
+
+	userspace, err := gitgateway.NewGitGatewayLocal(config.DefaultUserspaceRepository)
+	if err != nil {
+		panic(err)
+	}
+
+	return &gitOpsController{userspace: &userspace, mutex: sync.Mutex{}}
+}
+
+func (g *gitOpsController) SetupProject(projectID string) error {
+	return errutil.ErrNotImplemented
+}
+
+func (g *gitOpsController) SetupApp(projectID string, appID string) error {
+	return errutil.ErrNotImplemented
+}
+
+func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, toDeploymentID string) error {
+	return errutil.ErrNotImplemented
 }
