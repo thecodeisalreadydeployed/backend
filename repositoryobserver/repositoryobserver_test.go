@@ -75,7 +75,7 @@ func TestCheckGitSources(t *testing.T) {
 			},
 		},
 		{
-			ID: "C",
+			ID: "D",
 			GitSource: model.GitSource{
 				RepositoryURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
 				CommitSHA:     "62139be31792ab4a43c00eadcc8af6cadd90ee66",
