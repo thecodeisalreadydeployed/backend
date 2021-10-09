@@ -1,9 +1,12 @@
-name: test/gitgateway
+name: dev/unit-test
 on:
   push:
 jobs:
   test:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        pkg: ['./gitgateway/v2', './repositoryobserver']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -15,4 +18,4 @@ jobs:
             ~/.cache/go-build
             ~/go/pkg/mod
           key: go-${{ hashFiles('**/go.sum') }}
-      - run: go test -v ./gitgateway/v2
+      - run: go test -v ${{ matrix.pkg }}
