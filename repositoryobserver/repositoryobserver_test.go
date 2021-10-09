@@ -85,7 +85,7 @@ func TestCheckGitSources(t *testing.T) {
 	}
 	expected := map[string]string{
 		"A": "5da29979c5ef986dc8ec6aa603e0862310abc96e",
-		"C": "bc77fc515e6d66b8d9c15126ee49ca55faf879",
+		"C": "14bc77fc515e6d66b8d9c15126ee49ca55faf879",
 		"D": "14bc77fc515e6d66b8d9c15126ee49ca55faf879",
 	}
 	actual := checkGitSources(apps)
