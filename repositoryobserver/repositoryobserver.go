@@ -1,39 +1,29 @@
 package repositoryobserver
 
 import (
-	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/gitgateway"
-	"github.com/thecodeisalreadydeployed/model"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
-	"go.uber.org/zap"
+	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 )
 
-func hasChanges(gs *model.GitSource, gw *gitgateway.GitGateway) bool {
-	old := gw.GetCommit(gs.CommitSHA)
-	current := gw.GetCurrentCommit()
-	return gitgateway.HasProperDiff(old, current)
-}
-
-func ObserveGitSources() {
-	apps, err := datastore.GetObservableApps()
-
+func check(repoURL string, branch string, currentCommitSHA string) *string {
+	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return
+		return nil
 	}
 
-	if apps != nil && len(*apps) == 0 {
-		zap.L().Info("No apps to be observed.")
-		return
+	checkoutErr := git.Checkout(branch)
+	if checkoutErr != nil {
+		return nil
 	}
 
-	zap.L().Info("Observing source code...")
-	changes := make(map[string]string)
-	for _, app := range *apps {
-		gw := gitgateway.NewGitGateway(app.GitSource.RepositoryURL)
-		if hasChanges(&app.GitSource, &gw) {
-			changes[app.ID] = app.GitSource.CommitSHA
-		}
+	ref, err := git.Head()
+	if err != nil {
+		return nil
 	}
-	workloadcontroller.OnGitSourceUpdate(&changes)
+
+	_, diffErr := git.Diff(currentCommitSHA, ref)
+	if diffErr != nil {
+		return nil
+	}
+
+	return &ref
 }
