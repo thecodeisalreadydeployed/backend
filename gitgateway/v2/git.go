@@ -1,10 +1,12 @@
 package gitgateway
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 
+	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -23,6 +25,7 @@ type GitGateway interface {
 	Commit(files []string, message string) (string, error)
 	Pull() error
 	Log() error
+	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 }
 
@@ -41,7 +44,7 @@ func NewGitGatewayLocal(path string) (GitGateway, error) {
 }
 
 func NewGitGatewayRemote(url string) (GitGateway, error) {
-	repo, cloneErr := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+	repo, cloneErr := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: url,
 	})
 
@@ -61,15 +64,36 @@ func (g *gitGateway) Checkout(branch string) error {
 
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch),
-		Create: true,
+		Force:  true,
 	})
 
 	if checkoutErr != nil {
-		fmt.Printf("checkoutErr: %v\n", checkoutErr)
-		return errutil.ErrFailedPrecondition
+		if !errors.Is(checkoutErr, plumbing.ErrReferenceNotFound) {
+			fmt.Printf("checkoutErr: %v\n", checkoutErr)
+			return errutil.ErrFailedPrecondition
+		} else {
+			err := w.Checkout(&git.CheckoutOptions{
+				Branch: plumbing.NewBranchReferenceName(branch),
+				Create: true,
+				Force:  true,
+			})
+
+			if err != nil {
+				fmt.Printf("err: %v\n", err)
+				return errutil.ErrFailedPrecondition
+			}
+		}
 	}
 
 	return nil
+}
+
+func (g *gitGateway) Head() (string, error) {
+	ref, err := g.repo.Head()
+	if err != nil {
+		return "", errutil.ErrFailedPrecondition
+	}
+	return ref.Hash().String(), nil
 }
 
 func (g *gitGateway) OpenFile(filePath string) (string, error) {
