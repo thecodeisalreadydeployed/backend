@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
@@ -29,7 +28,6 @@ func checkGitSources(apps []model.App) map[string]string {
 		go func(appID string, gitSource model.GitSource) {
 			defer wg.Done()
 			commit := check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
-			fmt.Printf("commit: %v\n", commit)
 			if commit != nil {
 				fmt.Printf("appID: %v\n", appID)
 				fmt.Printf("commit: %v\n", *commit)
@@ -38,16 +36,13 @@ func checkGitSources(apps []model.App) map[string]string {
 		}(app.ID, app.GitSource)
 	}
 
+	wg.Wait()
 	appsToUpdate.Range(func(key, value interface{}) bool {
 		k := key.(string)
 		v := value.(string)
 		expected[k] = v
 		return true
 	})
-
-	wg.Wait()
-
-	spew.Dump(appsToUpdate)
 
 	return expected
 }
