@@ -1,6 +1,7 @@
 package gitgateway
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -67,8 +68,19 @@ func (g *gitGateway) Checkout(branch string) error {
 	})
 
 	if checkoutErr != nil {
-		fmt.Printf("checkoutErr: %v\n", checkoutErr)
-		return errutil.ErrFailedPrecondition
+		if !errors.Is(checkoutErr, git.ErrBranchExists) {
+			fmt.Printf("checkoutErr: %v\n", checkoutErr)
+			return errutil.ErrFailedPrecondition
+		} else {
+			err := w.Checkout(&git.CheckoutOptions{
+				Branch: plumbing.NewBranchReferenceName(branch),
+			})
+
+			if err != nil {
+				fmt.Printf("err: %v\n", err)
+				return errutil.ErrFailedPrecondition
+			}
+		}
 	}
 
 	return nil
