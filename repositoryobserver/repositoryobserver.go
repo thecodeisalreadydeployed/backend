@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
@@ -19,25 +20,18 @@ func ObserveGitSources() {
 }
 
 func checkGitSources(apps []model.App) map[string]string {
-	_appsToUpdate := sync.Map{}
+	appsToUpdate := sync.Map{}
 
 	for _, app := range apps {
 		go func(appID string, gitSource model.GitSource) {
 			commit := check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
 			if commit != nil {
-				_appsToUpdate.Store(appID, commit)
+				appsToUpdate.Store(appID, commit)
 			}
 		}(app.ID, app.GitSource)
 	}
-	appsToUpdate := map[string]string{}
-	_appsToUpdate.Range(func(key, value interface{}) bool {
-		k := key.(string)
-		v := value.(string)
-		appsToUpdate[k] = v
-		return true
-	})
 
-	return appsToUpdate
+	return cast.ToStringMapString(appsToUpdate)
 }
 
 func check(repoURL string, branch string, currentCommitSHA string) *string {
