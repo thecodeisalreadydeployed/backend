@@ -64,16 +64,18 @@ func (g *gitGateway) Checkout(branch string) error {
 
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch),
-		Create: true,
+		Force:  true,
 	})
 
 	if checkoutErr != nil {
-		if !errors.Is(checkoutErr, git.ErrBranchExists) {
+		if !errors.Is(checkoutErr, git.ErrBranchNotFound) {
 			fmt.Printf("checkoutErr: %v\n", checkoutErr)
 			return errutil.ErrFailedPrecondition
 		} else {
 			err := w.Checkout(&git.CheckoutOptions{
 				Branch: plumbing.NewBranchReferenceName(branch),
+				Create: true,
+				Force:  true,
 			})
 
 			if err != nil {
