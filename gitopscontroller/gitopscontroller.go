@@ -1,6 +1,7 @@
 package gitopscontroller
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/thecodeisalreadydeployed/config"
@@ -15,8 +16,8 @@ type GitOpsController interface {
 }
 
 type gitOpsController struct {
-	userspace *gitgateway.GitGateway
-	mutex     sync.Mutex
+	u     gitgateway.GitGateway
+	mutex sync.Mutex
 }
 
 var once sync.Once
@@ -39,7 +40,7 @@ func NewGitOpsController() GitOpsController {
 		panic(err)
 	}
 
-	return &gitOpsController{userspace: &userspace, mutex: sync.Mutex{}}
+	return &gitOpsController{u: userspace, mutex: sync.Mutex{}}
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
@@ -47,7 +48,38 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 }
 
 func (g *gitOpsController) SetupApp(projectID string, appID string) error {
-	return errutil.ErrNotImplemented
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+
+	prefix := fmt.Sprintf("%s/%s", projectID, appID)
+
+	kustomizationFile := fmt.Sprintf("%s/kustomization.yml", prefix)
+	deploymentFile := fmt.Sprintf("%s/deployment.yml", prefix)
+	serviceFile := fmt.Sprintf("%s/service.yml", prefix)
+
+	writeErr := g.u.WriteFile(kustomizationFile, "")
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	writeErr = g.u.WriteFile(deploymentFile, "")
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	writeErr = g.u.WriteFile(serviceFile, "")
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	commit, commitErr := g.u.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
+	if commitErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	fmt.Printf("commit: %v\n", commit)
+
+	return nil
 }
 
 func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, newImage string) error {
