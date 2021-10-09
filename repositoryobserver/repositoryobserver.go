@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
@@ -31,6 +32,8 @@ func checkGitSources(apps []model.App) map[string]string {
 			}
 		}(app.ID, app.GitSource)
 	}
+
+	spew.Dump(appsToUpdate)
 
 	return cast.ToStringMapString(appsToUpdate)
 }
