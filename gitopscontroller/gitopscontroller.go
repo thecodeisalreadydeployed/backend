@@ -5,8 +5,10 @@ import (
 	"sync"
 
 	"github.com/thecodeisalreadydeployed/config"
+	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/manifestgenerator"
 )
 
 type GitOpsController interface {
@@ -62,12 +64,39 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errutil.ErrFailedPrecondition
 	}
 
-	writeErr = g.u.WriteFile(deploymentFile, "")
+	registry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
+	containerImage, err := registry.RegistryFormat(appID, "")
+	if err != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	deploymentYAML, generateErr := manifestgenerator.GenerateDeploymentYAML(&manifestgenerator.GenerateDeploymentOptions{
+		Name:           appID,
+		Namespace:      projectID,
+		Labels:         map[string]string{},
+		ContainerImage: containerImage,
+	})
+
+	if generateErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	serviceYAML, generateErr := manifestgenerator.GenerateServiceYAML(&manifestgenerator.GenerateServiceOptions{
+		Name:      appID,
+		Namespace: projectID,
+		Labels:    map[string]string{},
+	})
+
+	if generateErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	writeErr = g.u.WriteFile(deploymentFile, deploymentYAML)
 	if writeErr != nil {
 		return errutil.ErrFailedPrecondition
 	}
 
-	writeErr = g.u.WriteFile(serviceFile, "")
+	writeErr = g.u.WriteFile(serviceFile, serviceYAML)
 	if writeErr != nil {
 		return errutil.ErrFailedPrecondition
 	}
