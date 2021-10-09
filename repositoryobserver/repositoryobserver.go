@@ -22,9 +22,12 @@ func ObserveGitSources() {
 
 func checkGitSources(apps []model.App) map[string]string {
 	appsToUpdate := sync.Map{}
+	var wg sync.WaitGroup
 
 	for _, app := range apps {
+		wg.Add(1)
 		go func(appID string, gitSource model.GitSource) {
+			defer wg.Done()
 			commit := check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
 			fmt.Printf("commit: %v\n", commit)
 			if commit != nil {
@@ -34,6 +37,8 @@ func checkGitSources(apps []model.App) map[string]string {
 			}
 		}(app.ID, app.GitSource)
 	}
+
+	wg.Wait()
 
 	spew.Dump(appsToUpdate)
 
