@@ -20,10 +20,14 @@ func check(repoURL string, branch string, currentCommitSHA string) *string {
 		return nil
 	}
 
-	_, diffErr := git.Diff(currentCommitSHA, ref)
+	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
 		return nil
 	}
 
-	return &ref
+	if len(diff) > 0 {
+		return &ref
+	}
+
+	return nil
 }
