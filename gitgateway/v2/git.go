@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -42,7 +43,7 @@ func NewGitGatewayLocal(path string) (GitGateway, error) {
 }
 
 func NewGitGatewayRemote(url string) (GitGateway, error) {
-	repo, cloneErr := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+	repo, cloneErr := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL: url,
 	})
 
