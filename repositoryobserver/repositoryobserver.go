@@ -3,8 +3,23 @@ package repositoryobserver
 import (
 	"fmt"
 
+	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/model"
 )
+
+func ObserveGitSources() {
+	apps, err := datastore.GetObservableApps()
+	if err != nil {
+		return
+	}
+
+	for _, app := range *apps {
+		go func(gitSource model.GitSource) {
+			check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
+		}(app.GitSource)
+	}
+}
 
 func check(repoURL string, branch string, currentCommitSHA string) *string {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
