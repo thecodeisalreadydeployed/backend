@@ -93,7 +93,7 @@ func (g *gitGateway) Head() (string, error) {
 	if err != nil {
 		return "", errutil.ErrFailedPrecondition
 	}
-	return ref.String(), nil
+	return ref.Hash().String(), nil
 }
 
 func (g *gitGateway) OpenFile(filePath string) (string, error) {
