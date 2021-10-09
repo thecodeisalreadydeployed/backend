@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/thecodeisalreadydeployed/model"
 )
 
 func TestCheck(t *testing.T) {
@@ -45,4 +46,11 @@ func TestCheck(t *testing.T) {
 			assert.Equal(t, test.expect, *commit)
 		}
 	}
+}
+
+func TestCheckGitSources(t *testing.T) {
+	apps := []model.App{}
+	expected := map[string]string{}
+	actual := checkGitSources(apps)
+	assert.Equal(t, expected, actual)
 }
