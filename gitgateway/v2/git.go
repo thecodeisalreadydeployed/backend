@@ -68,7 +68,7 @@ func (g *gitGateway) Checkout(branch string) error {
 	})
 
 	if checkoutErr != nil {
-		if !errors.Is(checkoutErr, git.ErrBranchNotFound) {
+		if !errors.Is(checkoutErr, plumbing.ErrReferenceNotFound) {
 			fmt.Printf("checkoutErr: %v\n", checkoutErr)
 			return errutil.ErrFailedPrecondition
 		} else {
