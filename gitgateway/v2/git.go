@@ -23,6 +23,7 @@ type GitGateway interface {
 	Commit(files []string, message string) (string, error)
 	Pull() error
 	Log() error
+	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 }
 
@@ -70,6 +71,14 @@ func (g *gitGateway) Checkout(branch string) error {
 	}
 
 	return nil
+}
+
+func (g *gitGateway) Head() (string, error) {
+	ref, err := g.repo.Head()
+	if err != nil {
+		return "", errutil.ErrFailedPrecondition
+	}
+	return ref.String(), nil
 }
 
 func (g *gitGateway) OpenFile(filePath string) (string, error) {
