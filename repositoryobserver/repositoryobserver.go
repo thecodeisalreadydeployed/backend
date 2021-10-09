@@ -26,6 +26,7 @@ func checkGitSources(apps []model.App) map[string]string {
 		go func(appID string, gitSource model.GitSource) {
 			commit := check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
 			if commit != nil {
+				fmt.Printf("commit: %v\n", commit)
 				appsToUpdate.Store(appID, commit)
 			}
 		}(app.ID, app.GitSource)
