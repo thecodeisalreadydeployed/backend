@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
@@ -24,6 +23,7 @@ func checkGitSources(apps []model.App) map[string]string {
 	appsToUpdate := sync.Map{}
 	var wg sync.WaitGroup
 
+	expected := map[string]string{}
 	for _, app := range apps {
 		wg.Add(1)
 		go func(appID string, gitSource model.GitSource) {
@@ -38,11 +38,18 @@ func checkGitSources(apps []model.App) map[string]string {
 		}(app.ID, app.GitSource)
 	}
 
+	appsToUpdate.Range(func(key, value interface{}) bool {
+		k := key.(string)
+		v := value.(string)
+		expected[k] = v
+		return true
+	})
+
 	wg.Wait()
 
 	spew.Dump(appsToUpdate)
 
-	return cast.ToStringMapString(appsToUpdate)
+	return expected
 }
 
 func check(repoURL string, branch string, currentCommitSHA string) *string {
