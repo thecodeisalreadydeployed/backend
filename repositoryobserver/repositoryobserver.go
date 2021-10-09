@@ -26,9 +26,11 @@ func checkGitSources(apps []model.App) map[string]string {
 	for _, app := range apps {
 		go func(appID string, gitSource model.GitSource) {
 			commit := check(gitSource.RepositoryURL, gitSource.Branch, gitSource.CommitSHA)
+			fmt.Printf("commit: %v\n", commit)
 			if commit != nil {
-				fmt.Printf("commit: %v\n", commit)
-				appsToUpdate.Store(appID, commit)
+				fmt.Printf("appID: %v\n", appID)
+				fmt.Printf("commit: %v\n", *commit)
+				appsToUpdate.Store(appID, *commit)
 			}
 		}(app.ID, app.GitSource)
 	}
