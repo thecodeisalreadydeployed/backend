@@ -74,6 +74,14 @@ func TestCheckGitSources(t *testing.T) {
 				Branch:        "main",
 			},
 		},
+		{
+			ID: "C",
+			GitSource: model.GitSource{
+				RepositoryURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
+				CommitSHA:     "62139be31792ab4a43c00eadcc8af6cadd90ee66",
+				Branch:        "dev",
+			},
+		},
 	}
 	expected := map[string]string{
 		"A": "5da29979c5ef986dc8ec6aa603e0862310abc96e",
