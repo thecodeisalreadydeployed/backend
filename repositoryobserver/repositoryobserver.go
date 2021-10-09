@@ -1,6 +1,8 @@
 package repositoryobserver
 
 import (
+	"fmt"
+
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 )
 
@@ -26,6 +28,7 @@ func check(repoURL string, branch string, currentCommitSHA string) *string {
 	}
 
 	if len(diff) > 0 {
+		fmt.Printf("len(diff): %v\n", len(diff))
 		return &ref
 	}
 
