@@ -11,7 +11,7 @@ import (
 type GitOpsController interface {
 	SetupProject(projectID string) error
 	SetupApp(projectID string, appID string) error
-	UpdateContainerImage(projectID string, appID string, toDeploymentID string) error
+	UpdateContainerImage(projectID string, appID string, newImage string) error
 }
 
 type gitOpsController struct {
@@ -31,7 +31,7 @@ func setupUserspace() {
 	})
 }
 
-func newGitOpsController() GitOpsController {
+func NewGitOpsController() GitOpsController {
 	setupUserspace()
 
 	userspace, err := gitgateway.NewGitGatewayLocal(config.DefaultUserspaceRepository)
@@ -50,6 +50,6 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	return errutil.ErrNotImplemented
 }
 
-func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, toDeploymentID string) error {
+func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, newImage string) error {
 	return errutil.ErrNotImplemented
 }
