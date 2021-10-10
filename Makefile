@@ -20,21 +20,13 @@ prod: dcp
 lint:
 	golangci-lint run
 
-.PHONY: lint-ci
-lint-ci:
-	sh hack/lint.sh
-
 .PHONY: test
 test:
 	go test -v ./test
 
-.PHONY: gitgateway
-test-gitgateway:
-	go test -v ./gitgateway
-
-.PHONY: gitopscontroller
-test-gitgateway:
-	go test -v ./gitopscontroller
+.PHONY: lint-ci
+lint-ci:
+	sh hack/lint.sh
 
 .PHONY: dev-image
 dev-image:

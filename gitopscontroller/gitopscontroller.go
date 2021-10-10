@@ -1,58 +1,116 @@
 package gitopscontroller
 
 import (
-	"errors"
-	"path/filepath"
+	"fmt"
 	"sync"
 
-	"github.com/go-git/go-git/v5"
 	"github.com/thecodeisalreadydeployed/config"
-	gitgw "github.com/thecodeisalreadydeployed/gitgateway"
+	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
+	"github.com/thecodeisalreadydeployed/errutil"
+	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/manifestgenerator"
 )
 
-type GitOpsController struct {
-	userspace *gitgw.GitGateway
-	mutex     sync.Mutex
+type GitOpsController interface {
+	SetupProject(projectID string) error
+	SetupApp(projectID string, appID string) error
+	UpdateContainerImage(projectID string, appID string, newImage string) error
 }
 
-var controller *GitOpsController
-
-func GetController() *GitOpsController {
-	return controller
+type gitOpsController struct {
+	u     gitgateway.GitGateway
+	mutex sync.Mutex
 }
 
-func Init() {
-	gw := gitgw.NewGitGateway(config.DefaultUserspaceRepository)
-	newGitOpsController(&gw)
+var once sync.Once
+
+func setupUserspace() {
+	once.Do(func() {
+		path := config.DefaultUserspaceRepository
+		_, err := gitgateway.NewGitRepository(path)
+		if err != nil {
+			panic(err)
+		}
+	})
 }
 
-func newGitOpsController(userspace *gitgw.GitGateway) {
-	controller = &GitOpsController{
-		userspace: userspace,
-		mutex:     sync.Mutex{},
+func NewGitOpsController() GitOpsController {
+	setupUserspace()
+
+	userspace, err := gitgateway.NewGitGatewayLocal(config.DefaultUserspaceRepository)
+	if err != nil {
+		panic(err)
 	}
+
+	return &gitOpsController{u: userspace, mutex: sync.Mutex{}}
 }
 
-func (c *GitOpsController) SetupUserspace() error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (g *gitOpsController) SetupProject(projectID string) error {
+	return errutil.ErrNotImplemented
+}
 
-	err := gitgw.InitRepository(config.DefaultUserspaceRepository)
-	if errors.Is(err, git.ErrRepositoryAlreadyExists) {
-		return nil
+func (g *gitOpsController) SetupApp(projectID string, appID string) error {
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+
+	prefix := fmt.Sprintf("%s/%s", projectID, appID)
+
+	kustomizationFile := fmt.Sprintf("%s/kustomization.yml", prefix)
+	deploymentFile := fmt.Sprintf("%s/deployment.yml", prefix)
+	serviceFile := fmt.Sprintf("%s/service.yml", prefix)
+
+	writeErr := g.u.WriteFile(kustomizationFile, "")
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
 	}
-	return err
+
+	registry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
+	containerImage, err := registry.RegistryFormat(appID, "")
+	if err != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	deploymentYAML, generateErr := manifestgenerator.GenerateDeploymentYAML(&manifestgenerator.GenerateDeploymentOptions{
+		Name:           appID,
+		Namespace:      projectID,
+		Labels:         map[string]string{},
+		ContainerImage: containerImage,
+	})
+
+	if generateErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	serviceYAML, generateErr := manifestgenerator.GenerateServiceYAML(&manifestgenerator.GenerateServiceOptions{
+		Name:      appID,
+		Namespace: projectID,
+		Labels:    map[string]string{},
+	})
+
+	if generateErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	writeErr = g.u.WriteFile(deploymentFile, deploymentYAML)
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	writeErr = g.u.WriteFile(serviceFile, serviceYAML)
+	if writeErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	commit, commitErr := g.u.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
+	if commitErr != nil {
+		return errutil.ErrFailedPrecondition
+	}
+
+	fmt.Printf("commit: %v\n", commit)
+
+	return nil
 }
 
-func (c *GitOpsController) Write(path string, data string) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	dst := filepath.Join("/", path)
-
-	file := filepath.Base(dst)
-	dir := filepath.Dir(dst)
-	c.userspace.WriteFile(dir, file, []byte(data))
-	c.userspace.Add(dst)
-	c.userspace.Commit(dst)
+func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, newImage string) error {
+	return errutil.ErrNotImplemented
 }

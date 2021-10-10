@@ -2,8 +2,6 @@ package scheduler
 
 import (
 	"github.com/robfig/cron"
-	"github.com/thecodeisalreadydeployed/repositoryobserver"
-	"github.com/thecodeisalreadydeployed/workloadcontroller"
 )
 
 const (
@@ -17,7 +15,7 @@ func Watch() {
 
 	// Every 5 minutes
 	err := c.AddFunc(_5m, func() {
-		repositoryobserver.ObserveGitSources()
+		// repositoryobserver.ObserveGitSources()
 	})
 
 	if err != nil {
@@ -26,7 +24,7 @@ func Watch() {
 
 	// Every 30 seconds
 	err = c.AddFunc(_30s, func() {
-		workloadcontroller.ObserveDeploymentState()
+		// workloadcontroller.ObserveDeploymentState()
 	})
 
 	if err != nil {
