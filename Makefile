@@ -24,18 +24,6 @@ lint:
 lint-ci:
 	sh hack/lint.sh
 
-.PHONY: test
-test:
-	go test -v ./test
-
-.PHONY: gitgateway
-test-gitgateway:
-	go test -v ./gitgateway
-
-.PHONY: gitopscontroller
-test-gitgateway:
-	go test -v ./gitopscontroller
-
 .PHONY: dev-image
 dev-image:
 	DOCKER_BUILDKIT=1 docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up --build -- backend
