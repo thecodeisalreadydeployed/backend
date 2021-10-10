@@ -20,6 +20,10 @@ prod: dcp
 lint:
 	golangci-lint run
 
+.PHONY: test
+test:
+	go test -v ./test
+
 .PHONY: lint-ci
 lint-ci:
 	sh hack/lint.sh
