@@ -6,6 +6,9 @@ import (
 )
 
 type BuildOptions struct {
+	BuildImage       string
+	RunImage         string
+	Executable       string
 	InstallCommand   string
 	BuildCommand     string
 	WorkingDirectory string
@@ -23,17 +26,7 @@ const (
 
 func Preset(opts BuildOptions, framework Framework) (string, error) {
 
-	text := "FROM " + image(framework) + ` as build-env
-WORKDIR /app
-ADD . /app
-WORKDIR /app/{{.WorkingDirectory}}
-RUN {{.InstallCommand}}
-RUN {{.BuildCommand}}
-
-FROM ` + image(framework) + `
-WORKDIR /app` + presetText(framework) + `COPY --from=build-env /app/{{.WorkingDirectory}}{{.OutputDirectory}} ./{{.OutputDirectory}}
-CMD {{.StartCommand}}
-`
+	text := presetText(framework)
 
 	var buffer bytes.Buffer
 	t := template.Must(template.New("Dockerfile").Parse(text))
@@ -50,30 +43,49 @@ func presetText(framework Framework) string {
 	switch framework {
 	case FrameworkNestJS:
 		return `
-COPY --from=build-env /app/{{.WorkingDirectory}}package.json /app/{{.WorkingDirectory}}yarn.lock ./
-COPY --from=build-env /app/{{.WorkingDirectory}}node_modules ./node_modules
+FROM {{.BuildImage}} as build-env
+ADD . /app
+WORKDIR /app/{{.WorkingDirectory}}
+RUN {{.InstallCommand}}
+RUN {{.BuildCommand}}
+
+FROM {{.RunImage}}
+WORKDIR /app
+COPY --from=build-env /app/{{.WorkingDirectory}}/package.json /app/{{.WorkingDirectory}}/yarn.lock ./
+COPY --from=build-env /app/{{.WorkingDirectory}}/node_modules ./node_modules
+COPY --from=build-env /app/{{.WorkingDirectory}}/{{.OutputDirectory}} ./{{.OutputDirectory}}
+CMD {{.StartCommand}}	
 `
+
 	case FrameworkSpring:
 		return `
-COPY --from=build-env /app/{{.WorkingDirectory}}pom.xml /app/{{.WorkingDirectory}}*gradle* /app/{{.WorkingDirectory}}*mvn* ./
-COPY --from=build-env /app/{{.WorkingDirectory}}target ./target
+FROM {{.BuildImage}} as build-env
+ADD . /app
+WORKDIR /app/{{.WorkingDirectory}}
+RUN {{.BuildCommand}}
+
+FROM {{.RunImage}}
+WORKDIR /app
+COPY --from=build-env /app/{{.WorkingDirectory}}/{{.OutputDirectory}}/{{.Executable}} .
+CMD java -jar {{.Executable}}
+
 `
 	case FrameworkFlask:
-		return "\n"
+		return `
+FROM {{.RunImage}}
+ADD . /app
+WORKDIR /app/{{.WorkingDirectory}}
+RUN {{.InstallCommand}}
+CMD {{.StartCommand}}
+`
 	default:
-		return "\n"
-	}
-}
-
-func image(framework Framework) string {
-	switch framework {
-	case FrameworkNestJS:
-		return "node:14-alpine"
-	case FrameworkSpring:
-		return "openjdk:8-jdk-alpine"
-	case FrameworkFlask:
-		return "3.11.0a1-alpine3.14"
-	default:
-		return "alpine:latest"
+		return `
+FROM {{.RunImage}}
+ADD . /app
+WORKDIR /app/{{.WorkingDirectory}}
+RUN {{.InstallCommand}}
+RUN {{.BuildCommand}}
+CMD {{.StartCommand}}	
+`
 	}
 }
