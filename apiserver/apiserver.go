@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/preset"
 	"log"
 
 	"github.com/spf13/cast"
@@ -135,6 +136,22 @@ func APIServer(port int) {
 			return fiber.NewError(mapStatusCode(err))
 		}
 		return c.SendStatus(fiber.StatusOK)
+	})
+
+	app.Get("/preset/:framework", func(c *fiber.Ctx) error {
+		framework := c.Params("framework")
+		text, err := preset.Preset(preset.BuildOptions{
+			InstallCommand:   "[INSTALL COMMAND]",
+			BuildCommand:     "[BUILD COMMAND]",
+			WorkingDirectory: "[WORKING DIRECTORY]",
+			OutputDirectory:  "[OUTPUT DIRECTORY]",
+			StartCommand:     "[START COMMAND]",
+		}, preset.Framework(framework))
+
+		if err != nil {
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
+		return c.SendString(text)
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
