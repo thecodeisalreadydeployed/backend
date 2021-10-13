@@ -2,4 +2,13 @@
 sidebar_position: 1
 ---
 
-# Create a Page
+# Architecture
+
+```mermaid
+sequenceDiagram
+	participant frontend
+	participant apiserver
+
+	frontend->>apiserver: POST /app/:appID/deployments/new
+	apiserver--)frontend: { "ok": true }
+```
