@@ -16,6 +16,11 @@ prod: dcp
 	APP_ENV=PROD \
 	go run main.go
 
+.PHONY: docs
+docs:
+	cd design-docs/ && yarn
+	cd design-docs/ && yarn start
+
 .PHONY: lint
 lint:
 	golangci-lint run
