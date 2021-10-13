@@ -10,11 +10,16 @@ import (
 	"github.com/thecodeisalreadydeployed/datastore"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func APIServer(port int) {
 	validator.Init()
 	app := fiber.New()
+
+	app.Use(cors.New())
+	app.Use(logger.New())
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		ok := datastore.IsReady()
