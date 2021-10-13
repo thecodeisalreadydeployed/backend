@@ -23,14 +23,14 @@ const (
 
 func Preset(opts BuildOptions, framework Framework) (string, error) {
 
-	text := `FROM node:14-alpine as build-env
+	text := "FROM " + image(framework) + ` as build-env
 WORKDIR /app
 ADD . /app
 WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.InstallCommand}}
 RUN {{.BuildCommand}}
 
-FROM node:14-alpine
+FROM ` + image(framework) + `
 WORKDIR /app` + presetText(framework) + `COPY --from=build-env /app/{{.WorkingDirectory}}{{.OutputDirectory}} ./{{.OutputDirectory}}
 CMD {{.StartCommand}}
 `
@@ -62,5 +62,18 @@ COPY --from=build-env /app/{{.WorkingDirectory}}target ./target
 		return "\n"
 	default:
 		return "\n"
+	}
+}
+
+func image(framework Framework) string {
+	switch framework {
+	case FrameworkNestJS:
+		return "node:14-alpine"
+	case FrameworkSpring:
+		return "openjdk:8-jdk-alpine"
+	case FrameworkFlask:
+		return "3.11.0a1-alpine3.14"
+	default:
+		return "alpine:latest"
 	}
 }
