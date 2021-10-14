@@ -1,6 +1,14 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,node,yarn
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,node,yarn
+# Created by https://www.toptal.com/developers/gitignore/api/macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,yarn,node,bazel
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,yarn,node,bazel
+
+### Bazel ###
+# gitignore template for Bazel build system
+# website: https://bazel.build/
+
+# Ignore all bazel-* symlinks. There is no full list since this can change
+# based on the name of the directory bazel is cloned into.
+/bazel-*
 
 ### Go ###
 # Binaries for programs and plugins
@@ -360,4 +368,4 @@ $RECYCLE.BIN/
 # and uncomment the following lines
 # .pnp.*
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,node,yarn
+# End of https://www.toptal.com/developers/gitignore/api/macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,yarn,node,bazel
