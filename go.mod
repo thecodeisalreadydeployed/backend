@@ -12,11 +12,14 @@ require (
 	github.com/ghodss/yaml v1.0.0 //ct
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/go-openapi/strfmt v0.19.5 // indirect
+	github.com/go-openapi/validate v0.19.8 // indirect
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gofiber/fiber/v2 v2.16.0
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/compress v1.13.3 // indirect
+	github.com/markbates/pkger v0.17.1 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nginxinc/kubernetes-ingress v1.12.0
@@ -41,5 +44,6 @@ require (
 	k8s.io/api v0.21.2
 	k8s.io/apimachinery v0.21.2
 	k8s.io/client-go v0.21.2
+	sigs.k8s.io/kustomize/api v0.10.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
