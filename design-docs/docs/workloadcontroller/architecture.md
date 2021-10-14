@@ -22,6 +22,8 @@ sequenceDiagram
 	datastore--)workloadcontroller: Deployment{appID, commitHash, DeploymentStateQueued}
 ```
 
+### Transitioning from `BuildSucceeded` to `Committed`
+
 ```mermaid
 sequenceDiagram
 	participant workloadcontroller
