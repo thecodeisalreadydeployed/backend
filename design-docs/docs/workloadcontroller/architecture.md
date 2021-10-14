@@ -21,3 +21,21 @@ sequenceDiagram
 	workloadcontroller->>datastore: NewDeployment(appID, commitHash)
 	datastore--)workloadcontroller: Deployment{appID, commitHash, DeploymentStateQueued}
 ```
+
+```mermaid
+sequenceDiagram
+	participant workloadcontroller
+	participant gitopscontroller
+	participant datastore
+
+	loop Every 1 minute
+		workloadcontroller->>datastore: GetDeployments(withState: DeploymentStateBuildSucceeded)
+		datastore--)workloadcontroller: Deployment[]
+		loop Deployment{deploymentID, appID}
+			workloadcontroller->>datastore: GetAppByID(appID)
+			datastore--)workloadcontroller: App{projectID}
+			workloadcontroller->>gitopscontroller: SetContainerImage(projectID, appID, expectedTag: deploymentID)
+			workloadcontroller->>datastore: SetDeploymentState(deploymentID, DeploymentStateCommitted)
+		end
+	end
+```
