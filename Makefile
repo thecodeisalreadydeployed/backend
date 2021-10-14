@@ -18,8 +18,8 @@ prod: dcp
 
 .PHONY: docs
 docs:
-	cd design-docs/ && yarn
-	cd design-docs/ && yarn start
+	cd .design-docs/ && yarn
+	cd .design-docs/ && yarn start
 
 .PHONY: lint
 lint:
