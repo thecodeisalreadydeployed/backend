@@ -41,3 +41,26 @@ sequenceDiagram
 		end
 	end
 ```
+
+### Transitioning from `Committed` to `Ready`
+
+```mermaid
+sequenceDiagram
+	participant workloadcontroller
+	participant kubernetesinteractor
+	participant datastore
+
+	loop Every 1 minute
+		workloadcontroller->>datastore: GetDeployments(withState: DeploymentStateBuildCommitted)
+		datastore--)workloadcontroller: Deployment[]
+		loop Deployment{deploymentID, appID}
+			workloadcontroller->>datastore: GetAppByID(appID)
+			datastore--)workloadcontroller: App{projectID}
+			workloadcontroller->>kubernetesinteractor: GetPod(namespace: projectID, name: appID, tag: deploymentID)
+			kubernetesinteractor--)workloadcontroller: (Optional) Pod{Status}
+			opt Pod.Status.Phase == v1.PodRunning
+				workloadcontroller->>datastore: SetDeploymentState(deploymentID, DeploymentStateReady)
+			end
+		end
+	end
+```
