@@ -1,4 +1,4 @@
-package apiserver
+package errutil
 
 import (
 	"github.com/gofiber/fiber/v2"

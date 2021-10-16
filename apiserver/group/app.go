@@ -2,8 +2,8 @@ package group
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
 )
@@ -12,7 +12,7 @@ func AppID(c *fiber.Ctx) error {
 	appID := c.Params("appID")
 	result, err := datastore.GetAppByID(appID)
 	if err != nil {
-		return fiber.NewError(apiserver.MapStatusCode(err))
+		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 	return c.JSON(result)
 }
@@ -20,7 +20,7 @@ func AppID(c *fiber.Ctx) error {
 func AppDeployments(c *fiber.Ctx) error {
 	result, err := datastore.GetDeploymentsByAppID(c.Params("appID"))
 	if err != nil {
-		return fiber.NewError(apiserver.MapStatusCode(err))
+		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 	return c.JSON(result)
 }
@@ -39,7 +39,7 @@ func PostApp(c *fiber.Ctx) error {
 	app := request.ToModel()
 
 	if err := datastore.SaveApp(&app); err != nil {
-		return fiber.NewError(apiserver.MapStatusCode(err))
+		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -48,7 +48,7 @@ func PostApp(c *fiber.Ctx) error {
 func DeleteApp(c *fiber.Ctx) error {
 	appID := c.Params("appID")
 	if err := datastore.RemoveApp(appID); err != nil {
-		return fiber.NewError(apiserver.MapStatusCode(err))
+		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 	return c.SendStatus(fiber.StatusOK)
 }
