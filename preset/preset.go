@@ -16,7 +16,7 @@ const (
 
 func Preset(opts kanikogateway.BuildOptions, framework Framework) (string, error) {
 
-	text := presetText(framework)
+	text := Text(framework)
 
 	var buffer bytes.Buffer
 	t := template.Must(template.New("Dockerfile").Parse(text))
@@ -29,7 +29,7 @@ func Preset(opts kanikogateway.BuildOptions, framework Framework) (string, error
 	return buffer.String(), nil
 }
 
-func presetText(framework Framework) string {
+func Text(framework Framework) string {
 	switch framework {
 	case FrameworkNestJS:
 		return `
@@ -39,12 +39,12 @@ WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.InstallCommand}}
 RUN {{.BuildCommand}}
 
-FROM node:14-alpine 
+FROM node:14-alpine
 WORKDIR /app
-COPY --from=build-env /app/{{.WorkingDirectory}}/package.json /app/{{.WorkingDirectory}}/yarn.lock ./
-COPY --from=build-env /app/{{.WorkingDirectory}}/node_modules ./node_modules
-COPY --from=build-env /app/{{.WorkingDirectory}}/{{.OutputDirectory}} ./{{.OutputDirectory}}
-CMD {{.StartCommand}}	
+COPY --from=build-env /app/{{.WorkingDirectory}}package.json /app/{{.WorkingDirectory}}yarn.lock ./
+COPY --from=build-env /app/{{.WorkingDirectory}}node_modules ./node_modules
+COPY --from=build-env /app/{{.WorkingDirectory}}{{.OutputDirectory}} ./{{.OutputDirectory}}
+CMD {{.StartCommand}}
 `
 
 	case FrameworkSpring:
@@ -56,16 +56,17 @@ RUN {{.BuildCommand}}
 
 FROM openjdk:8-jdk-alpine
 WORKDIR /app
-COPY --from=build-env /app/{{.WorkingDirectory}}/{{.OutputDirectory}}/*.jar .
-CMD java -jar *.jar
-
+COPY --from=build-env /app/{{.WorkingDirectory}}{{.OutputDirectory}}/*.jar .
+CMD {{.StartCommand}}
 `
 	case FrameworkFlask:
 		return `
-FROM python:3.11.0a1-alpine3.14 
+FROM python:3.11.0a1-alpine3.14
 ADD . /app
 WORKDIR /app/{{.WorkingDirectory}}
+RUN pip install flask
 RUN {{.InstallCommand}}
+RUN {{.BuildCommand}}
 CMD {{.StartCommand}}
 `
 	default:
