@@ -145,7 +145,7 @@ func APIServer(port int) {
 
 	app.Get("/preset/:framework", func(c *fiber.Ctx) error {
 		framework := c.Params("framework")
-		text := preset.PresetText(preset.Framework(framework))
+		text := preset.Text(preset.Framework(framework))
 		return c.SendString(text)
 	})
 
