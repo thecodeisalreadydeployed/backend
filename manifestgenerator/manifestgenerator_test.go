@@ -119,7 +119,7 @@ status:
 `
 
 	if actualDeploymentYAML != expectedDeploymentYAML {
-		t.Errorf("%s%s", actualDeploymentYAML, expectedDeploymentYAML)
+		t.Errorf("Actual Deployment YAML: \n%s\nExpected Deployment YAML: \n%s", actualDeploymentYAML, expectedDeploymentYAML)
 	}
 
 	if actualServiceYAML != expectedServiceYAML {
@@ -127,7 +127,7 @@ status:
 	}
 
 	if actualVirtualServerYAML != expectedVirtualServerYAML {
-		t.Errorf("Actual Virtual Server YAML is \n%s\nExpected Virtual Server YAML: \n%s", actualVirtualServerYAML, expectedVirtualServerYAML)
+		t.Errorf("Actual Virtual Server YAML: \n%s\nExpected Virtual Server YAML: \n%s", actualVirtualServerYAML, expectedVirtualServerYAML)
 	}
 
 }
