@@ -39,7 +39,7 @@ func PostProject(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest)
 	}
 
-	if validationErrors := validator.Validate(request); len(validationErrors) > 0 {
+	if validationErrors := validator.CheckStruct(request); len(validationErrors) > 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 

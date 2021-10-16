@@ -16,7 +16,7 @@ func Init() {
 	validate = govalidator.New()
 }
 
-func Validate(s interface{}) []ValidationError {
+func CheckStruct(s interface{}) []ValidationError {
 	var errors []ValidationError
 	err := validate.Struct(s)
 	if err != nil {
