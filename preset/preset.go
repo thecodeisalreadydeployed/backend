@@ -2,19 +2,9 @@ package preset
 
 import (
 	"bytes"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"text/template"
 )
-
-type BuildOptions struct {
-	BuildImage       string
-	RunImage         string
-	Executable       string
-	InstallCommand   string
-	BuildCommand     string
-	WorkingDirectory string
-	OutputDirectory  string
-	StartCommand     string
-}
 
 type Framework string
 
@@ -24,7 +14,7 @@ const (
 	FrameworkFlask  Framework = "FrameworkFlask"
 )
 
-func Preset(opts BuildOptions, framework Framework) (string, error) {
+func Preset(opts kanikogateway.BuildOptions, framework Framework) (string, error) {
 
 	text := presetText(framework)
 
@@ -43,13 +33,13 @@ func presetText(framework Framework) string {
 	switch framework {
 	case FrameworkNestJS:
 		return `
-FROM {{.BuildImage}} as build-env
+FROM node:14-alpine as build-env
 ADD . /app
 WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.InstallCommand}}
 RUN {{.BuildCommand}}
 
-FROM {{.RunImage}}
+FROM node:14-alpine 
 WORKDIR /app
 COPY --from=build-env /app/{{.WorkingDirectory}}/package.json /app/{{.WorkingDirectory}}/yarn.lock ./
 COPY --from=build-env /app/{{.WorkingDirectory}}/node_modules ./node_modules
@@ -59,20 +49,20 @@ CMD {{.StartCommand}}
 
 	case FrameworkSpring:
 		return `
-FROM {{.BuildImage}} as build-env
+FROM maven:3.8.3-ibmjava-8-alpine as build-env
 ADD . /app
 WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.BuildCommand}}
 
-FROM {{.RunImage}}
+FROM openjdk:8-jdk-alpine
 WORKDIR /app
-COPY --from=build-env /app/{{.WorkingDirectory}}/{{.OutputDirectory}}/{{.Executable}} .
-CMD java -jar {{.Executable}}
+COPY --from=build-env /app/{{.WorkingDirectory}}/{{.OutputDirectory}}/*.jar .
+CMD java -jar *.jar
 
 `
 	case FrameworkFlask:
 		return `
-FROM {{.RunImage}}
+FROM python:3.11.0a1-alpine3.14 
 ADD . /app
 WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.InstallCommand}}
@@ -80,7 +70,7 @@ CMD {{.StartCommand}}
 `
 	default:
 		return `
-FROM {{.RunImage}}
+FROM alpine:latest
 ADD . /app
 WORKDIR /app/{{.WorkingDirectory}}
 RUN {{.InstallCommand}}
