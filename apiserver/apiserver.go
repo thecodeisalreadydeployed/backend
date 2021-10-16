@@ -145,17 +145,7 @@ func APIServer(port int) {
 
 	app.Get("/preset/:framework", func(c *fiber.Ctx) error {
 		framework := c.Params("framework")
-		text, err := preset.Preset(preset.BuildOptions{
-			InstallCommand:   "[INSTALL COMMAND]",
-			BuildCommand:     "[BUILD COMMAND]",
-			WorkingDirectory: "[WORKING DIRECTORY]",
-			OutputDirectory:  "[OUTPUT DIRECTORY]",
-			StartCommand:     "[START COMMAND]",
-		}, preset.Framework(framework))
-
-		if err != nil {
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
+		text := preset.PresetText(preset.Framework(framework))
 		return c.SendString(text)
 	})
 
