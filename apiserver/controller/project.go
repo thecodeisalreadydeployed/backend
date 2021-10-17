@@ -9,7 +9,7 @@ import (
 )
 
 func NewProjectController(api fiber.Router) {
-	api.Get("/", listProjects)
+	api.Get("/list", listProjects)
 	api.Get("/:projectID", getProject)
 	api.Get("/:projectID/apps", listProjectApps)
 	api.Post("/", createProject)

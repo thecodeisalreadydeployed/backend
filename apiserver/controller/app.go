@@ -9,7 +9,7 @@ import (
 )
 
 func NewAppController(api fiber.Router) {
-	api.Get("/", listApps)
+	api.Get("/list", listApps)
 	api.Get("/:appID", getApp)
 	api.Get("/:appID/deployments", getApp)
 	api.Post("/", createApp)
