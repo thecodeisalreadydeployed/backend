@@ -11,7 +11,7 @@ import (
 func NewAppController(api fiber.Router) {
 	api.Get("/list", listApps)
 	api.Get("/:appID", getApp)
-	api.Get("/:appID/deployments", getApp)
+	api.Get("/:appID/deployments", listAppDeployments)
 	api.Post("/", createApp)
 	api.Delete("/:appID", deleteApp)
 }
