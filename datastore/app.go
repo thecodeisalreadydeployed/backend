@@ -90,11 +90,11 @@ func GetAppByID(appID string) (*model.App, error) {
 	return &ret, nil
 }
 
-func SaveApp(app *model.App) error {
+func SaveApp(app *model.App) (*model.App, error) {
 	if app.ID != "" {
 		if !strings.HasPrefix(app.ID, "app_") {
 			zap.L().Error(MsgAppPrefix)
-			return errutil.ErrInvalidArgument
+			return nil, errutil.ErrInvalidArgument
 		}
 	} else {
 		app.ID = model.GenerateAppID()
@@ -107,16 +107,16 @@ func SaveApp(app *model.App) error {
 		zap.L().Error(err.Error())
 
 		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
-			return errutil.ErrInvalidArgument
+			return nil, errutil.ErrInvalidArgument
 		}
 
 		if errors.Is(err, gorm.ErrMissingWhereClause) {
-			return errutil.ErrFailedPrecondition
+			return nil, errutil.ErrFailedPrecondition
 		}
 
-		return errutil.ErrUnknown
+		return nil, errutil.ErrUnknown
 	}
-	return nil
+	return GetAppByID(app.ID)
 }
 
 func RemoveApp(id string) error {
