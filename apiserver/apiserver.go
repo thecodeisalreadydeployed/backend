@@ -20,6 +20,7 @@ func APIServer(port int) {
 	app.Use(logger.New())
 
 	controller.NewProjectController(app.Group("projects"))
+	controller.NewAppController(app.Group("apps"))
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }
