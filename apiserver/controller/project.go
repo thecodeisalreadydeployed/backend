@@ -17,3 +17,12 @@ func listProjects(ctx *fiber.Ctx) error {
 	}
 	return ctx.JSON(result)
 }
+
+func getProject(ctx *fiber.Ctx) error {
+	projectID := ctx.Params("projectID")
+	result, err := datastore.GetProjectByID(projectID)
+	if err != nil {
+		return fiber.NewError(errutil.MapStatusCode(err))
+	}
+	return ctx.JSON(result)
+}
