@@ -19,6 +19,7 @@ require (
 	github.com/klauspost/compress v1.13.3 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/moby/buildkit v0.9.1 // indirect
 	github.com/nginxinc/kubernetes-ingress v1.12.0
 	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.2.0 // indirect
