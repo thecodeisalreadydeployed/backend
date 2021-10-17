@@ -2,8 +2,9 @@ package apiserver
 
 import (
 	"fmt"
-	"github.com/thecodeisalreadydeployed/apiserver/group"
 	"log"
+
+	"github.com/thecodeisalreadydeployed/apiserver/controller"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -18,22 +19,13 @@ func APIServer(port int) {
 	app.Use(cors.New())
 	app.Use(logger.New())
 
-	app.Get("/health", group.Health)
+	controller.NewProjectController(app.Group("project"))
+	controller.NewAppController(app.Group("app"))
+	controller.NewDeploymentController(app.Group("deployment"))
 
-	app.Get("/projects", group.ProjectList)
-	app.Get("/project/:projectID", group.ProjectID)
-	app.Get("/project/:projectID/apps", group.ProjectApps)
-	app.Get("/app/:appID", group.AppID)
-	app.Get("/app/:appID/deployments", group.AppDeployments)
-	app.Get("/deployment/:deploymentID", group.DeploymentID)
-	app.Get("/deployment/:deploymentID/event", group.DeploymentEvent)
-
-	app.Post("/project", group.PostProject)
-	app.Post("/app", group.PostApp)
-	app.Delete("/project/:projectID", group.DeleteProject)
-	app.Delete("/app/:appID", group.DeleteApp)
-
-	app.Get("/preset/:framework", group.Preset)
+	controller.NewHealthController(app.Group("health"))
+	controller.NewPresetController(app.Group("preset"))
+	controller.NewBuildScriptController(app.Group("build-script"))
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }

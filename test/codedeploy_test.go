@@ -43,7 +43,7 @@ func TestIntegration(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	projects := expect.GET("/projects").
+	projects := expect.GET("/project/list").
 		Expect().
 		Status(http.StatusOK).
 		JSON()

@@ -1,6 +1,10 @@
 package manifestgenerator
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestManifestGenerator(t *testing.T) {
 
@@ -118,16 +122,7 @@ status:
   state: ""
 `
 
-	if actualDeploymentYAML != expectedDeploymentYAML {
-		t.Errorf("Actual Deployment YAML: \n%s\nExpected Deployment YAML: \n%s", actualDeploymentYAML, expectedDeploymentYAML)
-	}
-
-	if actualServiceYAML != expectedServiceYAML {
-		t.Errorf("Actual Service YAML: \n%s\nExpected Service YAML: \n%s", actualServiceYAML, expectedServiceYAML)
-	}
-
-	if actualVirtualServerYAML != expectedVirtualServerYAML {
-		t.Errorf("Actual Virtual Server YAML: \n%s\nExpected Virtual Server YAML: \n%s", actualVirtualServerYAML, expectedVirtualServerYAML)
-	}
-
+	assert.Equal(t, expectedDeploymentYAML, actualDeploymentYAML)
+	assert.Equal(t, expectedServiceYAML, actualServiceYAML)
+	assert.Equal(t, expectedVirtualServerYAML, actualVirtualServerYAML)
 }
