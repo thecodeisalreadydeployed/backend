@@ -12,6 +12,8 @@ func NewProjectController(api fiber.Router) {
 	api.Get("/", listProjects)
 	api.Get("/:projectID", getProject)
 	api.Get("/:projectID/apps", listProjectApps)
+	api.Post("/", createProject)
+	api.Delete("/:projectID", deleteProject)
 }
 
 func listProjects(ctx *fiber.Ctx) error {
