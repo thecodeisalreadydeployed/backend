@@ -19,9 +19,9 @@ func APIServer(port int) {
 	app.Use(cors.New())
 	app.Use(logger.New())
 
-	controller.NewProjectController(app.Group("projects"))
-	controller.NewAppController(app.Group("apps"))
-	controller.NewDeploymentController(app.Group("deployments"))
+	controller.NewProjectController(app.Group("project"))
+	controller.NewAppController(app.Group("app"))
+	controller.NewDeploymentController(app.Group("deployment"))
 
 	controller.NewHealthController(app.Group("health"))
 	controller.NewPresetController(app.Group("preset"))
