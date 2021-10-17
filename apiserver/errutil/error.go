@@ -1,11 +1,11 @@
-package apiserver
+package errutil
 
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/errutil"
 )
 
-func mapStatusCode(err error) int {
+func MapStatusCode(err error) int {
 	if errutil.IsAlreadyExists(err) {
 		return fiber.StatusBadRequest
 	}

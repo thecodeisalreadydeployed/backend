@@ -38,8 +38,8 @@ func IsFailedPrecondition(err error) bool {
 	return errors.Is(err, ErrFailedPrecondition)
 }
 
-// IsUnavilable returns true if the error is due to a resource being unavailable.
-func IsUnavilable(err error) bool {
+// IsUnavailable returns true if the error is due to a resource being unavailable.
+func IsUnavailable(err error) bool {
 	return errors.Is(err, ErrUnavailable)
 }
 
