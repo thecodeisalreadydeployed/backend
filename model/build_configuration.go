@@ -2,28 +2,28 @@ package model
 
 type BuildConfiguration struct {
 	// Dockerfile instructions for building container image.
-	BuildScript string `json:"build_script"`
+	BuildScript string `json:"buildScript"`
 
 	// Flag to specify whether the BuildScript should be parsed.
-	ParseBuildScript bool `json:"parse_build_script"`
+	ParseBuildScript bool `json:"parseBuildScript"`
 
 	// Directory for running Dockerfile instructions.
 	// If not set, the working directory defaults to the root of the repository.
-	WorkingDirectory string `json:"working_directory"`
+	WorkingDirectory string `json:"workingDirectory"`
 
 	// Command to run to install the application's dependencies.
 	// For example, `npm install`.
-	InstallCommand string `json:"install_command"`
+	InstallCommand string `json:"installCommand"`
 
 	// Command to run to build the application.
 	// For example, `npm run build`.
-	BuildCommand string `json:"build_command"`
+	BuildCommand string `json:"buildCommand"`
 
 	// Directory (relative to the root of the repository) that contains the
 	// outputs of the BuildCommand. For example, `dist`.
-	OutputDirectory string `json:"output_directory"`
+	OutputDirectory string `json:"outputDirectory"`
 
 	// Command to run to start the application.
 	// For example, `npm start`.
-	StartCommand string `json:"start_command"`
+	StartCommand string `json:"startCommand"`
 }
