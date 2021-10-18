@@ -32,10 +32,8 @@ COPY --from=build-env /app/nx/node_modules ./node_modules
 COPY --from=build-env /app/nx/dist/apps/a ./dist/apps/a
 CMD node dist/apps/a/main
 `
-
-	if actualText != expectedText {
-		t.Errorf("Actual Nest JS Preset: \n%s\nExpected Nest JS Preset: \n%s", actualText, expectedText)
-	}
+	
+	assert.Equal(t, actualText, expectedText)
 }
 
 func TestFlaskPreset(t *testing.T) {
@@ -60,10 +58,8 @@ RUN echo
 RUN echo
 CMD export FLASK_APP=app && flask run
 `
-
-	if actualText != expectedText {
-		t.Errorf("Actual Flask Preset: \n%s\nExpected Flask Preset: \n%s", actualText, expectedText)
-	}
+	
+	assert.Equal(t, actualText, expectedText)
 }
 
 func TestSpringPreset(t *testing.T) {
@@ -90,8 +86,6 @@ WORKDIR /app
 COPY --from=build-env /app/src/main/java/com/example/demo/target/*.jar .
 CMD java -jar *.jar
 `
-
-	if actualText != expectedText {
-		t.Errorf("Actual Spring Preset: \n%s\nExpected Spring Preset: \n%s", actualText, expectedText)
-	}
+	
+	assert.Equal(t, actualText, expectedText)
 }
