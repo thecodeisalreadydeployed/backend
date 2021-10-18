@@ -1,10 +1,10 @@
 package preset
 
 import (
-	"github.com/thecodeisalreadydeployed/kanikogateway"
-	"github.com/stretchr/testify/assert"
-	
 	"testing"
+	
+	"github.com/stretchr/testify/assert"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 )
 
 func TestNestJSPreset(t *testing.T) {
