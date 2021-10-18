@@ -9,12 +9,12 @@ import (
 
 type App struct {
 	ID                 string             `json:"id"`
-	ProjectID          string             `json:"project_id"`
+	ProjectID          string             `json:"projectID"`
 	Name               string             `json:"name"`
-	GitSource          GitSource          `json:"git_source"`
-	CreatedAt          time.Time          `json:"created_at"`
-	UpdatedAt          time.Time          `json:"updated_at"`
-	BuildConfiguration BuildConfiguration `json:"build_configuration"`
+	GitSource          GitSource          `json:"gitSource"`
+	CreatedAt          time.Time          `json:"createdAt"`
+	UpdatedAt          time.Time          `json:"updatedAt"`
+	BuildConfiguration BuildConfiguration `json:"buildConfiguration"`
 	Observable         bool               `json:"observable"`
 }
 

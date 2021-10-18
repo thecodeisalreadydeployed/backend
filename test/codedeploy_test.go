@@ -43,7 +43,7 @@ func TestIntegration(t *testing.T) {
 		Expect().
 		Status(http.StatusOK)
 
-	projects := expect.GET("/projects").
+	projects := expect.GET("/project/list").
 		Expect().
 		Status(http.StatusOK).
 		JSON()
@@ -85,7 +85,7 @@ func TestIntegration(t *testing.T) {
 	expect.GET(fmt.Sprintf("/app/%s", appID)).
 		Expect().Status(http.StatusOK).JSON().
 		Object().
-		ContainsKey("project_id").ValueEqual("project_id", projectID).
+		ContainsKey("projectID").ValueEqual("projectID", projectID).
 		ContainsKey("name").ValueEqual("name", appName)
 
 	expect.GET(fmt.Sprintf("/app/%s/deployments", appID)).
