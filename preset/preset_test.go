@@ -1,8 +1,10 @@
 package preset
 
 import (
-	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 )
 
 func TestNestJSPreset(t *testing.T) {
@@ -32,7 +34,7 @@ COPY --from=build-env /app/nx/node_modules ./node_modules
 COPY --from=build-env /app/nx/dist/apps/a ./dist/apps/a
 CMD node dist/apps/a/main
 `
-	
+
 	assert.Equal(t, actualText, expectedText)
 }
 
@@ -58,7 +60,7 @@ RUN echo
 RUN echo
 CMD export FLASK_APP=app && flask run
 `
-	
+
 	assert.Equal(t, actualText, expectedText)
 }
 
@@ -86,6 +88,6 @@ WORKDIR /app
 COPY --from=build-env /app/src/main/java/com/example/demo/target/*.jar .
 CMD java -jar *.jar
 `
-	
+
 	assert.Equal(t, actualText, expectedText)
 }
