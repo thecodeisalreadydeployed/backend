@@ -78,7 +78,7 @@ func TestGenerateVirtualServer(t *testing.T) {
 		AppID:     "AppID",
 	}
 
-	expected := `
+	expected := `apiVersion: k8s.nginx.org/v1
 	kind: VirtualServer
 metadata:
   creationTimestamp: null
