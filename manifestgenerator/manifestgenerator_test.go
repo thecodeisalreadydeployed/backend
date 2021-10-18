@@ -44,5 +44,29 @@ status: {}
 	actual, err := GenerateDeploymentYAML(options)
 
 	assert.Nil(t, err)
-	assert.Equal(t, expected, actual)
+	assert.YAMLEq(t, expected, actual)
+}
+
+func TestGenerateService(t *testing.T) {
+	options := &GenerateServiceOptions{
+		Name:      "ServiceName",
+		Namespace: "ServiceNamespace",
+		Labels:    map[string]string{"ServiceLabelKey": "ServiceLabelValue"},
+	}
+
+	expected := `apiVersion: apps/v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    ServiceLabelKey: ServiceLabelValue
+  name: ServiceName
+  namespace: ServiceNamespace
+spec: {}
+status:
+  loadBalancer: {}
+	`
+	actual, err := GenerateServiceYAML(options)
+	assert.Nil(t, err)
+	assert.YAMLEq(t, expected, actual)
 }
