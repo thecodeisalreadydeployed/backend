@@ -18,11 +18,11 @@ type GitOpsController interface {
 }
 
 type gitOpsController struct {
-	u     gitgateway.GitGateway
-	mutex sync.Mutex
+	user gitgateway.GitGateway
 }
 
 var once sync.Once
+var mutex sync.Mutex
 
 func setupUserspace() {
 	once.Do(func() {
@@ -42,7 +42,7 @@ func NewGitOpsController() GitOpsController {
 		panic(err)
 	}
 
-	return &gitOpsController{u: userspace, mutex: sync.Mutex{}}
+	return &gitOpsController{user: userspace}
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
@@ -50,8 +50,8 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 }
 
 func (g *gitOpsController) SetupApp(projectID string, appID string) error {
-	g.mutex.Lock()
-	defer g.mutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	prefix := fmt.Sprintf("%s/%s", projectID, appID)
 
@@ -59,7 +59,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	deploymentFile := fmt.Sprintf("%s/deployment.yml", prefix)
 	serviceFile := fmt.Sprintf("%s/service.yml", prefix)
 
-	writeErr := g.u.WriteFile(kustomizationFile, "")
+	writeErr := g.user.WriteFile(kustomizationFile, "")
 	if writeErr != nil {
 		return errutil.ErrFailedPrecondition
 	}
@@ -91,17 +91,17 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errutil.ErrFailedPrecondition
 	}
 
-	writeErr = g.u.WriteFile(deploymentFile, deploymentYAML)
+	writeErr = g.user.WriteFile(deploymentFile, deploymentYAML)
 	if writeErr != nil {
 		return errutil.ErrFailedPrecondition
 	}
 
-	writeErr = g.u.WriteFile(serviceFile, serviceYAML)
+	writeErr = g.user.WriteFile(serviceFile, serviceYAML)
 	if writeErr != nil {
 		return errutil.ErrFailedPrecondition
 	}
 
-	commit, commitErr := g.u.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
+	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
 	if commitErr != nil {
 		return errutil.ErrFailedPrecondition
 	}

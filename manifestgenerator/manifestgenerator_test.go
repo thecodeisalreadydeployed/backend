@@ -6,19 +6,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestManifestGenerator(t *testing.T) {
-
-	yamls, err := GenerateManifests()
-
-	if err != nil {
-		t.Error(err)
+func TestGenerateDeployment(t *testing.T) {
+	options := &GenerateDeploymentOptions{
+		Name:           "DeploymentName",
+		Namespace:      "DeploymentNamespace",
+		Labels:         map[string]string{"DeploymentLabelKey": "DeploymentLabelValue"},
+		ContainerImage: "DeploymentContainerImage",
 	}
 
-	actualDeploymentYAML := yamls["deploymentYAML"]
-	actualServiceYAML := yamls["serviceYAML"]
-	actualVirtualServerYAML := yamls["virtualServerYAML"]
-
-	expectedDeploymentYAML := `apiVersion: apps/v1
+	expected := `apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
@@ -43,10 +39,22 @@ spec:
         imagePullPolicy: IfNotPresent
         name: DeploymentContainerImage
         resources: {}
-status: {}
-`
+status: {}`
 
-	expectedServiceYAML := `apiVersion: apps/v1
+	actual, err := GenerateDeploymentYAML(options)
+
+	assert.Nil(t, err)
+	assert.YAMLEq(t, expected, actual)
+}
+
+func TestGenerateService(t *testing.T) {
+	options := &GenerateServiceOptions{
+		Name:      "ServiceName",
+		Namespace: "ServiceNamespace",
+		Labels:    map[string]string{"ServiceLabelKey": "ServiceLabelValue"},
+	}
+
+	expected := `apiVersion: apps/v1
 kind: Service
 metadata:
   creationTimestamp: null
@@ -56,10 +64,21 @@ metadata:
   namespace: ServiceNamespace
 spec: {}
 status:
-  loadBalancer: {}
-`
+  loadBalancer: {}`
 
-	expectedVirtualServerYAML := `apiVersion: k8s.nginx.org/v1
+	actual, err := GenerateServiceYAML(options)
+	assert.Nil(t, err)
+	assert.YAMLEq(t, expected, actual)
+}
+
+func TestGenerateVirtualServer(t *testing.T) {
+	options := &GenerateVirtualServerOptions{
+		Labels:    map[string]string{"VirtualServerLabelKey": "VirtualServerLabelValue"},
+		ProjectID: "ProjectID",
+		AppID:     "AppID",
+	}
+
+	expected := `apiVersion: k8s.nginx.org/v1
 kind: VirtualServer
 metadata:
   creationTimestamp: null
@@ -119,10 +138,9 @@ spec:
 status:
   message: ""
   reason: ""
-  state: ""
-`
+  state: ""`
 
-	assert.Equal(t, expectedDeploymentYAML, actualDeploymentYAML)
-	assert.Equal(t, expectedServiceYAML, actualServiceYAML)
-	assert.Equal(t, expectedVirtualServerYAML, actualVirtualServerYAML)
+	actual, err := GenerateVirtualServerYAML(options)
+	assert.Nil(t, err)
+	assert.YAMLEq(t, expected, actual)
 }

@@ -42,5 +42,6 @@ require (
 	k8s.io/api v0.21.2
 	k8s.io/apimachinery v0.21.2
 	k8s.io/client-go v0.21.2
+	sigs.k8s.io/kustomize/api v0.10.0
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
