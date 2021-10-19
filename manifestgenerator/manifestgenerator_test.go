@@ -39,8 +39,8 @@ spec:
         imagePullPolicy: IfNotPresent
         name: DeploymentContainerImage
         resources: {}
-status: {}
-	`
+status: {}`
+
 	actual, err := GenerateDeploymentYAML(options)
 
 	assert.Nil(t, err)
@@ -64,8 +64,8 @@ metadata:
   namespace: ServiceNamespace
 spec: {}
 status:
-  loadBalancer: {}
-	`
+  loadBalancer: {}`
+
 	actual, err := GenerateServiceYAML(options)
 	assert.Nil(t, err)
 	assert.YAMLEq(t, expected, actual)
@@ -138,8 +138,7 @@ spec:
 status:
   message: ""
   reason: ""
-  state: ""
-	`
+  state: ""`
 
 	actual, err := GenerateVirtualServerYAML(options)
 	assert.Nil(t, err)
