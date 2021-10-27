@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"gorm.io/gorm"
 	"strings"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
@@ -9,9 +10,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func GetAllProjects() (*[]model.Project, error) {
+func GetAllProjects(DB *gorm.DB) (*[]model.Project, error) {
 	var _data []datamodel.Project
-	err := getDB().Table("projects").Scan(&_data).Error
+	err := DB.Table("projects").Scan(&_data).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, errutil.ErrNotFound
