@@ -17,7 +17,7 @@ func NewProjectController(api fiber.Router) {
 }
 
 func listProjects(ctx *fiber.Ctx) error {
-	result, err := datastore.GetAllProjects()
+	result, err := datastore.GetAllProjects(datastore.GetDB())
 	return writeResponse(ctx, result, err)
 }
 
