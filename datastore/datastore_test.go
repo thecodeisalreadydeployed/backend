@@ -1,7 +1,6 @@
 package datastore
 
 import (
-	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
@@ -16,9 +15,7 @@ import (
 
 func TestGetAllProjects(t *testing.T) {
 	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
 
 	rows := sqlmock.NewRows(datamodel.ProjectStructString()).
 		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
@@ -32,16 +29,10 @@ func TestGetAllProjects(t *testing.T) {
 	gdb, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: db,
 	}), &gorm.Config{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fmt.Println(gdb)
+	assert.Nil(t, err)
 
 	actual, err := GetAllProjects(gdb)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
 	expected := &[]model.Project{{
 		ID:        "prj_test",
@@ -53,11 +44,8 @@ func TestGetAllProjects(t *testing.T) {
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Error(err)
-	}
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
 }
