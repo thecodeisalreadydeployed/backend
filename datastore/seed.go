@@ -108,6 +108,7 @@ func seedDeployments(size int) {
 		datum.AppID = getForeignKey(keys)
 		datum.GitSource = getGitSource()
 		datum.Creator = getCreator()
+		datum.BuildConfiguration = getBuildConfiguration()
 		datum.State = model.DeploymentState(getState())
 
 		data = append(data, datum)
