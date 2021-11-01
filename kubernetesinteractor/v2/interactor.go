@@ -1,6 +1,7 @@
 package kubernetesinteractor
 
 import (
+	"context"
 	"flag"
 	"path/filepath"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -49,8 +51,27 @@ func NewKubernetesInteractor() (KubernetesInteractor, error) {
 	return kubernetesInteractor{client: clientset}, nil
 }
 
-func (kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (string, error) {
-	return "", errutil.ErrNotImplemented
+func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (string, error) {
+	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
+	if err != nil {
+		zap.L().Error("namespace not found: " + namespace)
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	_, err = it.client.CoreV1().Pods(namespace).Get(context.TODO(), pod.Name, v1.GetOptions{})
+	if err != nil {
+		zap.L().Sugar().Errorf("pod already exists: %s/%s", namespace, pod.Name)
+		return "", errutil.ErrAlreadyExists
+	}
+
+	create, createErr := it.client.CoreV1().Pods(namespace).Create(context.TODO(), &pod, v1.CreateOptions{})
+	if createErr != nil {
+		zap.L().Sugar().Errorf("error creating pod: %s/%s", namespace, pod.Name)
+		return "", errutil.ErrUnknown
+
+	}
+
+	return create.Name, nil
 }
 
 func (kubernetesInteractor) GetDeploymentState(name string, namespace string) model.DeploymentState {
