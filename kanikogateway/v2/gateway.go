@@ -1,6 +1,9 @@
 package kanikogateway
 
 import (
+	"fmt"
+	"path/filepath"
+
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
@@ -22,6 +25,8 @@ type kanikoGateway struct {
 	kubernetes         *kubernetesinteractor.KubernetesInteractor
 	registry           *containerregistry.ContainerRegistry
 }
+
+const busyboxImage = "busybox:1.33.1"
 
 func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, buildConfiguration model.BuildConfiguration) (KanikoGateway, error) {
 	it, err := kubernetesinteractor.NewKubernetesInteractor()
@@ -54,6 +59,9 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 		"thecodeisalreadydeployed.github/component":     "KANIKO",
 	}
 
+	buildScript := it.buildConfiguration.BuildScript
+	buildScriptPath := filepath.Join(workingDirectory.MountPath, "codedeploy.Dockerfile")
+
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   it.deploymentID,
@@ -73,6 +81,31 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 					VolumeSource: apiv1.VolumeSource{
 						EmptyDir: &apiv1.EmptyDirVolumeSource{},
 					},
+				},
+			},
+			InitContainers: []apiv1.Container{
+				{
+					Name:         "init-build-script",
+					Image:        busyboxImage,
+					VolumeMounts: []apiv1.VolumeMount{workingDirectory},
+					Command: []string{
+						"sh",
+						"-c",
+						fmt.Sprintf(`cat << EOF >> %s
+%s
+EOF`, buildScriptPath, buildScript),
+					},
+				},
+				// {
+				// 	Name: "init-ssh",
+				// 	Image: busyboxImage,
+				// 	VolumeMounts: []apiv1.VolumeMount{dotSSH}
+				// },
+				{
+					Name:         "init-repository",
+					Image:        "alpine/git:v2.30.2",
+					Args:         []string{"clone", "--single-branch", "--", it.branch, filepath.Join(workingDirectory.MountPath, "code")},
+					VolumeMounts: []apiv1.VolumeMount{workingDirectory, dotSSH},
 				},
 			},
 		},
