@@ -37,12 +37,13 @@ func NewKubernetesInteractor() (KubernetesInteractor, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		zap.L().Error("error creating rest.Config when using BuildConfigFromFlags()")
-		return nil, errutil.ErrUnknown
+		return nil, errutil.ErrFailedPrecondition
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		zap.L().Error("error creating kubernetes.Clientset when using NewForConfig()")
+		return nil, errutil.ErrFailedPrecondition
 	}
 
 	return kubernetesInteractor{client: clientset}, nil
