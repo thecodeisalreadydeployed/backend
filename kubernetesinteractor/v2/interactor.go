@@ -17,7 +17,7 @@ import (
 
 type KubernetesInteractor interface {
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
-	GetDeploymentState(name string, namespace string) model.DeploymentState
+	GetDeploymentState(name string, namespace string) (model.DeploymentState, error)
 }
 
 type kubernetesInteractor struct {
@@ -74,6 +74,23 @@ func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (strin
 	return create.Name, nil
 }
 
-func (kubernetesInteractor) GetDeploymentState(name string, namespace string) model.DeploymentState {
-	return model.DeploymentStateError
+func (it kubernetesInteractor) GetDeploymentState(deploymentID string, namespace string) (model.DeploymentState, error) {
+	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
+	if err != nil {
+		zap.L().Error("namespace not found: " + namespace)
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	pods, err := it.client.CoreV1().Pods(namespace).List(context.TODO(), v1.ListOptions{LabelSelector: "codedeploy/deployment-id=" + deploymentID})
+	if err != nil {
+		zap.L().Sugar().Errorf("error listing pods with codedeploy/deployment-id=%s label in %s namespace", deploymentID, namespace)
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	if len(pods.Items) == 0 {
+		zap.L().Sugar().Errorf("cannot find pod with codedeploy/deployment-id=%s label in %s namespace", deploymentID, namespace)
+		return "", errutil.ErrNotFound
+	}
+
+	return model.DeploymentStateError, nil
 }
