@@ -60,7 +60,7 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 	}
 
 	buildScript := it.buildConfiguration.BuildScript
-	buildScriptPath := filepath.Join(workingDirectory.MountPath, "codedeploy.Dockerfile")
+	buildScriptPath := filepath.Join(workingDirectory.MountPath, "Dockerfile")
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
