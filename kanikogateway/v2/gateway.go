@@ -6,6 +6,8 @@ import (
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type KanikoGateway interface {
@@ -34,4 +36,47 @@ func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, 
 
 func (kanikoGateway) BuildContainerImage() (string, error) {
 	return "", errutil.ErrNotImplemented
+}
+
+func (it kanikoGateway) kanikoPod() apiv1.Pod {
+	workingDirectory := apiv1.VolumeMount{
+		Name:      "workingDirectory",
+		MountPath: "/__w",
+	}
+
+	dotSSH := apiv1.VolumeMount{
+		Name:      "dotSSH",
+		MountPath: "/root/.ssh",
+	}
+
+	podLabel := map[string]string{
+		"thecodeisalreadydeployed.github/deployment-id": it.deploymentID,
+		"thecodeisalreadydeployed.github/component":     "KANIKO",
+	}
+
+	pod := apiv1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   it.deploymentID,
+			Labels: podLabel,
+		},
+		Spec: apiv1.PodSpec{
+			RestartPolicy: apiv1.RestartPolicyNever,
+			Volumes: []apiv1.Volume{
+				{
+					Name: workingDirectory.Name,
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{},
+					},
+				},
+				{
+					Name: dotSSH.Name,
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{},
+					},
+				},
+			},
+		},
+	}
+
+	return pod
 }
