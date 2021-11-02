@@ -10,6 +10,13 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+type GoogleContainerRegistryOptions struct {
+	hostname          string
+	projectID         string
+	repository        string
+	serviceAccountKey string
+}
+
 type gcrGateway struct {
 	hostname          string
 	projectID         string
@@ -17,7 +24,7 @@ type gcrGateway struct {
 	serviceAccountKey string
 }
 
-func NewGCRGateway(hostname string, projectID string, repository string, serviceAccountKey string) (ContainerRegistry, error) {
+func NewGCRGateway(options GoogleContainerRegistryOptions) (ContainerRegistry, error) {
 	c, err := google.DefaultClient(context.TODO(), cloudresourcemanager.CloudPlatformScope)
 	if err != nil {
 		zap.L().Error("cannot initialize google.DefaultClient")
@@ -47,7 +54,7 @@ func NewGCRGateway(hostname string, projectID string, repository string, service
 	}
 
 	if len(resp.Permissions) == len(permissions) {
-		return gcrGateway{hostname: hostname, projectID: projectID, repository: repository, serviceAccountKey: serviceAccountKey}, nil
+		return gcrGateway{hostname: options.hostname, projectID: options.projectID, repository: options.repository, serviceAccountKey: options.serviceAccountKey}, nil
 	}
 
 	return nil, errutil.ErrUnavailable
