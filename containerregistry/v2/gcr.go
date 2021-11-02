@@ -11,12 +11,13 @@ import (
 )
 
 type gcrGateway struct {
-	hostname   string
-	projectID  string
-	repository string
+	hostname          string
+	projectID         string
+	repository        string
+	serviceAccountKey string
 }
 
-func NewGCRGateway(hostname string, projectID string, repository string) (ContainerRegistry, error) {
+func NewGCRGateway(hostname string, projectID string, repository string, serviceAccountKey string) (ContainerRegistry, error) {
 	c, err := google.DefaultClient(context.TODO(), cloudresourcemanager.CloudPlatformScope)
 	if err != nil {
 		zap.L().Error("cannot initialize google.DefaultClient")
