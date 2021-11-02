@@ -2,6 +2,7 @@ package containerregistry
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/thecodeisalreadydeployed/errutil"
 	"go.uber.org/zap"
@@ -10,9 +11,12 @@ import (
 )
 
 type gcrGateway struct {
+	hostname   string
+	projectID  string
+	repository string
 }
 
-func NewGCRGateway() (ContainerRegistry, error) {
+func NewGCRGateway(hostname string, projectID string, repository string) (ContainerRegistry, error) {
 	c, err := google.DefaultClient(context.TODO(), cloudresourcemanager.CloudPlatformScope)
 	if err != nil {
 		zap.L().Error("cannot initialize google.DefaultClient")
@@ -42,12 +46,12 @@ func NewGCRGateway() (ContainerRegistry, error) {
 	}
 
 	if len(resp.Permissions) == len(permissions) {
-		return gcrGateway{}, nil
+		return gcrGateway{hostname: hostname, projectID: projectID, repository: repository}, nil
 	}
 
 	return nil, errutil.ErrUnavailable
 }
 
-func (gateway gcrGateway) ImageURL(name string, tag string) string {
-	return ""
+func (gateway gcrGateway) ImageName(name string, tag string) string {
+	return fmt.Sprintf("%s/%s/%s/%s:%s", gateway.hostname, gateway.projectID, gateway.repository, name, tag)
 }
