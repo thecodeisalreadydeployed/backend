@@ -47,7 +47,7 @@ func NewGCRGateway(hostname string, projectID string, repository string, service
 	}
 
 	if len(resp.Permissions) == len(permissions) {
-		return gcrGateway{hostname: hostname, projectID: projectID, repository: repository}, nil
+		return gcrGateway{hostname: hostname, projectID: projectID, repository: repository, serviceAccountKey: serviceAccountKey}, nil
 	}
 
 	return nil, errutil.ErrUnavailable
@@ -55,4 +55,8 @@ func NewGCRGateway(hostname string, projectID string, repository string, service
 
 func (gateway gcrGateway) ImageName(name string, tag string) string {
 	return fmt.Sprintf("%s/%s/%s/%s:%s", gateway.hostname, gateway.projectID, gateway.repository, name, tag)
+}
+
+func (gateway gcrGateway) Type() ContainerRegistryType {
+	return GCR
 }
