@@ -25,9 +25,15 @@ func NewGCRGateway() (ContainerRegistry, error) {
 		return nil, errutil.ErrFailedPrecondition
 	}
 
-	resource := ""
-	request := &cloudresourcemanager.TestIamPermissionsRequest{}
-	permissions := []string{}
+	resource := "artifactregistry"
+
+	permissions := []string{
+		"artifactregistry.repositories.uploadArtifacts",
+		"artifactregistry.tags.create",
+		"artifactregistry.tags.update",
+	}
+
+	request := &cloudresourcemanager.TestIamPermissionsRequest{Permissions: permissions}
 
 	resp, err := cloudResourceManagerService.Projects.TestIamPermissions(resource, request).Context(context.TODO()).Do()
 	if err != nil {
