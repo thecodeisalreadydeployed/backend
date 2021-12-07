@@ -141,3 +141,88 @@ func TestSaveProject(t *testing.T) {
 	err = mock.ExpectationsWereMet()
 	assert.Nil(t, err)
 }
+
+func TestRemoveProject(t *testing.T) {
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Unix(0, 0)
+	})
+	defer monkey.UnpatchAll()
+
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+
+	rows := sqlmock.NewRows(datamodel.ProjectStructString()).
+		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
+
+	mock.ExpectQuery("SELECT VERSION()").WithArgs().WillReturnRows(
+		mock.NewRows([]string{"version"}).FromCSVString("1"),
+	)
+
+	query := "SELECT * FROM `projects` WHERE `projects`.`id` = ? ORDER BY `projects`.`id` LIMIT 1"
+	exec := "DELETE FROM `projects` WHERE `projects`.`id` = ?"
+
+	mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs("prj_test").
+		WillReturnRows(rows)
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(exec)).
+		WithArgs("prj_test").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	mock.ExpectClose()
+
+	gdb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn: db,
+	}), &gorm.Config{})
+	assert.Nil(t, err)
+
+	err = RemoveProject(gdb, "prj_test")
+	assert.Nil(t, err)
+
+	err = db.Close()
+	assert.Nil(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
+}
+
+func TestGetProjectByName(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+
+	rows := sqlmock.NewRows(datamodel.ProjectStructString()).
+		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
+
+	mock.ExpectQuery("SELECT VERSION()").WithArgs().WillReturnRows(
+		mock.NewRows([]string{"version"}).FromCSVString("1"),
+	)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects` WHERE `projects`.`name` = ?")).
+		WithArgs("Best Project").
+		WillReturnRows(rows)
+	mock.ExpectClose()
+
+	gdb, err := gorm.Open(mysql.New(mysql.Config{
+		Conn: db,
+	}), &gorm.Config{})
+	assert.Nil(t, err)
+
+	actual, err := GetProjectsByName(gdb, "Best Project")
+	assert.Nil(t, err)
+
+	expected := &[]model.Project{{
+		ID:        "prj_test",
+		Name:      "Best Project",
+		CreatedAt: time.Unix(0, 0),
+		UpdatedAt: time.Unix(0, 0),
+	}}
+
+	assert.Equal(t, expected, actual)
+
+	err = db.Close()
+	assert.Nil(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
+}
