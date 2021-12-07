@@ -18,7 +18,7 @@ func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, erro
 	}
 
 	var _data []datamodel.Deployment
-	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
+	err := GetDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -42,7 +42,7 @@ func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, err
 	}
 
 	var _data datamodel.Deployment
-	err := getDB().First(&_data, "id = ?", deploymentID).Error
+	err := GetDB().First(&_data, "id = ?", deploymentID).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -59,7 +59,7 @@ func SetDeploymentState(deploymentID string, state model.DeploymentState) error 
 		return getDeploymentErr
 	}
 
-	err := getDB().Model(&dpl).Update("state", state).Error
+	err := GetDB().Model(&dpl).Update("state", state).Error
 	if err != nil {
 		return err
 	}

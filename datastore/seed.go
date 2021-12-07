@@ -20,7 +20,7 @@ func seed() {
 
 func seedExists(name string) bool {
 	var existing int64
-	err := getDB().Table(name).Count(&existing).Error
+	err := GetDB().Table(name).Count(&existing).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return false
@@ -47,7 +47,7 @@ func seedProjects(size int) {
 		datum.ID = withPrefix(datum.ID, "prj")
 		data = append(data, datum)
 	}
-	if err := getDB().Create(&data).Error; err != nil {
+	if err := GetDB().Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed projects.")
 	}
 
@@ -59,7 +59,7 @@ func seedApps(size int) {
 	}
 
 	var keys []string
-	err := getDB().Table("projects").Select("ID").Scan(&keys).Error
+	err := GetDB().Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
@@ -80,7 +80,7 @@ func seedApps(size int) {
 
 		data = append(data, datum)
 	}
-	if err := getDB().Omit("Project").Create(&data).Error; err != nil {
+	if err := GetDB().Omit("Project").Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed apps.")
 	}
 }
@@ -91,7 +91,7 @@ func seedDeployments(size int) {
 	}
 
 	var keys []string
-	err := getDB().Table("apps").Select("ID").Scan(&keys).Error
+	err := GetDB().Table("apps").Select("ID").Scan(&keys).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
@@ -113,7 +113,7 @@ func seedDeployments(size int) {
 
 		data = append(data, datum)
 	}
-	if err := getDB().Omit("App").Create(&data).Error; err != nil {
+	if err := GetDB().Omit("App").Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed deployments.")
 	}
 
