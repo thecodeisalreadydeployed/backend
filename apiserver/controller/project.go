@@ -23,13 +23,13 @@ func listProjects(ctx *fiber.Ctx) error {
 
 func getProject(ctx *fiber.Ctx) error {
 	projectID := ctx.Params("projectID")
-	result, err := datastore.GetProjectByID(projectID)
+	result, err := datastore.GetProjectByID(datastore.GetDB(), projectID)
 	return writeResponse(ctx, result, err)
 }
 
 func listProjectApps(ctx *fiber.Ctx) error {
 	projectID := ctx.Params("projectID")
-	result, err := datastore.GetAppsByProjectID(projectID)
+	result, err := datastore.GetAppsByProjectID(datastore.GetDB(), projectID)
 	return writeResponse(ctx, result, err)
 }
 
@@ -45,14 +45,14 @@ func createProject(ctx *fiber.Ctx) error {
 	}
 
 	prj := input.ToModel()
-	project, createErr := datastore.SaveProject(&prj)
+	project, createErr := datastore.SaveProject(datastore.GetDB(), &prj)
 
 	return writeResponse(ctx, project, createErr)
 }
 
 func deleteProject(ctx *fiber.Ctx) error {
 	projectID := ctx.Params("projectID")
-	err := datastore.RemoveProject(projectID)
+	err := datastore.RemoveProject(datastore.GetDB(), projectID)
 	if err != nil {
 		return fiber.NewError(errutil.MapStatusCode(err))
 	}
