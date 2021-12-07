@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAllApps() (*[]model.App, error) {
+func GetAllApps(DB *gorm.DB) (*[]model.App, error) {
 	var _data []datamodel.App
 	err := getDB().Table("apps").Scan(&_data).Error
 	if err != nil {
@@ -30,7 +30,7 @@ func GetAllApps() (*[]model.App, error) {
 	return ret, nil
 }
 
-func GetObservableApps() (*[]model.App, error) {
+func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 	var _data []datamodel.App
 	err := getDB().Table("apps").Where("observable = ?", true).Scan(&_data).Error
 	if err != nil {
@@ -48,7 +48,7 @@ func GetObservableApps() (*[]model.App, error) {
 	return ret, nil
 }
 
-func GetAppsByProjectID(projectID string) (*[]model.App, error) {
+func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
 	if !strings.HasPrefix(projectID, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
 		return nil, errutil.ErrInvalidArgument
@@ -72,7 +72,7 @@ func GetAppsByProjectID(projectID string) (*[]model.App, error) {
 	return ret, nil
 }
 
-func GetAppByID(appID string) (*model.App, error) {
+func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
 	if !strings.HasPrefix(appID, "app_") {
 		zap.L().Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
@@ -90,7 +90,7 @@ func GetAppByID(appID string) (*model.App, error) {
 	return &ret, nil
 }
 
-func SaveApp(app *model.App) (*model.App, error) {
+func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 	if app.ID != "" {
 		if !strings.HasPrefix(app.ID, "app_") {
 			zap.L().Error(MsgAppPrefix)
@@ -116,10 +116,10 @@ func SaveApp(app *model.App) (*model.App, error) {
 
 		return nil, errutil.ErrUnknown
 	}
-	return GetAppByID(app.ID)
+	return GetAppByID(DB, app.ID)
 }
 
-func RemoveApp(id string) error {
+func RemoveApp(DB *gorm.DB, id string) error {
 	if !strings.HasPrefix(id, "app_") {
 		zap.L().Error(MsgAppPrefix)
 		return errutil.ErrInvalidArgument
@@ -137,7 +137,7 @@ func RemoveApp(id string) error {
 	return nil
 }
 
-func GetAppsByName(name string) (*[]model.App, error) {
+func GetAppsByName(DB *gorm.DB, name string) (*[]model.App, error) {
 	var _data []datamodel.App
 
 	err := getDB().Table("apps").Where(datamodel.App{Name: name}).Scan(&_data).Error
