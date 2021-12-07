@@ -49,12 +49,12 @@ func Init() {
 	}
 }
 
-func getDB() *gorm.DB {
+func GetDB() *gorm.DB {
 	return DB
 }
 
 func IsReady() bool {
-	_sql, err := getDB().DB()
+	_sql, err := GetDB().DB()
 	if err != nil {
 		return false
 	}
