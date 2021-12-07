@@ -14,7 +14,7 @@ import (
 
 func GetAllApps(DB *gorm.DB) (*[]model.App, error) {
 	var _data []datamodel.App
-	err := GetDB().Table("apps").Scan(&_data).Error
+	err := DB.Table("apps").Scan(&_data).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, errutil.ErrNotFound
@@ -32,7 +32,7 @@ func GetAllApps(DB *gorm.DB) (*[]model.App, error) {
 
 func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 	var _data []datamodel.App
-	err := GetDB().Table("apps").Where("observable = ?", true).Scan(&_data).Error
+	err := DB.Table("apps").Where("observable = ?", true).Scan(&_data).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, errutil.ErrNotFound
@@ -55,7 +55,7 @@ func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
 	}
 
 	var _data []datamodel.App
-	err := GetDB().Table("apps").Where(datamodel.App{ProjectID: projectID}).Scan(&_data).Error
+	err := DB.Table("apps").Where(datamodel.App{ProjectID: projectID}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -79,7 +79,7 @@ func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
 	}
 
 	var _data datamodel.App
-	err := GetDB().First(&_data, "id = ?", appID).Error
+	err := DB.First(&_data, "id = ?", appID).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -101,7 +101,7 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 	}
 
 	a := datamodel.NewAppFromModel(app)
-	err := GetDB().Save(a).Error
+	err := DB.Save(a).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -125,12 +125,12 @@ func RemoveApp(DB *gorm.DB, id string) error {
 		return errutil.ErrInvalidArgument
 	}
 	var a datamodel.App
-	err := GetDB().Table("apps").Where(datamodel.App{ID: id}).First(&a).Error
+	err := DB.Table("apps").Where(datamodel.App{ID: id}).First(&a).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrNotFound
 	}
-	if err := GetDB().Delete(&a).Error; err != nil {
+	if err := DB.Delete(&a).Error; err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrUnknown
 	}
@@ -140,7 +140,7 @@ func RemoveApp(DB *gorm.DB, id string) error {
 func GetAppsByName(DB *gorm.DB, name string) (*[]model.App, error) {
 	var _data []datamodel.App
 
-	err := GetDB().Table("apps").Where(datamodel.App{Name: name}).Scan(&_data).Error
+	err := DB.Table("apps").Where(datamodel.App{Name: name}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
