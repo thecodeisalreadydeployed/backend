@@ -3,6 +3,7 @@ module github.com/thecodeisalreadydeployed
 go 1.16
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
