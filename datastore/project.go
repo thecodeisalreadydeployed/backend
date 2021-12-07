@@ -36,7 +36,7 @@ func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
 
 	var _data datamodel.Project
 
-	err := GetDB().Table("projects").First(&_data, "id = ?", id).Error
+	err := DB.Table("projects").First(&_data, "id = ?", id).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -57,7 +57,7 @@ func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
 		project.ID = model.GenerateProjectID()
 	}
 	p := datamodel.NewProjectFromModel(project)
-	err := GetDB().Save(p).Error
+	err := DB.Save(p).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -73,12 +73,12 @@ func RemoveProject(DB *gorm.DB, id string) error {
 		return errutil.ErrInvalidArgument
 	}
 	var p datamodel.Project
-	err := GetDB().Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
+	err := DB.Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrNotFound
 	}
-	if err := GetDB().Delete(&p).Error; err != nil {
+	if err := DB.Delete(&p).Error; err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrUnknown
 	}
@@ -88,7 +88,7 @@ func RemoveProject(DB *gorm.DB, id string) error {
 func GetProjectsByName(DB *gorm.DB, name string) (*[]model.Project, error) {
 	var _data []datamodel.Project
 
-	err := GetDB().Table("projects").Where(datamodel.Project{Name: name}).Scan(&_data).Error
+	err := DB.Table("projects").Where(datamodel.Project{Name: name}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
