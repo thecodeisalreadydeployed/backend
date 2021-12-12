@@ -3,7 +3,6 @@ package datastore
 import (
 	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"time"
@@ -165,18 +164,4 @@ func TestGetProjectByName(t *testing.T) {
 
 	err = mock.ExpectationsWereMet()
 	assert.Nil(t, err)
-}
-
-func getProjectRows() *sqlmock.Rows {
-	return sqlmock.NewRows(datamodel.ProjectStructString()).
-		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
-}
-
-func getExpectedProject() *model.Project {
-	return &model.Project{
-		ID:        "prj_test",
-		Name:      "Best Project",
-		CreatedAt: time.Unix(0, 0),
-		UpdatedAt: time.Unix(0, 0),
-	}
 }
