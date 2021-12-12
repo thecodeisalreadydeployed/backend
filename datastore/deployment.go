@@ -53,13 +53,11 @@ func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, err
 	return &ret, nil
 }
 
-func SetDeploymentState(deploymentID string, state model.DeploymentState) error {
-	dpl, getDeploymentErr := GetDeploymentByID(DB, deploymentID)
-	if getDeploymentErr != nil {
-		return getDeploymentErr
-	}
-
-	err := DB.Model(&dpl).Update("state", state).Error
+func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.DeploymentState) error {
+	err := DB.Table("deployments").
+		Where(datamodel.Deployment{ID: deploymentID}).
+		Update("state", state).
+		Error
 	if err != nil {
 		return err
 	}
