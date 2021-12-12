@@ -2,12 +2,8 @@ package datastore
 
 import (
 	"bou.ke/monkey"
-	"encoding/base64"
-	"encoding/json"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/spf13/cast"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"testing"
@@ -228,47 +224,4 @@ func TestGetAppByName(t *testing.T) {
 
 	err = mock.ExpectationsWereMet()
 	assert.Nil(t, err)
-}
-
-func getGitSourceString() string {
-	gitSource, err := json.Marshal(model.GitSource{})
-	if err != nil {
-		panic(err)
-	}
-	return cast.ToString(gitSource)
-}
-
-func getBuildConfigurationString() string {
-	buildConfiguration, err := json.Marshal(model.BuildConfiguration{})
-	if err != nil {
-		panic(err)
-	}
-	return base64.StdEncoding.EncodeToString(buildConfiguration)
-}
-
-func getAppRows() *sqlmock.Rows {
-	return sqlmock.NewRows(datamodel.AppStructString()).
-		AddRow(
-			"app_test",
-			"prj_test",
-			"Best App",
-			getGitSourceString(),
-			time.Unix(0, 0),
-			time.Unix(0, 0),
-			getBuildConfigurationString(),
-			true,
-		)
-}
-
-func getExpectedApp() *model.App {
-	return &model.App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
-		Name:               "Best App",
-		GitSource:          model.GitSource{},
-		CreatedAt:          time.Unix(0, 0),
-		UpdatedAt:          time.Unix(0, 0),
-		BuildConfiguration: model.BuildConfiguration{},
-		Observable:         true,
-	}
 }
