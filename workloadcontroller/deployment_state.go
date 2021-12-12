@@ -22,7 +22,7 @@ func AddDeploymentToCheck(deploymentID string) {
 
 func SetDeploymentState(deploymentID string, state model.DeploymentState) {
 	zap.L().Sugar().Infof("Updating state of deployment ID '%s' to '%s'.", deploymentID, state)
-	err := datastore.SetDeploymentState(deploymentID, state)
+	err := datastore.SetDeploymentState(datastore.GetDB(), deploymentID, state)
 	if err != nil {
 		zap.L().Sugar().Infof("Failed to set state of deployment ID '%s'.", deploymentID)
 	}
