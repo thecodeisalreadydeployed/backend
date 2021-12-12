@@ -3,6 +3,7 @@ package datamodel
 import (
 	"encoding/base64"
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/spf13/cast"
@@ -74,4 +75,19 @@ func NewAppFromModel(app *model.App) *App {
 		BuildConfiguration: buildConfiguration64,
 		Observable:         app.Observable,
 	}
+}
+
+func AppStructString() []string {
+	app := App{}
+	var str []string
+
+	e := reflect.ValueOf(&app).Elem()
+
+	for i := 0; i < e.NumField(); i++ {
+		if IsStoredInDatabase(e.Type().Field(i)) {
+			str = append(str, e.Type().Field(i).Name)
+		}
+	}
+
+	return str
 }

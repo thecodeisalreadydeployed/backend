@@ -39,7 +39,9 @@ func ProjectStructString() []string {
 	e := reflect.ValueOf(&prj).Elem()
 
 	for i := 0; i < e.NumField(); i++ {
-		str = append(str, e.Type().Field(i).Name)
+		if IsStoredInDatabase(e.Type().Field(i)) {
+			str = append(str, e.Type().Field(i).Name)
+		}
 	}
 
 	return str
