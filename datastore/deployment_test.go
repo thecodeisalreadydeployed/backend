@@ -64,3 +64,31 @@ func TestGetDeploymentByID(t *testing.T) {
 	err = mock.ExpectationsWereMet()
 	assert.Nil(t, err)
 }
+
+func TestSetDeploymentState(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+	expectVersionQuery(mock)
+	fmt.Println(datamodel.DeploymentStructString())
+
+	exec := "UPDATE `deployments` SET `state`=? WHERE `deployments`.`id` = ?"
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(exec)).
+		WithArgs(model.DeploymentStateReady, "dpl_test").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+	mock.ExpectClose()
+
+	gdb, err := openGormDB(db)
+	assert.Nil(t, err)
+
+	err = SetDeploymentState(gdb, "dpl_test", model.DeploymentStateReady)
+	assert.Nil(t, err)
+
+	err = db.Close()
+	assert.Nil(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
+}
