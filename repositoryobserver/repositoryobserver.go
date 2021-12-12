@@ -10,7 +10,7 @@ import (
 )
 
 func ObserveGitSources() {
-	apps, err := datastore.GetObservableApps()
+	apps, err := datastore.GetObservableApps(datastore.GetDB())
 	if err != nil {
 		return
 	}

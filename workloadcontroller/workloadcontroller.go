@@ -28,7 +28,7 @@ func NewApp(opts *NewAppOptions) error {
 }
 
 func NewDeployment(appID string) (string, error) {
-	app, getAppErr := datastore.GetAppByID(appID)
+	app, getAppErr := datastore.GetAppByID(datastore.GetDB(), appID)
 	if getAppErr != nil {
 		return "", getAppErr
 	}

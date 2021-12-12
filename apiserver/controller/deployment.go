@@ -12,7 +12,7 @@ func NewDeploymentController(api fiber.Router) {
 
 func getDeployment(ctx *fiber.Ctx) error {
 	deploymentID := ctx.Params("deploymentID")
-	result, err := datastore.GetDeploymentByID(deploymentID)
+	result, err := datastore.GetDeploymentByID(datastore.GetDB(), deploymentID)
 	return writeResponse(ctx, result, err)
 }
 

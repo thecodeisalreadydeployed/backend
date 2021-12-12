@@ -17,19 +17,19 @@ func NewAppController(api fiber.Router) {
 }
 
 func listApps(ctx *fiber.Ctx) error {
-	result, err := datastore.GetAllApps()
+	result, err := datastore.GetAllApps(datastore.GetDB())
 	return writeResponse(ctx, result, err)
 }
 
 func getApp(ctx *fiber.Ctx) error {
 	appID := ctx.Params("appID")
-	result, err := datastore.GetAppByID(appID)
+	result, err := datastore.GetAppByID(datastore.GetDB(), appID)
 	return writeResponse(ctx, result, err)
 }
 
 func listAppDeployments(ctx *fiber.Ctx) error {
 	appID := ctx.Params("appID")
-	result, err := datastore.GetDeploymentsByAppID(appID)
+	result, err := datastore.GetDeploymentsByAppID(datastore.GetDB(), appID)
 	return writeResponse(ctx, result, err)
 }
 
@@ -45,14 +45,14 @@ func createApp(ctx *fiber.Ctx) error {
 	}
 
 	inputModel := input.ToModel()
-	app, createErr := datastore.SaveApp(&inputModel)
+	app, createErr := datastore.SaveApp(datastore.GetDB(), &inputModel)
 
 	return writeResponse(ctx, app, createErr)
 }
 
 func deleteApp(ctx *fiber.Ctx) error {
 	appID := ctx.Params("appID")
-	err := datastore.RemoveApp(appID)
+	err := datastore.RemoveApp(datastore.GetDB(), appID)
 	if err != nil {
 		return fiber.NewError(errutil.MapStatusCode(err))
 	}

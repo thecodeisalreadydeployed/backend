@@ -3,6 +3,7 @@ package datamodel
 import (
 	"encoding/base64"
 	"encoding/json"
+	"reflect"
 	"time"
 
 	"github.com/spf13/cast"
@@ -51,6 +52,7 @@ func (dpl *Deployment) ToModel() model.Deployment {
 
 	return model.Deployment{
 		ID:                 dpl.ID,
+		AppID:              dpl.AppID,
 		Creator:            creator,
 		Meta:               dpl.Meta,
 		GitSource:          gitSource,
@@ -96,4 +98,19 @@ func NewDeploymentFromModel(dpl *model.Deployment) *Deployment {
 		CreatedAt:          dpl.CreatedAt,
 		UpdatedAt:          dpl.UpdatedAt,
 	}
+}
+
+func DeploymentStructString() []string {
+	dpl := Deployment{}
+	var str []string
+
+	e := reflect.ValueOf(&dpl).Elem()
+
+	for i := 0; i < e.NumField(); i++ {
+		if IsStoredInDatabase(e.Type().Field(i)) {
+			str = append(str, e.Type().Field(i).Name)
+		}
+	}
+
+	return str
 }

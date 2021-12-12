@@ -1,6 +1,7 @@
 package datamodel
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/model"
@@ -29,4 +30,19 @@ func NewProjectFromModel(prj *model.Project) *Project {
 		CreatedAt: prj.CreatedAt,
 		UpdatedAt: prj.UpdatedAt,
 	}
+}
+
+func ProjectStructString() []string {
+	prj := Project{}
+	var str []string
+
+	e := reflect.ValueOf(&prj).Elem()
+
+	for i := 0; i < e.NumField(); i++ {
+		if IsStoredInDatabase(e.Type().Field(i)) {
+			str = append(str, e.Type().Field(i).Name)
+		}
+	}
+
+	return str
 }
