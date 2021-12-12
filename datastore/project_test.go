@@ -129,6 +129,7 @@ func TestRemoveProject(t *testing.T) {
 	mock.ExpectClose()
 
 	gdb, err := openGormDB(db)
+	assert.Nil(t, err)
 
 	err = RemoveProject(gdb, "prj_test")
 	assert.Nil(t, err)
@@ -151,6 +152,7 @@ func TestGetProjectByName(t *testing.T) {
 	mock.ExpectClose()
 
 	gdb, err := openGormDB(db)
+	assert.Nil(t, err)
 
 	actual, err := GetProjectsByName(gdb, "Best Project")
 	assert.Nil(t, err)
