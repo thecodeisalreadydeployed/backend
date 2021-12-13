@@ -37,3 +37,7 @@ func (q *queue) N() int {
 	n := q.list.Len()
 	return n
 }
+
+func NewQueue() Queue {
+	return &queue{}
+}
