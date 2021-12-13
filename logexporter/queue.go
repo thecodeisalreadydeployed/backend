@@ -9,11 +9,14 @@ type Queue interface {
 	Enqueue(data string)
 	Dequeue() string
 	N() int
+	End()
+	IsEnded() bool
 }
 
 type queue struct {
-	m    sync.Mutex
-	list list.List
+	m       sync.Mutex
+	list    list.List
+	isEnded bool
 }
 
 func (q *queue) Enqueue(data string) {
@@ -38,6 +41,18 @@ func (q *queue) N() int {
 	return n
 }
 
+func (q *queue) End() {
+	q.m.Lock()
+	defer q.m.Unlock()
+	q.isEnded = true
+}
+
+func (q *queue) IsEnded() bool {
+	q.m.Lock()
+	defer q.m.Unlock()
+	return q.isEnded
+}
+
 func NewQueue() Queue {
-	return &queue{}
+	return &queue{m: sync.Mutex{}, list: *list.New(), isEnded: false}
 }
