@@ -1,4 +1,4 @@
-package logexporter
+package main
 
 import (
 	"bufio"
@@ -8,8 +8,7 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	queue := NewQueue()
-	for {
-		scanner.Scan()
+	for scanner.Scan() {
 		text := scanner.Text()
 		queue.Enqueue(text)
 	}

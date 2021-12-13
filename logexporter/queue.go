@@ -1,4 +1,4 @@
-package logexporter
+package main
 
 import (
 	"container/list"
