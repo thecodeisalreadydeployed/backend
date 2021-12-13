@@ -31,6 +31,16 @@ func main() {
 			go export(apiURL, queue)
 		}
 	}
+
+	queue.End()
 }
 
-func export(apiURL string, queue Queue) {}
+func export(apiURL string, queue Queue) {
+	for {
+		if queue.N() == 0 && queue.IsEnded() {
+			break
+		}
+
+		_ = queue.Dequeue()
+	}
+}
