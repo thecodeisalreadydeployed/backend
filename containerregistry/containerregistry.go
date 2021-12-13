@@ -1,6 +1,7 @@
 package containerregistry
 
 type ContainerRegistryType string
+type AuthenticationMethod string
 
 const (
 	// Local
@@ -19,8 +20,14 @@ const (
 	ECR ContainerRegistryType = "ECR"
 )
 
+const (
+	KubernetesServiceAccount AuthenticationMethod = "KubernetesServiceAccount"
+	Secret                   AuthenticationMethod = "Secret"
+)
+
 type ContainerRegistry interface {
 	RegistryFormat(repository string, tag string) (string, error)
 	Type() ContainerRegistryType
 	Secret() string
+	AuthenticationMethod() AuthenticationMethod
 }
