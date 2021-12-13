@@ -31,3 +31,10 @@ type ContainerRegistry interface {
 	Secret() string
 	AuthenticationMethod() AuthenticationMethod
 }
+
+type ContainerRegistryConfiguration struct {
+	Type                 ContainerRegistryType `json:"type"`
+	AuthenticationMethod AuthenticationMethod  `json:"authenticationMethod"`
+	Repository           string                `json:"repository"`
+	Secret               string                `json:"secret"`
+}
