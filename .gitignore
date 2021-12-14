@@ -367,3 +367,7 @@ __w/*
 hack/__w
 hack/__w/
 hack/__w/*
+logexporter
+!logexporter/
+apiserver
+!apiserver/
