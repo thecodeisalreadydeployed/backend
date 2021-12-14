@@ -24,6 +24,7 @@ require (
 	github.com/moby/buildkit v0.9.1
 	github.com/nginxinc/kubernetes-ingress v1.12.0
 	github.com/robfig/cron v1.2.0
+	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/pflag v1.0.5
