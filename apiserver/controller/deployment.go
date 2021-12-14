@@ -2,7 +2,11 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/apiserver/errutil"
+	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"go.uber.org/zap"
 )
 
 func NewDeploymentController(api fiber.Router) {
@@ -27,6 +31,23 @@ func createDeploymentEvents(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusNotFound)
 	}
 
-	_ = ctx.Params("deploymentID")
-	return fiber.NewError(fiber.StatusNotImplemented)
+	deploymentID := ctx.Params("deploymentID")
+	input := dto.CreateDeploymentEventRequest{}
+
+	if err := ctx.BodyParser(&input); err != nil {
+		return fiber.NewError(errutil.MapStatusCode(err))
+	}
+
+	if validationErrors := validator.CheckStruct(input); len(validationErrors) > 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
+	}
+
+	inputModel := input.ToModel()
+	inputModel.DeploymentID = deploymentID
+
+	zap.L().Sugar().Debug(inputModel.Text)
+
+	_ = datastore.SaveEvent(datastore.GetDB(), &inputModel)
+
+	return ctx.SendStatus(fiber.StatusOK)
 }
