@@ -2,9 +2,13 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -17,7 +21,7 @@ func main() {
 	viper.BindEnv("DEPLOYMENT_BUILD_CONFIGURATION")
 
 	deploymentID := viper.GetString("CODEDEPLOY_DEPLOYMENT_ID")
-	apiURL := fmt.Sprintf("%s/internal/%s/events", strings.TrimSuffix(viper.GetString("CODEDEPLOY_API_URL"), "/"), deploymentID)
+	apiURL := fmt.Sprintf("%s/%s/events", strings.TrimSuffix(viper.GetString("CODEDEPLOY_API_URL"), "/"), deploymentID)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	queue := NewQueue()
@@ -45,6 +49,14 @@ func export(apiURL string, queue Queue, done chan bool) {
 			break
 		}
 
-		_ = queue.Dequeue()
+		text := queue.Dequeue()
+		data := map[string]string{
+			"text":       text,
+			"exportedAt": time.Now().String(),
+			"type":       "DEBUG",
+		}
+		dataJSON, _ := json.Marshal(data)
+		requestBody := bytes.NewBuffer(dataJSON)
+		http.Post(apiURL, "application/json", requestBody)
 	}
 }
