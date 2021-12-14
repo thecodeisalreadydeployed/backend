@@ -22,22 +22,26 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	queue := NewQueue()
 	isExporting := false
+	done := make(chan bool, 1)
 
 	for scanner.Scan() {
 		text := scanner.Text()
 		queue.Enqueue(text)
 
 		if !isExporting {
-			go export(apiURL, queue)
+			isExporting = true
+			go export(apiURL, queue, done)
 		}
 	}
 
 	queue.End()
+	<-done
 }
 
-func export(apiURL string, queue Queue) {
+func export(apiURL string, queue Queue, done chan bool) {
 	for {
 		if queue.N() == 0 && queue.IsEnded() {
+			done <- true
 			break
 		}
 
