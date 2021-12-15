@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: '1.16'
-      - run: GOOS=linux GOARCH=amd64 go build -o logexporter-linux-amd64 ./logexporter
+      - run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o logexporter-linux-amd64 -ldflags '-w -s' ./logexporter
       - run: ls
       - run: ls ./logexporter
       - uses: docker/setup-buildx-action@v1
