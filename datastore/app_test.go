@@ -132,10 +132,10 @@ func TestSaveApp(t *testing.T) {
 		WithArgs(
 			"prj_test",
 			"Best App",
-			getGitSourceString(),
+			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
-			getBuildConfigurationString(),
+			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
 			"app_test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
