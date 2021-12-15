@@ -9,7 +9,9 @@ jobs:
         pkg: [
           'gitgateway/v2',
           'repositoryobserver',
-          'manifestgenerator'
+          'manifestgenerator',
+          'datastore',
+          'datamodel'
         ]
     steps:
       - uses: actions/checkout@v2
