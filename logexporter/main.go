@@ -31,6 +31,7 @@ func main() {
 
 	for scanner.Scan() {
 		text := scanner.Text()
+		fmt.Printf("In: %s\n", text)
 		queue.Enqueue(text)
 
 		if !isExporting {
