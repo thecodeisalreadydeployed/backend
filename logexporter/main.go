@@ -49,7 +49,7 @@ func export(apiURL string, queue Queue, done chan bool) {
 		text := queue.Dequeue()
 		data := map[string]string{
 			"text":       text,
-			"exportedAt": time.Now().String(),
+			"exportedAt": time.Now().Format(time.RFC3339Nano),
 			"type":       "DEBUG",
 		}
 		dataJSON, _ := json.Marshal(data)
