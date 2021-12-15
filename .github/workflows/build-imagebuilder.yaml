@@ -29,6 +29,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v3
+        id: metadata-action
+        with:
+          images: |
+            ghcr.io/thecodeisalreadydeployed/imagebuilder
+          tags: |
+            type=sha
+            type=raw,value=latest
       - uses: docker/build-push-action@v2
         with:
           context: .
@@ -36,8 +44,5 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: |
-            thecodeisalreadydeployed/imagebuilder:latest
-            thecodeisalreadydeployed/imagebuilder:${{ env.SHA7 }}
-            ghcr.io/thecodeisalreadydeployed/imagebuilder:latest
-            ghcr.io/thecodeisalreadydeployed/imagebuilder:${{ env.SHA7 }}
+          tags: ${{ steps.metadata-action.outputs.tags }}
+          labels: ${{ steps.metadata-action.outputs.labels }}
