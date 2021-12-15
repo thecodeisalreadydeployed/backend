@@ -9,19 +9,11 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 func main() {
-	viper.SetEnvPrefix("CODEDEPLOY")
-	viper.BindEnv("API_URL")
-	viper.BindEnv("DEPLOYMENT_ID")
-	viper.BindEnv("DEPLOYMENT_GIT_SOURCE")
-	viper.BindEnv("DEPLOYMENT_BUILD_CONFIGURATION")
-
-	deploymentID := viper.GetString("CODEDEPLOY_DEPLOYMENT_ID")
-	apiURL := fmt.Sprintf("%s/%s/events", strings.TrimSuffix(viper.GetString("CODEDEPLOY_API_URL"), "/"), deploymentID)
+	deploymentID := os.Getenv("CODEDEPLOY_DEPLOYMENT_ID")
+	apiURL := fmt.Sprintf("%s/%s/events", strings.TrimSuffix(os.Getenv("CODEDEPLOY_API_URL"), "/"), deploymentID)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	queue := NewQueue()
