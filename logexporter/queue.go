@@ -29,7 +29,12 @@ func (q *queue) Dequeue() string {
 	q.m.Lock()
 	defer q.m.Unlock()
 	e := q.list.Front()
-	data := e.Value.(string)
+	var data string
+	if e.Value == nil {
+		data = ""
+	} else {
+		data = e.Value.(string)
+	}
 	q.list.Remove(e)
 	return data
 }
