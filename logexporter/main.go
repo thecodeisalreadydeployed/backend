@@ -42,6 +42,10 @@ func export(apiURL string, queue Queue, done chan bool) {
 			break
 		}
 
+		if queue.N() == 0 {
+			continue
+		}
+
 		text := queue.Dequeue()
 		data := map[string]string{
 			"text":       text,

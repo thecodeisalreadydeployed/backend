@@ -14,8 +14,8 @@ type Queue interface {
 }
 
 type queue struct {
-	m       sync.Mutex
-	list    list.List
+	m       *sync.Mutex
+	list    *list.List
 	isEnded bool
 }
 
@@ -59,5 +59,7 @@ func (q *queue) IsEnded() bool {
 }
 
 func NewQueue() Queue {
-	return &queue{m: sync.Mutex{}, list: *list.New(), isEnded: false}
+	mutex := sync.Mutex{}
+	l := list.New()
+	return &queue{m: &mutex, list: l, isEnded: false}
 }
