@@ -371,3 +371,11 @@ logexporter
 !logexporter/
 apiserver
 !apiserver/
+logexporter-linux-amd64
+logexporter-darwin-amd64
+logexporter-darwin-arm64
+logexporter-*
+apiserver-linux-amd64
+apiserver-darwin-amd64
+apiserver-darwin-arm64
+apiserver-*
