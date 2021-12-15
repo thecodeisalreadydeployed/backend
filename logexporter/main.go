@@ -13,7 +13,7 @@ import (
 
 func main() {
 	deploymentID := os.Getenv("CODEDEPLOY_DEPLOYMENT_ID")
-	apiURL := fmt.Sprintf("%s/%s/events", strings.TrimSuffix(os.Getenv("CODEDEPLOY_API_URL"), "/"), deploymentID)
+	apiURL := fmt.Sprintf("%s/deployments/%s/events", strings.TrimSuffix(os.Getenv("CODEDEPLOY_API_URL"), "/"), deploymentID)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	queue := NewQueue()
@@ -53,6 +53,7 @@ func export(apiURL string, queue Queue, done chan bool) {
 
 		req, err := http.NewRequest("POST", apiURL, requestBody)
 		req.Header.Add("X-CodeDeploy-Internal-Request", "True")
+		req.Header.Add("Content-Type", "application/json")
 
 		if err != nil {
 			fmt.Printf("failed to create an HTTP request: %v\n", err)
