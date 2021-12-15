@@ -36,6 +36,6 @@ jobs:
           cache-to: type=gha,mode=max
           tags: |
             thecodeisalreadydeployed/imagebuilder:latest
-            thecodeisalreadydeployed/imagebuilder:${GITHUB_SHA::7}
+            thecodeisalreadydeployed/imagebuilder:${{ GITHUB_SHA::7 }}
             ghcr.io/thecodeisalreadydeployed/imagebuilder:latest
-            ghcr.io/thecodeisalreadydeployed/imagebuilder:${GITHUB_SHA::7}
+            ghcr.io/thecodeisalreadydeployed/imagebuilder:${{ GITHUB_SHA::7 }}
