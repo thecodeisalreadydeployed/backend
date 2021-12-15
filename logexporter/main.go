@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -64,13 +63,13 @@ func export(apiURL string, queue Queue, done chan bool) {
 		req.Header.Add("X-CodeDeploy-Internal-Request", "True")
 
 		if err != nil {
-			zap.L().Error("failed to create an HTTP request")
+			fmt.Printf("failed to create an HTTP request: %v\n", err)
 			continue
 		}
 
 		_, err = http.DefaultClient.Do(req)
 		if err != nil {
-			zap.L().Error("failed to send an HTTP request")
+			fmt.Printf("failed to send an HTTP request: %v\n", err)
 			continue
 		}
 	}
