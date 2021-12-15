@@ -1,51 +1,24 @@
 package datastore
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 	"time"
 )
-
-func getCreatorString() string {
-	creator, err := json.Marshal(model.Actor{})
-	if err != nil {
-		panic(err)
-	}
-	return cast.ToString(creator)
-}
-
-func getGitSourceString() string {
-	gitSource, err := json.Marshal(model.GitSource{})
-	if err != nil {
-		panic(err)
-	}
-	return cast.ToString(gitSource)
-}
-
-func getBuildConfigurationString() string {
-	buildConfiguration, err := json.Marshal(model.BuildConfiguration{})
-	if err != nil {
-		panic(err)
-	}
-	return base64.StdEncoding.EncodeToString(buildConfiguration)
-}
 
 func getDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.DeploymentStructString()).
 		AddRow(
 			"dpl_test",
 			"app_test",
-			getCreatorString(),
+			model.GetCreatorString(model.Actor{}),
 			"dummy_meta",
-			getGitSourceString(),
+			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
-			getBuildConfigurationString(),
+			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.DeploymentStateReady,
@@ -58,10 +31,10 @@ func getAppRows() *sqlmock.Rows {
 			"app_test",
 			"prj_test",
 			"Best App",
-			getGitSourceString(),
+			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
-			getBuildConfigurationString(),
+			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
 		)
 }
