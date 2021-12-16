@@ -1,8 +1,6 @@
 package datastore
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 
@@ -129,11 +127,7 @@ func getGitSource() string {
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
-	res, err := json.Marshal(gs)
-	if err != nil {
-		zap.L().Error(err.Error())
-	}
-	return string(res)
+	return model.GetGitSourceString(gs)
 }
 
 func getBuildConfiguration() string {
@@ -142,12 +136,7 @@ func getBuildConfiguration() string {
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
-	_res, err := json.Marshal(bc)
-	if err != nil {
-		zap.L().Error(err.Error())
-	}
-	res := base64.StdEncoding.EncodeToString(_res)
-	return res
+	return model.GetBuildConfigurationString(bc)
 }
 
 func getCreator() string {
@@ -156,11 +145,7 @@ func getCreator() string {
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
-	res, err := json.Marshal(c)
-	if err != nil {
-		zap.L().Error(err.Error())
-	}
-	return string(res)
+	return model.GetCreatorString(c)
 }
 
 func withPrefix(body string, prefix string) string {
