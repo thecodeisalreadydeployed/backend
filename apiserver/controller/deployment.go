@@ -22,7 +22,9 @@ func getDeployment(ctx *fiber.Ctx) error {
 }
 
 func getDeploymentEvents(ctx *fiber.Ctx) error {
-	return fiber.NewError(fiber.StatusNotImplemented)
+	deploymentID := ctx.Params("deploymentID")
+	result, err := datastore.GetEventsByDeploymentID(datastore.GetDB(), deploymentID)
+	return writeResponse(ctx, result, err)
 }
 
 func createDeploymentEvents(ctx *fiber.Ctx) error {
