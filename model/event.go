@@ -23,7 +23,11 @@ type Event struct {
 	ExportedAt   time.Time `json:"exportedAt"`
 }
 
-func GenerateEventID() string {
-	id := ksuid.New()
+func GenerateEventID(exportedAt time.Time) string {
+	id, err := ksuid.NewRandomWithTime(exportedAt)
+	if err != nil {
+		panic("cannot generate KSUID")
+	}
+
 	return id.String()
 }
