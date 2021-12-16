@@ -14,8 +14,8 @@ type Queue interface {
 }
 
 type queue struct {
-	m       sync.Mutex
-	list    list.List
+	m       *sync.Mutex
+	list    *list.List
 	isEnded bool
 }
 
@@ -29,7 +29,12 @@ func (q *queue) Dequeue() string {
 	q.m.Lock()
 	defer q.m.Unlock()
 	e := q.list.Front()
-	data := e.Value.(string)
+	var data string
+	if e.Value == nil {
+		data = ""
+	} else {
+		data = e.Value.(string)
+	}
 	q.list.Remove(e)
 	return data
 }
@@ -54,5 +59,7 @@ func (q *queue) IsEnded() bool {
 }
 
 func NewQueue() Queue {
-	return &queue{m: sync.Mutex{}, list: *list.New(), isEnded: false}
+	mutex := sync.Mutex{}
+	l := list.New()
+	return &queue{m: &mutex, list: l, isEnded: false}
 }

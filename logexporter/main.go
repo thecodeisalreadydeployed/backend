@@ -9,19 +9,11 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 func main() {
-	viper.SetEnvPrefix("CODEDEPLOY")
-	viper.BindEnv("API_URL")
-	viper.BindEnv("DEPLOYMENT_ID")
-	viper.BindEnv("DEPLOYMENT_GIT_SOURCE")
-	viper.BindEnv("DEPLOYMENT_BUILD_CONFIGURATION")
-
-	deploymentID := viper.GetString("CODEDEPLOY_DEPLOYMENT_ID")
-	apiURL := fmt.Sprintf("%s/%s/events", strings.TrimSuffix(viper.GetString("CODEDEPLOY_API_URL"), "/"), deploymentID)
+	deploymentID := os.Getenv("CODEDEPLOY_DEPLOYMENT_ID")
+	apiURL := fmt.Sprintf("%s/deployments/%s/events", strings.TrimSuffix(os.Getenv("CODEDEPLOY_API_URL"), "/"), deploymentID)
 
 	scanner := bufio.NewScanner(os.Stdin)
 	queue := NewQueue()
@@ -30,6 +22,7 @@ func main() {
 
 	for scanner.Scan() {
 		text := scanner.Text()
+		fmt.Printf("In: %s\n", text)
 		queue.Enqueue(text)
 
 		if !isExporting {
@@ -49,14 +42,32 @@ func export(apiURL string, queue Queue, done chan bool) {
 			break
 		}
 
+		if queue.N() == 0 {
+			continue
+		}
+
 		text := queue.Dequeue()
 		data := map[string]string{
 			"text":       text,
-			"exportedAt": time.Now().String(),
+			"exportedAt": time.Now().Format(time.RFC3339Nano),
 			"type":       "DEBUG",
 		}
 		dataJSON, _ := json.Marshal(data)
 		requestBody := bytes.NewBuffer(dataJSON)
-		http.Post(apiURL, "application/json", requestBody)
+
+		req, err := http.NewRequest("POST", apiURL, requestBody)
+		req.Header.Add("X-CodeDeploy-Internal-Request", "True")
+		req.Header.Add("Content-Type", "application/json")
+
+		if err != nil {
+			fmt.Printf("failed to create an HTTP request: %v\n", err)
+			continue
+		}
+
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			fmt.Printf("failed to send an HTTP request: %v\n", err)
+			continue
+		}
 	}
 }
