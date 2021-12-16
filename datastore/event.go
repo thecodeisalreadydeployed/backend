@@ -25,7 +25,7 @@ func SaveEvent(DB *gorm.DB, event *model.Event) error {
 			return errutil.ErrInvalidArgument
 		}
 	} else {
-		event.ID = model.GenerateEventID()
+		event.ID = model.GenerateEventID(event.ExportedAt)
 	}
 	e := datamodel.NewEventFromModel(event)
 	err := DB.Save(e).Error
