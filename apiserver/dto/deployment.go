@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/model"
@@ -12,10 +13,37 @@ type CreateDeploymentEventRequest struct {
 	Type       model.EventType `validate:"required"`
 }
 
+type KanikoLog struct {
+	Level string
+	Msg   string
+}
+
 func (req *CreateDeploymentEventRequest) ToModel() model.Event {
+	var kanikoLog KanikoLog
+	err := json.Unmarshal([]byte(req.Text), &kanikoLog)
+	if err != nil {
+		return model.Event{
+			Text:       req.Text,
+			Type:       req.Type,
+			ExportedAt: req.ExportedAt,
+		}
+	}
+
+	logLevel := model.DEBUG
+	switch kanikoLog.Level {
+	case "debug":
+		logLevel = model.DEBUG
+	case "info":
+		logLevel = model.INFO
+	case "warning":
+		logLevel = model.INFO
+	default:
+		logLevel = model.ERROR
+	}
+
 	return model.Event{
-		Text:       req.Text,
-		Type:       req.Type,
+		Text:       kanikoLog.Msg,
+		Type:       logLevel,
 		ExportedAt: req.ExportedAt,
 	}
 }
