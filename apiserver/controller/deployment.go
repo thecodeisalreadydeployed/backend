@@ -4,7 +4,6 @@ import (
 	"sort"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/segmentio/ksuid"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
@@ -33,9 +32,10 @@ func getDeploymentEvents(ctx *fiber.Ctx) error {
 
 	ret := *result
 	sort.SliceStable(ret, func(i, j int) bool {
-		a, _ := ksuid.Parse(ret[i].ID)
-		b, _ := ksuid.Parse(ret[j].ID)
-		return ksuid.Compare(a, b) < 0
+		// a, _ := ksuid.Parse(ret[i].ID)
+		// b, _ := ksuid.Parse(ret[j].ID)
+		// return ksuid.Compare(a, b) < 0
+		return ret[i].ExportedAt.Before(ret[j].ExportedAt)
 	})
 
 	return writeResponse(ctx, ret, nil)
