@@ -10,8 +10,23 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetEventByDeploymentID(DB *gorm.DB, deploymentID string) (string, error) {
-	return "", nil
+func GetEventsByDeploymentID(DB *gorm.DB, deploymentID string) (*[]model.Event, error) {
+	var _data []datamodel.Event
+	err := DB.Table("events").Where(datamodel.Event{DeploymentID: deploymentID}).Scan(&_data).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrNotFound
+	}
+
+	var _ret []model.Event
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
 }
 
 func IsValidKSUID(str string) bool {
