@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"sort"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/segmentio/ksuid"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
@@ -24,7 +27,18 @@ func getDeployment(ctx *fiber.Ctx) error {
 func getDeploymentEvents(ctx *fiber.Ctx) error {
 	deploymentID := ctx.Params("deploymentID")
 	result, err := datastore.GetEventsByDeploymentID(datastore.GetDB(), deploymentID)
-	return writeResponse(ctx, result, err)
+	if err != nil {
+		return writeResponse(ctx, result, err)
+	}
+
+	ret := *result
+	sort.SliceStable(ret, func(i, j int) bool {
+		a, _ := ksuid.Parse(ret[i].ID)
+		b, _ := ksuid.Parse(ret[j].ID)
+		return ksuid.Compare(a, b) < 0
+	})
+
+	return writeResponse(ctx, ret, nil)
 }
 
 func createDeploymentEvents(ctx *fiber.Ctx) error {
