@@ -8,6 +8,7 @@ on:
       - "logexporter/**"
       - ".github/workflows/build-imagebuilder.yaml"
     branches:
+      - main
       - dev/imagebuilder
       - dev/imagebuilder-docker
 jobs:
