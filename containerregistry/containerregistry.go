@@ -29,7 +29,6 @@ type ContainerRegistry interface {
 	RegistryFormat(repository string, tag string) (string, error)
 	Type() ContainerRegistryType
 	Secret() string
-	AuthenticationMethod() AuthenticationMethod
 }
 
 type ContainerRegistryConfiguration struct {
