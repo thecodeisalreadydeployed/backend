@@ -19,13 +19,13 @@ func APIServer(port int) {
 	app.Use(cors.New())
 	app.Use(logger.New())
 
-	controller.NewProjectController(app.Group("project"))
-	controller.NewAppController(app.Group("app"))
-	controller.NewDeploymentController(app.Group("deployment"))
+	controller.NewProjectController(app.Group("projects"))
+	controller.NewAppController(app.Group("apps"))
+	controller.NewDeploymentController(app.Group("deployments"))
 
-	controller.NewHealthController(app.Group("health"))
-	controller.NewPresetController(app.Group("preset"))
-	controller.NewBuildScriptController(app.Group("build-script"))
+	controller.NewHealthController(app.Group("healthz"))
+	// controller.NewPresetController(app.Group("preset"))
+	// controller.NewBuildScriptController(app.Group("build-script"))
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }

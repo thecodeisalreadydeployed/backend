@@ -3,9 +3,10 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
+	"os"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"gorm.io/driver/mysql"
-	"os"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/util"
@@ -43,6 +44,11 @@ func Init() {
 	}
 
 	err = DB.AutoMigrate(&datamodel.Deployment{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = DB.AutoMigrate(&datamodel.Event{})
 	if err != nil {
 		panic(err)
 	}

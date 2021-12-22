@@ -361,3 +361,21 @@ $RECYCLE.BIN/
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,vim,linux,jetbrains+all,visualstudiocode,go,node,yarn
+__w
+__w/
+__w/*
+hack/__w
+hack/__w/
+hack/__w/*
+logexporter
+!logexporter/
+apiserver
+!apiserver/
+logexporter-linux-amd64
+logexporter-darwin-amd64
+logexporter-darwin-arm64
+logexporter-*
+apiserver-linux-amd64
+apiserver-darwin-amd64
+apiserver-darwin-arm64
+apiserver-*
