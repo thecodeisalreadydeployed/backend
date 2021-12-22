@@ -29,7 +29,7 @@ func (req *CreateDeploymentEventRequest) ToModel() model.Event {
 		}
 	}
 
-	logLevel := model.DEBUG
+	var logLevel model.EventType
 	switch kanikoLog.Level {
 	case "debug":
 		logLevel = model.DEBUG
