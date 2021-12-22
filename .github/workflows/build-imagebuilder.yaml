@@ -14,6 +14,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-20.04
+    concurrency:
+      group: build/imagebuilder:${{ github.head_ref }}
+      cancel-in-progress: true
     env:
       SHA7: ${GITHUB_SHA::7}
     steps:
