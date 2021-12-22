@@ -38,12 +38,12 @@ func TestIntegration(t *testing.T) {
 
 	expect := Setup(t)
 
-	expect.POST("/project").
+	expect.POST("/projects").
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
 		Expect().
 		Status(http.StatusOK)
 
-	projects := expect.GET("/project/list").
+	projects := expect.GET("/projects/list").
 		Expect().
 		Status(http.StatusOK).
 		JSON()
@@ -54,7 +54,7 @@ func TestIntegration(t *testing.T) {
 
 	assert.NotEmpty(t, projectID)
 
-	expect.POST("/app").
+	expect.POST("/apps").
 		WithForm(dto.CreateAppRequest{
 			ProjectID:       projectID,
 			Name:            appName,
@@ -66,7 +66,7 @@ func TestIntegration(t *testing.T) {
 			StartCommand:    fake,
 		}).Expect().Status(http.StatusOK)
 
-	apps := expect.GET("/project/" + projectID + "/apps").
+	apps := expect.GET("/projects/" + projectID + "/apps").
 		Expect().
 		Status(http.StatusOK).
 		JSON()
@@ -77,30 +77,30 @@ func TestIntegration(t *testing.T) {
 
 	assert.NotEmpty(t, appID)
 
-	expect.GET(fmt.Sprintf("/project/%s", projectID)).
+	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
 		Expect().Status(http.StatusOK).JSON().
 		Object().
 		ContainsKey("name").ValueEqual("name", projectName)
 
-	expect.GET(fmt.Sprintf("/app/%s", appID)).
+	expect.GET(fmt.Sprintf("/apps/%s", appID)).
 		Expect().Status(http.StatusOK).JSON().
 		Object().
 		ContainsKey("projectID").ValueEqual("projectID", projectID).
 		ContainsKey("name").ValueEqual("name", appName)
 
-	expect.GET(fmt.Sprintf("/app/%s/deployments", appID)).
+	expect.GET(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).JSON().
 		Null()
 
-	expect.DELETE(fmt.Sprintf("/app/%s", appID)).
+	expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
 		Expect().Status(http.StatusOK)
 
-	expect.DELETE(fmt.Sprintf("/project/%s", projectID)).
+	expect.DELETE(fmt.Sprintf("/projects/%s", projectID)).
 		Expect().Status(http.StatusOK)
 
-	expect.GET(fmt.Sprintf("/project/%s", projectID)).
+	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
 		Expect().Status(http.StatusNotFound)
 
-	expect.GET(fmt.Sprintf("/app/%s", appID)).
+	expect.GET(fmt.Sprintf("/apps/%s", appID)).
 		Expect().Status(http.StatusNotFound)
 }
