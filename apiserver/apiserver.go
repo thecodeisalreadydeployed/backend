@@ -24,8 +24,8 @@ func APIServer(port int) {
 	controller.NewDeploymentController(app.Group("deployments"))
 
 	controller.NewHealthController(app.Group("health"))
-	// controller.NewPresetController(app.Group("preset"))
-	// controller.NewBuildScriptController(app.Group("build-script"))
+	controller.NewPresetController(app.Group("preset"))
+	controller.NewBuildScriptController(app.Group("build-script"))
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }
