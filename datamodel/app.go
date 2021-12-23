@@ -16,6 +16,7 @@ type App struct {
 	UpdatedAt          time.Time `gorm:"autoUpdateTime"`
 	BuildConfiguration string
 	Observable         bool
+	CommitDuration     int64
 }
 
 func (app *App) ToModel() model.App {
@@ -28,6 +29,7 @@ func (app *App) ToModel() model.App {
 		UpdatedAt:          app.UpdatedAt,
 		BuildConfiguration: model.GetBuildConfigurationObject(app.BuildConfiguration),
 		Observable:         app.Observable,
+		CommitDuration:     app.CommitDuration,
 	}
 }
 
@@ -41,6 +43,7 @@ func NewAppFromModel(app *model.App) *App {
 		UpdatedAt:          app.UpdatedAt,
 		BuildConfiguration: model.GetBuildConfigurationString(app.BuildConfiguration),
 		Observable:         app.Observable,
+		CommitDuration:     app.CommitDuration,
 	}
 }
 
@@ -54,5 +57,6 @@ func AppStructString() []string {
 		"UpdatedAt",
 		"BuildConfiguration",
 		"Observable",
+		"CommitDuration",
 	}
 }
