@@ -23,7 +23,7 @@ func APIServer(port int) {
 	controller.NewAppController(app.Group("apps"))
 	controller.NewDeploymentController(app.Group("deployments"))
 
-	controller.NewHealthController(app.Group("healthz"))
+	controller.NewHealthController(app.Group("health"))
 	// controller.NewPresetController(app.Group("preset"))
 	// controller.NewBuildScriptController(app.Group("build-script"))
 
