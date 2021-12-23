@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -27,6 +28,9 @@ type GitGateway interface {
 	Log() error
 	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
+
+	// Calculate average commit duration for the last 5 commit intervals
+	CommitDuration() (time.Duration, error)
 }
 
 type gitGateway struct {
@@ -262,4 +266,41 @@ func (g *gitGateway) Log() error {
 
 	return nil
 
+}
+
+func (g *gitGateway) CommitDuration() (time.Duration, error) {
+	ref, refErr := g.repo.Head()
+	if refErr != nil {
+		return -1, errutil.ErrFailedPrecondition
+	}
+
+	cIter, logErr := g.repo.Log(&git.LogOptions{From: ref.Hash()})
+	if logErr != nil {
+		return -1, errutil.ErrFailedPrecondition
+	}
+
+	var times []time.Time
+	for i := 0; i <= 5; i++ {
+		commit, err := cIter.Next()
+		if err != nil {
+			break
+		}
+		times = append(times, commit.Author.When)
+	}
+
+	if len(times) < 2 {
+		return -1, errutil.ErrFailedPrecondition
+	}
+
+	var durations []time.Duration
+	for i := 1; i < len(times); i++ {
+		durations = append(durations, times[i].Sub(times[i-1]))
+	}
+
+	var sum float64
+	for _, duration := range durations {
+		sum += duration.Minutes()
+	}
+
+	return time.Duration(sum/float64(len(durations))) * time.Minute, nil
 }
