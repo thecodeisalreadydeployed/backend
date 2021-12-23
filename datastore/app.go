@@ -48,6 +48,11 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 	return ret, nil
 }
 
+func IsObservableApp(DB *gorm.DB, appID string) (bool, error) {
+	//TODO: code functionality and mock test
+	return true, nil
+}
+
 func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
 	if !strings.HasPrefix(projectID, "prj_") {
 		zap.L().Error(MsgProjectPrefix)
