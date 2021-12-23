@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"github.com/robfig/cron"
+	"github.com/thecodeisalreadydeployed/repositoryobserver"
 )
 
 const (
@@ -15,7 +16,7 @@ func Watch() {
 
 	// Every 5 minutes
 	err := c.AddFunc(_5m, func() {
-		// repositoryobserver.ObserveGitSources()
+		repositoryobserver.CheckObservableApps()
 	})
 
 	if err != nil {

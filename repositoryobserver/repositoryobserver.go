@@ -16,8 +16,11 @@ const WaitAfterErrorInterval = 10 * time.Second
 
 // TODO: (Critical) Create a goroutine that checks every interval if new apps are made observable
 
+func CheckObservableApps() {
+	//TODO: this
+}
+
 func ObserveGitSources() {
-	var observable sync.Map
 	var wg sync.WaitGroup
 
 	apps, err := datastore.GetObservableApps(datastore.GetDB())
