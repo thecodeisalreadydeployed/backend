@@ -16,9 +16,6 @@ type App struct {
 	UpdatedAt          time.Time          `json:"updatedAt"`
 	BuildConfiguration BuildConfiguration `json:"buildConfiguration"`
 	Observable         bool               `json:"observable"`
-
-	// Calculated recent commit duration in nanoseconds.
-	CommitDuration int64 `json:"commitDuration"`
 }
 
 func GenerateAppID() string {
