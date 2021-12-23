@@ -10,6 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
+//TODO: test this file
+
 func GetEventsByDeploymentID(DB *gorm.DB, deploymentID string) (*[]model.Event, error) {
 	var _data []datamodel.Event
 	err := DB.Table("events").Where(datamodel.Event{DeploymentID: deploymentID}).Scan(&_data).Error
