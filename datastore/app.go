@@ -156,3 +156,19 @@ func GetAppsByName(DB *gorm.DB, name string) (*[]model.App, error) {
 	ret := &_ret
 	return ret, nil
 }
+
+//TODO: test update commit duration
+
+func UpdateCommitDuration(DB *gorm.DB, id string, duration int64) error {
+	if !strings.HasPrefix(id, "app_") {
+		zap.L().Error(MsgAppPrefix)
+		return errutil.ErrInvalidArgument
+	}
+
+	err := DB.Table("apps").Where(datamodel.App{ID: id}).Update("CommitDuration", duration).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+	return nil
+}
