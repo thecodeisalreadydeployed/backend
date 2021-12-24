@@ -31,6 +31,6 @@ func main() {
 
 	datastore.Init()
 	scheduler.Watch()
-	repositoryobserver.ObserveGitSources()
+	go repositoryobserver.ObserveGitSources(datastore.GetDB())
 	apiserver.APIServer(3000)
 }
