@@ -3,6 +3,7 @@ package repositoryobserver
 import (
 	"fmt"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -13,46 +14,54 @@ import (
 const FetchObservableAppsInterval = 3 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
-func ObserveGitSources() {
-	aChan := make(chan model.App)
+func ObserveGitSources(DB *gorm.DB) {
+	aChan := make(chan *model.App)
 
-	go checkObservableApps(aChan)
+	go checkObservableApps(DB, aChan, true)
 
 	for {
 		select {
 		case app := <-aChan:
-			go checkGitSource(app, 0)
+			go checkGitSource(*app, 0, true)
 		}
 	}
 }
 
-func checkObservableApps(aChan chan model.App) {
-	apps, err := datastore.GetObservableApps(datastore.GetDB())
+func checkObservableApps(DB *gorm.DB, aChan chan *model.App, recurrent bool) {
+	apps, err := datastore.GetObservableApps(DB)
 
 	if err != nil {
 		zap.L().Error(err.Error())
 		fmt.Println("Unable to fetch observable apps, waiting for the next fetch of observables.")
 		time.Sleep(WaitAfterErrorInterval)
-		checkObservableApps(aChan)
+		defer func() {
+			go checkObservableApps(DB, aChan, recurrent)
+		}()
 		return
 	}
 
 	if len(*apps) == 0 {
 		fmt.Println("All apps are set to not be observed, waiting for the next fetch of observables.")
 		time.Sleep(FetchObservableAppsInterval)
-		checkObservableApps(aChan)
+		defer func() {
+			go checkObservableApps(DB, aChan, recurrent)
+		}()
 		return
 	}
 
 	for _, app := range *apps {
-		aChan <- app
+		aChan <- &app
 	}
 
-	time.Sleep(FetchObservableAppsInterval)
-	checkObservableApps(aChan)
+	if recurrent {
+		time.Sleep(FetchObservableAppsInterval)
+		defer func() {
+			go checkObservableApps(DB, aChan, true)
+		}()
+	}
 }
 
-func checkGitSource(app model.App, waitInterval time.Duration) {
+func checkGitSource(app model.App, waitInterval time.Duration, recurrent bool) {
 	commit, duration := checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 	if commit == nil {
 		if waitInterval == 0 {
@@ -64,21 +73,30 @@ func checkGitSource(app model.App, waitInterval time.Duration) {
 				waitInterval = duration
 			}
 		}
-		checkGitSource(app, waitInterval)
+		time.Sleep(waitInterval)
+		defer func() {
+			go checkGitSource(app, waitInterval, recurrent)
+		}()
 		return
 	}
 
 	deployNewRevision()
 
-	time.Sleep(waitInterval)
+	if recurrent {
+		time.Sleep(waitInterval)
 
-	observable, err := datastore.IsObservableApp(datastore.GetDB(), app.ID)
-	if err != nil {
-		checkGitSource(app, WaitAfterErrorInterval)
-		return
-	}
-	if observable {
-		go checkGitSource(app, duration)
+		observable, err := datastore.IsObservableApp(datastore.GetDB(), app.ID)
+		if err != nil {
+			defer func() {
+				go checkGitSource(app, WaitAfterErrorInterval, true)
+			}()
+			return
+		}
+		if observable {
+			defer func() {
+				go checkGitSource(app, duration, true)
+			}()
+		}
 	}
 }
 
