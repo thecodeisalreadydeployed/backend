@@ -3,7 +3,6 @@ package repositoryobserver
 import (
 	"fmt"
 	"go.uber.org/zap"
-	"sync"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -14,43 +13,46 @@ import (
 const FetchObservableAppsInterval = 3 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
-// TODO: (Critical) Create a goroutine that checks every interval if new apps are made observable
+func ObserveGitSources() {
+	aChan := make(chan model.App)
 
-func CheckObservableApps() {
-	//TODO: this
+	go checkObservableApps(aChan)
+
+	for {
+		select {
+		case app := <-aChan:
+			go checkGitSource(app, 0)
+		}
+	}
 }
 
-func ObserveGitSources() {
-	var wg sync.WaitGroup
-
+func checkObservableApps(aChan chan model.App) {
 	apps, err := datastore.GetObservableApps(datastore.GetDB())
 
 	if err != nil {
 		zap.L().Error(err.Error())
 		fmt.Println("Unable to fetch observable apps, waiting for the next fetch of observables.")
 		time.Sleep(WaitAfterErrorInterval)
-		ObserveGitSources()
+		checkObservableApps(aChan)
 		return
 	}
 
 	if len(*apps) == 0 {
 		fmt.Println("All apps are set to not be observed, waiting for the next fetch of observables.")
 		time.Sleep(FetchObservableAppsInterval)
-		ObserveGitSources()
+		checkObservableApps(aChan)
 		return
 	}
 
-	wg.Add(len(*apps))
 	for _, app := range *apps {
-		go checkGitSource(app, &wg, 0)
+		aChan <- app
 	}
-	wg.Wait()
-	ObserveGitSources()
+
+	time.Sleep(FetchObservableAppsInterval)
+	checkObservableApps(aChan)
 }
 
-func checkGitSource(app model.App, wg *sync.WaitGroup, waitInterval time.Duration) {
-	defer wg.Done()
-
+func checkGitSource(app model.App, waitInterval time.Duration) {
 	commit, duration := checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 	if commit == nil {
 		if waitInterval == 0 {
@@ -61,7 +63,7 @@ func checkGitSource(app model.App, wg *sync.WaitGroup, waitInterval time.Duratio
 			fmt.Println("There are no changes in the application, waiting for next repository check.")
 			waitInterval = duration
 		}
-		checkGitSource(app, wg, waitInterval)
+		checkGitSource(app, waitInterval)
 		return
 	}
 
@@ -73,12 +75,11 @@ func checkGitSource(app model.App, wg *sync.WaitGroup, waitInterval time.Duratio
 
 	observable, err := datastore.IsObservableApp(datastore.GetDB(), app.ID)
 	if err != nil {
-		checkGitSource(app, wg, WaitAfterErrorInterval)
+		checkGitSource(app, WaitAfterErrorInterval)
 		return
 	}
 	if observable {
-		wg.Add(1)
-		go checkGitSource(app, wg, duration)
+		go checkGitSource(app, duration)
 	}
 }
 
