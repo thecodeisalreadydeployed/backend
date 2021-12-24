@@ -225,3 +225,30 @@ func TestGetAppByName(t *testing.T) {
 	err = mock.ExpectationsWereMet()
 	assert.Nil(t, err)
 }
+
+func TestIsObservableApp(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+	expectVersionQuery(mock)
+
+	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
+		WithArgs("app_test").
+		WillReturnRows(rows)
+	mock.ExpectClose()
+
+	gdb, err := openGormDB(db)
+	assert.Nil(t, err)
+
+	actual, err := IsObservableApp(gdb, "app_test")
+	assert.Nil(t, err)
+
+	assert.Equal(t, true, actual)
+
+	err = db.Close()
+	assert.Nil(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
+}
