@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"sync"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -12,91 +13,120 @@ import (
 )
 
 const FetchObservableAppsInterval = 3 * time.Minute
+const MaximumDuration = 3 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
 func ObserveGitSources(DB *gorm.DB) {
 	aChan := make(chan *model.App)
+	var observables sync.Map
 
-	go checkObservableApps(DB, aChan, true)
+	go fetchWrapper(DB, aChan, &observables)
 
 	for {
-		select {
-		case app := <-aChan:
-			go checkGitSource(*app, 0, true)
-		}
+		app := <-aChan
+		go checkWrapper(DB, *app, &observables)
 	}
 }
 
-func checkObservableApps(DB *gorm.DB, aChan chan *model.App, recurrent bool) {
+func fetchWrapper(DB *gorm.DB, aChan chan *model.App, observables *sync.Map) {
+	var wgFetch sync.WaitGroup
+
+	for {
+		wgFetch.Add(1)
+		go fetchObservableApps(DB, aChan, &wgFetch, observables)
+		wgFetch.Wait()
+	}
+}
+
+func fetchObservableApps(DB *gorm.DB, aChan chan *model.App, wgFetch *sync.WaitGroup, observables *sync.Map) {
 	apps, err := datastore.GetObservableApps(DB)
 
 	if err != nil {
 		zap.L().Error(err.Error())
 		fmt.Println("Unable to fetch observable apps, waiting for the next fetch of observables.")
 		time.Sleep(WaitAfterErrorInterval)
-		defer func() {
-			go checkObservableApps(DB, aChan, recurrent)
-		}()
+		wgFetch.Done()
 		return
 	}
 
 	if len(*apps) == 0 {
 		fmt.Println("All apps are set to not be observed, waiting for the next fetch of observables.")
 		time.Sleep(FetchObservableAppsInterval)
-		defer func() {
-			go checkObservableApps(DB, aChan, recurrent)
-		}()
+		wgFetch.Done()
 		return
 	}
 
 	for _, app := range *apps {
-		aChan <- &app
+		_, ok := observables.Load(app.ID)
+		if !ok {
+			observables.Store(app.ID, nil)
+			aChan <- &app
+		}
 	}
 
-	if recurrent {
-		time.Sleep(FetchObservableAppsInterval)
-		defer func() {
-			go checkObservableApps(DB, aChan, true)
-		}()
+	time.Sleep(FetchObservableAppsInterval)
+	wgFetch.Done()
+}
+
+func checkWrapper(DB *gorm.DB, app model.App, observables *sync.Map) {
+	cChan := make(chan bool)
+
+	for {
+		go checkGitSource(DB, app, cChan, observables)
+		cont := <-cChan
+		if !cont {
+			return
+		}
 	}
 }
 
-func checkGitSource(app model.App, waitInterval time.Duration, recurrent bool) {
+func checkGitSource(DB *gorm.DB, app model.App, cChan chan bool, observables *sync.Map) {
 	commit, duration := checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
+	if duration > MaximumDuration {
+		duration = MaximumDuration
+	}
 	if commit == nil {
-		if waitInterval == 0 {
-			if duration == -1 {
-				fmt.Println("An error occurred while fetching the repository, waiting for next repository check.")
-				waitInterval = WaitAfterErrorInterval
-			} else {
-				fmt.Println("There are no changes in the application, waiting for next repository check.")
-				waitInterval = duration
-			}
+		if duration == -1 {
+			fmt.Println("An error occurred while fetching the repository, waiting for next repository check.")
+			time.Sleep(WaitAfterErrorInterval)
+		} else {
+			fmt.Println("There are no changes in the application, waiting for next repository check.")
+			time.Sleep(duration)
 		}
-		time.Sleep(waitInterval)
-		defer func() {
-			go checkGitSource(app, waitInterval, recurrent)
-		}()
+		cChan <- true
 		return
 	}
 
 	deployNewRevision()
 
-	if recurrent {
-		time.Sleep(waitInterval)
+	time.Sleep(duration)
 
-		observable, err := datastore.IsObservableApp(datastore.GetDB(), app.ID)
-		if err != nil {
-			defer func() {
-				go checkGitSource(app, WaitAfterErrorInterval, true)
-			}()
+	retryChan := make(chan bool)
+	for {
+		go checkObservable(DB, &app, cChan, retryChan, observables)
+		cont := <-retryChan
+		if !cont {
 			return
 		}
-		if observable {
-			defer func() {
-				go checkGitSource(app, duration, true)
-			}()
-		}
+	}
+}
+
+func checkObservable(DB *gorm.DB, app *model.App, cChan chan bool, retryChan chan bool, observables *sync.Map) {
+	observableNow, err := datastore.IsObservableApp(DB, app.ID)
+	if err != nil {
+		time.Sleep(WaitAfterErrorInterval)
+		retryChan <- true
+		return
+	}
+	if observableNow {
+		retryChan <- false
+		cChan <- true
+		return
+	} else {
+		observables.Delete(app.ID)
+		retryChan <- false
+		cChan <- false
+		return
 	}
 }
 
@@ -113,17 +143,17 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
-		return nil, duration
+		return nil, -1
 	}
 
 	ref, err := git.Head()
 	if err != nil {
-		return nil, duration
+		return nil, -1
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
-		return nil, duration
+		return nil, -1
 	}
 
 	if len(diff) > 0 {
