@@ -14,13 +14,13 @@ import (
 func TestGetAllProjects(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects`")).
 		WillReturnRows(getProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetAllProjects(gdb)
@@ -40,7 +40,7 @@ func TestGetAllProjects(t *testing.T) {
 func TestGetProjectByID(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `projects` WHERE id = ? ORDER BY `projects`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -48,7 +48,7 @@ func TestGetProjectByID(t *testing.T) {
 		WillReturnRows(getProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetProjectByID(gdb, "prj_test")
@@ -73,7 +73,7 @@ func TestSaveProject(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `projects` WHERE id = ? ORDER BY `projects`.`id` LIMIT 1"
 	exec := "UPDATE `projects` SET `name`=?,`created_at`=?,`updated_at`=? WHERE `id` = ?"
@@ -88,7 +88,7 @@ func TestSaveProject(t *testing.T) {
 		WillReturnRows(getProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	expected := getExpectedProject()
@@ -112,7 +112,7 @@ func TestRemoveProject(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `projects` WHERE `projects`.`id` = ? ORDER BY `projects`.`id` LIMIT 1"
 	exec := "DELETE FROM `projects` WHERE `projects`.`id` = ?"
@@ -128,7 +128,7 @@ func TestRemoveProject(t *testing.T) {
 
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	err = RemoveProject(gdb, "prj_test")
@@ -144,14 +144,14 @@ func TestRemoveProject(t *testing.T) {
 func TestGetProjectByName(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects` WHERE `projects`.`name` = ?")).
 		WithArgs("Best Project").
 		WillReturnRows(getProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetProjectsByName(gdb, "Best Project")

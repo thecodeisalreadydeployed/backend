@@ -13,12 +13,12 @@ import (
 func TestGetAllApps(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps`")).WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetAllApps(gdb)
@@ -37,14 +37,14 @@ func TestGetAllApps(t *testing.T) {
 func TestGetObservableApps(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetObservableApps(gdb)
@@ -63,7 +63,7 @@ func TestGetObservableApps(t *testing.T) {
 func TestGetAppByProjectID(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `apps` WHERE `apps`.`project_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -71,7 +71,7 @@ func TestGetAppByProjectID(t *testing.T) {
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetAppsByProjectID(gdb, "prj_test")
@@ -90,7 +90,7 @@ func TestGetAppByProjectID(t *testing.T) {
 func TestGetAppByID(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -98,7 +98,7 @@ func TestGetAppByID(t *testing.T) {
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetAppByID(gdb, "app_test")
@@ -122,7 +122,7 @@ func TestSaveApp(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
 	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
@@ -145,7 +145,7 @@ func TestSaveApp(t *testing.T) {
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	expected := getExpectedApp()
@@ -169,7 +169,7 @@ func TestRemoveApp(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `apps` WHERE `apps`.`id` = ? ORDER BY `apps`.`id` LIMIT 1"
 	exec := "DELETE FROM `apps` WHERE `apps`.`id` = ?"
@@ -186,7 +186,7 @@ func TestRemoveApp(t *testing.T) {
 
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	err = RemoveApp(gdb, "app_test")
@@ -202,14 +202,14 @@ func TestRemoveApp(t *testing.T) {
 func TestGetAppByName(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE `apps`.`name` = ?")).
 		WithArgs("Best App").
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetAppsByName(gdb, "Best App")
@@ -229,7 +229,7 @@ func TestGetAppByName(t *testing.T) {
 func TestIsObservableApp(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
 
@@ -238,7 +238,7 @@ func TestIsObservableApp(t *testing.T) {
 		WillReturnRows(rows)
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := IsObservableApp(gdb, "app_test")
