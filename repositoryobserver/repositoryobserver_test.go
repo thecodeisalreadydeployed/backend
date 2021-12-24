@@ -1,12 +1,15 @@
 package repositoryobserver
 
 import (
+	"bou.ke/monkey"
+	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
+	"sync"
 	"testing"
 	"time"
 
@@ -21,9 +24,9 @@ func TestCheckChanges(t *testing.T) {
 	)
 
 	assert.Equal(t, "5da29979c5ef986dc8ec6aa603e0862310abc96e", *changeString)
-	assert.Equal(t, 19*time.Minute, duration)
+	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
-	changeString, duration = checkChanges(
+	changeString, _ = checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"5da29979c5ef986dc8ec6aa603e0862310abc96e",
@@ -38,7 +41,7 @@ func TestCheckChanges(t *testing.T) {
 	)
 
 	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
-	assert.Equal(t, 723*time.Hour+39*time.Minute, duration)
+	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 
 	changeString, duration = checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
@@ -47,10 +50,15 @@ func TestCheckChanges(t *testing.T) {
 	)
 
 	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
-	assert.Equal(t, 723*time.Hour+39*time.Minute, duration)
+	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 }
 
-func TestCheckObservableApps(t *testing.T) {
+func TestFetchObservableApps(t *testing.T) {
+	monkey.Patch(time.Sleep, func(d time.Duration) {
+		fmt.Println("Sleep skipped.")
+	})
+	defer monkey.UnpatchAll()
+
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	datastore.ExpectVersionQuery(mock)
@@ -64,8 +72,11 @@ func TestCheckObservableApps(t *testing.T) {
 	mock.ExpectClose()
 
 	aChan := make(chan *model.App)
+	var wgFetch sync.WaitGroup
+	wgFetch.Add(1)
+	var observables sync.Map
 
-	go checkObservableApps(gdb, aChan, false)
+	go fetchObservableApps(gdb, aChan, &wgFetch, &observables)
 
 	app := *<-aChan
 
@@ -79,6 +90,25 @@ func TestCheckObservableApps(t *testing.T) {
 }
 
 func TestCheckGitSource(t *testing.T) {
+	monkey.Patch(time.Sleep, func(d time.Duration) {
+		fmt.Println("Sleep skipped.")
+	})
+	defer monkey.UnpatchAll()
+
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+	datastore.ExpectVersionQuery(mock)
+
+	gdb, err := datastore.OpenGormDB(db)
+	assert.Nil(t, err)
+
+	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(false)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
+		WithArgs("app_test").
+		WillReturnRows(rows)
+	mock.ExpectClose()
+
 	path, clean := gitgateway.InitRepository()
 	defer clean()
 
@@ -114,5 +144,11 @@ func TestCheckGitSource(t *testing.T) {
 	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, "This is another commit.")
 	assert.Nil(t, err)
 
-	checkGitSource(app, 0, false)
+	cChan := make(chan bool)
+	var observables sync.Map
+
+	go checkGitSource(gdb, app, cChan, &observables)
+
+	cont := <-cChan
+	assert.False(t, cont)
 }
