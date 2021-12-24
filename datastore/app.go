@@ -49,8 +49,17 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 }
 
 func IsObservableApp(DB *gorm.DB, appID string) (bool, error) {
-	//TODO: code functionality and mock test
-	return true, nil
+	var observable bool
+	err := DB.Table("apps").
+		Where(datamodel.App{ID: appID}).
+		Select("Observable").
+		Scan(&observable).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+		return false, errutil.ErrNotFound
+	}
+	return observable, nil
 }
 
 func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
