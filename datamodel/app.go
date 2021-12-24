@@ -54,6 +54,5 @@ func AppStructString() []string {
 		"UpdatedAt",
 		"BuildConfiguration",
 		"Observable",
-		"CommitDuration",
 	}
 }
