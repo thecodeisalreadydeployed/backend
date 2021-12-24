@@ -44,3 +44,31 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
 	assert.Equal(t, 723*time.Hour+39*time.Minute, duration)
 }
+
+func TestCheckObservableApps(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+	datastore.ExpectVersionQuery(mock)
+
+	gdb, err := datastore.OpenGormDB(db)
+	assert.Nil(t, err)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
+		WithArgs(true).
+		WillReturnRows(datastore.GetAppRows())
+	mock.ExpectClose()
+
+	aChan := make(chan *model.App)
+
+	go checkObservableApps(gdb, aChan, false)
+
+	app := *<-aChan
+
+	assert.Equal(t, datastore.GetExpectedApp(), &app)
+
+	err = db.Close()
+	assert.Nil(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
+}
