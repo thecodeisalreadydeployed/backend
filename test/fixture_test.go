@@ -16,12 +16,12 @@ func testFixture(t *testing.T, fixtureRepo string) {
 
 	repo := strings.TrimLeft(repoURL.Path, "/")
 
-	projectName := "project/" + repo
+	projectName := "projects/" + repo
 	appName := repo
 
 	expect := Setup(t)
 
-	expect.POST("/project").
+	expect.POST("/projects").
 		WithForm(dto.CreateProjectRequest{Name: projectName}).
 		Expect().
 		Status(http.StatusOK)
