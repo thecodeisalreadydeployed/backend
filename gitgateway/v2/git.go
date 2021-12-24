@@ -268,6 +268,8 @@ func (g *gitGateway) Log() error {
 
 }
 
+const DefaultCommitDuration = 3 * time.Minute
+
 func (g *gitGateway) CommitDuration() (time.Duration, error) {
 	ref, refErr := g.repo.Head()
 	if refErr != nil {
@@ -289,7 +291,7 @@ func (g *gitGateway) CommitDuration() (time.Duration, error) {
 	}
 
 	if len(times) < 2 {
-		return -1, errutil.ErrFailedPrecondition
+		return DefaultCommitDuration, nil
 	}
 
 	var durations []time.Duration
