@@ -1,11 +1,8 @@
 package datamodel
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"time"
 
-	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
@@ -26,39 +23,16 @@ type Deployment struct {
 }
 
 func (dpl *Deployment) ToModel() model.Deployment {
-	gitSource := model.GitSource{}
-	err := json.Unmarshal([]byte(dpl.GitSource), &gitSource)
-	if err != nil {
-		panic(err)
-	}
-
-	creator := model.Actor{}
-	err = json.Unmarshal([]byte(dpl.Creator), &creator)
-	if err != nil {
-		panic(err)
-	}
-
-	buildConfiguration := model.BuildConfiguration{}
-	_buildConfiguration, err := base64.StdEncoding.DecodeString(dpl.BuildConfiguration)
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(_buildConfiguration, &buildConfiguration)
-	if err != nil {
-		panic(err)
-	}
-
 	return model.Deployment{
 		ID:                 dpl.ID,
 		AppID:              dpl.AppID,
-		Creator:            creator,
+		Creator:            model.GetCreatorObject(dpl.Creator),
 		Meta:               dpl.Meta,
-		GitSource:          gitSource,
+		GitSource:          model.GetGitSourceObject(dpl.GitSource),
 		BuiltAt:            dpl.BuiltAt,
 		CommittedAt:        dpl.CommittedAt,
 		DeployedAt:         dpl.DeployedAt,
-		BuildConfiguration: buildConfiguration,
+		BuildConfiguration: model.GetBuildConfigurationObject(dpl.BuildConfiguration),
 		CreatedAt:          dpl.CreatedAt,
 		UpdatedAt:          dpl.UpdatedAt,
 		State:              dpl.State,
@@ -66,31 +40,14 @@ func (dpl *Deployment) ToModel() model.Deployment {
 }
 
 func NewDeploymentFromModel(dpl *model.Deployment) *Deployment {
-	gitSource, err := json.Marshal(dpl.GitSource)
-	if err != nil {
-		panic(err)
-	}
-
-	creator, err := json.Marshal(dpl.Creator)
-	if err != nil {
-		panic(err)
-	}
-
-	buildConfiguration, err := json.Marshal(dpl.BuildConfiguration)
-	if err != nil {
-		panic(err)
-	}
-
-	buildConfiguration64 := base64.StdEncoding.EncodeToString(buildConfiguration)
-
 	return &Deployment{
 		ID:                 dpl.ID,
 		AppID:              dpl.AppID,
 		Meta:               dpl.Meta,
 		State:              dpl.State,
-		GitSource:          cast.ToString(gitSource),
-		Creator:            cast.ToString(creator),
-		BuildConfiguration: buildConfiguration64,
+		GitSource:          model.GetGitSourceString(dpl.GitSource),
+		Creator:            model.GetCreatorString(dpl.Creator),
+		BuildConfiguration: model.GetBuildConfigurationString(dpl.BuildConfiguration),
 		BuiltAt:            dpl.BuiltAt,
 		CommittedAt:        dpl.CommittedAt,
 		DeployedAt:         dpl.DeployedAt,
