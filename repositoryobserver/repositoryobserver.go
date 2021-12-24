@@ -109,7 +109,6 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 	}
 
 	if len(diff) > 0 {
-		fmt.Printf("len(diff): %v\n", len(diff))
 		return &ref, duration
 	}
 
