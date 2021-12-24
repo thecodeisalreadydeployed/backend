@@ -1,11 +1,26 @@
 package datastore
 
 import (
+	"database/sql"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"time"
 )
+
+func ExpectVersionQuery(mock sqlmock.Sqlmock) {
+	mock.ExpectQuery("SELECT VERSION()").WithArgs().WillReturnRows(
+		mock.NewRows([]string{"version"}).FromCSVString("1"),
+	)
+}
+
+func OpenGormDB(db *sql.DB) (*gorm.DB, error) {
+	return gorm.Open(mysql.New(mysql.Config{
+		Conn: db,
+	}), &gorm.Config{})
+}
 
 func getDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.DeploymentStructString()).
