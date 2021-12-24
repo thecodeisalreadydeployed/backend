@@ -59,16 +59,15 @@ func checkGitSource(app model.App, waitInterval time.Duration) {
 			if duration == -1 {
 				fmt.Println("An error occurred while fetching the repository, waiting for next repository check.")
 				waitInterval = WaitAfterErrorInterval
+			} else {
+				fmt.Println("There are no changes in the application, waiting for next repository check.")
+				waitInterval = duration
 			}
-			fmt.Println("There are no changes in the application, waiting for next repository check.")
-			waitInterval = duration
 		}
 		checkGitSource(app, waitInterval)
 		return
 	}
 
-	fmt.Printf("appID: %v\n", app.ID)
-	fmt.Printf("commit: %v\n", *commit)
 	deployNewRevision()
 
 	time.Sleep(waitInterval)
@@ -120,5 +119,6 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 // TODO: Integrate with workload controller
 
 func deployNewRevision() {
+	fmt.Println("Deploying new revision...")
 	// direct to workload controller
 }
