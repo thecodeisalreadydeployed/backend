@@ -29,7 +29,7 @@ type GitGateway interface {
 	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 
-	// Calculate average commit duration for the last 5 commit intervals
+	// Calculate average commit duration for the last 3 commit intervals
 	CommitDuration() (time.Duration, error)
 }
 
@@ -281,28 +281,32 @@ func (g *gitGateway) CommitDuration() (time.Duration, error) {
 		return -1, errutil.ErrFailedPrecondition
 	}
 
-	var times []time.Time
-	for i := 0; i <= 5; i++ {
-		commit, err := cIter.Next()
-		if err != nil {
-			break
-		}
-		times = append(times, commit.Author.When)
-	}
-
-	if len(times) < 2 {
+	//Latest commit
+	commit, err := cIter.Next()
+	if err != nil {
 		return DefaultCommitDuration, nil
 	}
+	latest := commit.Author.When
 
-	var durations []time.Duration
-	for i := 1; i < len(times); i++ {
-		durations = append(durations, times[i].Sub(times[i-1]))
+	//1 commit before
+	commit, err = cIter.Next()
+	if err != nil {
+		return DefaultCommitDuration, nil
 	}
+	prev := commit.Author.When
 
-	var sum float64
-	for _, duration := range durations {
-		sum += duration.Minutes()
+	//2 commit before
+	commit, err = cIter.Next()
+	if err != nil {
+		return latest.Sub(prev), nil
 	}
+	prev = commit.Author.When
 
-	return time.Duration(sum/float64(len(durations))) * time.Minute, nil
+	//3 commit before
+	commit, err = cIter.Next()
+	if err != nil {
+		return latest.Sub(prev) / 2, nil
+	}
+	prev = commit.Author.When
+	return latest.Sub(prev) / 3, nil
 }
