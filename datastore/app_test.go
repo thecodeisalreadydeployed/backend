@@ -15,7 +15,7 @@ func TestGetAllApps(t *testing.T) {
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps`")).WillReturnRows(getAppRows())
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps`")).WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -24,7 +24,7 @@ func TestGetAllApps(t *testing.T) {
 	actual, err := GetAllApps(gdb)
 	assert.Nil(t, err)
 
-	expected := &[]model.App{*getExpectedApp()}
+	expected := &[]model.App{*GetExpectedApp()}
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -41,7 +41,7 @@ func TestGetObservableApps(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
-		WillReturnRows(getAppRows())
+		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -50,7 +50,7 @@ func TestGetObservableApps(t *testing.T) {
 	actual, err := GetObservableApps(gdb)
 	assert.Nil(t, err)
 
-	expected := &[]model.App{*getExpectedApp()}
+	expected := &[]model.App{*GetExpectedApp()}
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -68,7 +68,7 @@ func TestGetAppByProjectID(t *testing.T) {
 	query := "SELECT * FROM `apps` WHERE `apps`.`project_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("prj_test").
-		WillReturnRows(getAppRows())
+		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -77,7 +77,7 @@ func TestGetAppByProjectID(t *testing.T) {
 	actual, err := GetAppsByProjectID(gdb, "prj_test")
 	assert.Nil(t, err)
 
-	expected := &[]model.App{*getExpectedApp()}
+	expected := &[]model.App{*GetExpectedApp()}
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -95,7 +95,7 @@ func TestGetAppByID(t *testing.T) {
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("app_test").
-		WillReturnRows(getAppRows())
+		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -104,7 +104,7 @@ func TestGetAppByID(t *testing.T) {
 	actual, err := GetAppByID(gdb, "app_test")
 	assert.Nil(t, err)
 
-	expected := getExpectedApp()
+	expected := GetExpectedApp()
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -142,13 +142,13 @@ func TestSaveApp(t *testing.T) {
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("app_test").
-		WillReturnRows(getAppRows())
+		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	expected := getExpectedApp()
+	expected := GetExpectedApp()
 
 	actual, err := SaveApp(gdb, expected)
 	assert.Nil(t, err)
@@ -176,7 +176,7 @@ func TestRemoveApp(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("app_test").
-		WillReturnRows(getAppRows())
+		WillReturnRows(GetAppRows())
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
@@ -206,7 +206,7 @@ func TestGetAppByName(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE `apps`.`name` = ?")).
 		WithArgs("Best App").
-		WillReturnRows(getAppRows())
+		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -215,7 +215,7 @@ func TestGetAppByName(t *testing.T) {
 	actual, err := GetAppsByName(gdb, "Best App")
 	assert.Nil(t, err)
 
-	expected := &[]model.App{*getExpectedApp()}
+	expected := &[]model.App{*GetExpectedApp()}
 
 	assert.Equal(t, expected, actual)
 

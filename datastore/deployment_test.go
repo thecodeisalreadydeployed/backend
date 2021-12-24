@@ -19,7 +19,7 @@ func TestGetDeploymentByAppID(t *testing.T) {
 	query := "SELECT * FROM `deployments` WHERE `deployments`.`app_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("app_test").
-		WillReturnRows(getDeploymentRows())
+		WillReturnRows(GetDeploymentRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -28,7 +28,7 @@ func TestGetDeploymentByAppID(t *testing.T) {
 	actual, err := GetDeploymentsByAppID(gdb, "app_test")
 	assert.Nil(t, err)
 
-	expected := &[]model.Deployment{*getExpectedDeployment()}
+	expected := &[]model.Deployment{*GetExpectedDeployment()}
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -46,7 +46,7 @@ func TestGetDeploymentByID(t *testing.T) {
 	query := "SELECT * FROM `deployments` WHERE id = ? ORDER BY `deployments`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("dpl_test").
-		WillReturnRows(getDeploymentRows())
+		WillReturnRows(GetDeploymentRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -55,7 +55,7 @@ func TestGetDeploymentByID(t *testing.T) {
 	actual, err := GetDeploymentByID(gdb, "dpl_test")
 	assert.Nil(t, err)
 
-	expected := getExpectedDeployment()
+	expected := GetExpectedDeployment()
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()

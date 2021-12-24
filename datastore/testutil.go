@@ -22,7 +22,7 @@ func OpenGormDB(db *sql.DB) (*gorm.DB, error) {
 	}), &gorm.Config{})
 }
 
-func getDeploymentRows() *sqlmock.Rows {
+func GetDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.DeploymentStructString()).
 		AddRow(
 			"dpl_test",
@@ -40,7 +40,7 @@ func getDeploymentRows() *sqlmock.Rows {
 		)
 }
 
-func getAppRows() *sqlmock.Rows {
+func GetAppRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.AppStructString()).
 		AddRow(
 			"app_test",
@@ -54,12 +54,12 @@ func getAppRows() *sqlmock.Rows {
 		)
 }
 
-func getProjectRows() *sqlmock.Rows {
+func GetProjectRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.ProjectStructString()).
 		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
 }
 
-func getExpectedDeployment() *model.Deployment {
+func GetExpectedDeployment() *model.Deployment {
 	return &model.Deployment{
 		ID:                 "dpl_test",
 		AppID:              "app_test",
@@ -76,7 +76,7 @@ func getExpectedDeployment() *model.Deployment {
 	}
 }
 
-func getExpectedApp() *model.App {
+func GetExpectedApp() *model.App {
 	return &model.App{
 		ID:                 "app_test",
 		ProjectID:          "prj_test",
@@ -89,7 +89,7 @@ func getExpectedApp() *model.App {
 	}
 }
 
-func getExpectedProject() *model.Project {
+func GetExpectedProject() *model.Project {
 	return &model.Project{
 		ID:        "prj_test",
 		Name:      "Best Project",

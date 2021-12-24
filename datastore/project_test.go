@@ -17,7 +17,7 @@ func TestGetAllProjects(t *testing.T) {
 	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects`")).
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -26,7 +26,7 @@ func TestGetAllProjects(t *testing.T) {
 	actual, err := GetAllProjects(gdb)
 	assert.Nil(t, err)
 
-	expected := &[]model.Project{*getExpectedProject()}
+	expected := &[]model.Project{*GetExpectedProject()}
 
 	assert.Equal(t, expected, actual)
 
@@ -45,7 +45,7 @@ func TestGetProjectByID(t *testing.T) {
 	query := "SELECT * FROM `projects` WHERE id = ? ORDER BY `projects`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("prj_test").
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -54,7 +54,7 @@ func TestGetProjectByID(t *testing.T) {
 	actual, err := GetProjectByID(gdb, "prj_test")
 	assert.Nil(t, err)
 
-	expected := getExpectedProject()
+	expected := GetExpectedProject()
 
 	assert.Equal(t, expected, actual)
 
@@ -85,13 +85,13 @@ func TestSaveProject(t *testing.T) {
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("prj_test").
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	expected := getExpectedProject()
+	expected := GetExpectedProject()
 
 	actual, err := SaveProject(gdb, expected)
 	assert.Nil(t, err)
@@ -119,7 +119,7 @@ func TestRemoveProject(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("prj_test").
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
 		WithArgs("prj_test").
@@ -148,7 +148,7 @@ func TestGetProjectByName(t *testing.T) {
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects` WHERE `projects`.`name` = ?")).
 		WithArgs("Best Project").
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
@@ -157,7 +157,7 @@ func TestGetProjectByName(t *testing.T) {
 	actual, err := GetProjectsByName(gdb, "Best Project")
 	assert.Nil(t, err)
 
-	expected := &[]model.Project{*getExpectedProject()}
+	expected := &[]model.Project{*GetExpectedProject()}
 
 	assert.Equal(t, expected, actual)
 
