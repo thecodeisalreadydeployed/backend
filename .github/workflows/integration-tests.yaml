@@ -4,6 +4,9 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-20.04
+    concurrency:
+      group: dev/integration-test:${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2

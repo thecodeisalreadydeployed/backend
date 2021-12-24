@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"gorm.io/gorm"
 	"strings"
 
 	"go.uber.org/zap"
@@ -10,14 +11,14 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
+func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app_") {
 		zap.L().Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data []datamodel.Deployment
-	err := getDB().Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
+	err := DB.Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -34,14 +35,14 @@ func GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 	return ret, nil
 }
 
-func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
+func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, error) {
 	if !strings.HasPrefix(deploymentID, "dpl_") {
 		zap.L().Error(MsgDeploymentPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.Deployment
-	err := getDB().First(&_data, "id = ?", deploymentID).Error
+	err := DB.First(&_data, "id = ?", deploymentID).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -52,13 +53,11 @@ func GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	return &ret, nil
 }
 
-func SetDeploymentState(deploymentID string, state model.DeploymentState) error {
-	dpl, getDeploymentErr := GetDeploymentByID(deploymentID)
-	if getDeploymentErr != nil {
-		return getDeploymentErr
-	}
-
-	err := getDB().Model(&dpl).Update("state", state).Error
+func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.DeploymentState) error {
+	err := DB.Table("deployments").
+		Where(datamodel.Deployment{ID: deploymentID}).
+		Update("state", state).
+		Error
 	if err != nil {
 		return err
 	}

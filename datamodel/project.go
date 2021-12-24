@@ -30,3 +30,7 @@ func NewProjectFromModel(prj *model.Project) *Project {
 		UpdatedAt: prj.UpdatedAt,
 	}
 }
+
+func ProjectStructString() []string {
+	return []string{"ID", "Name", "CreatedAt", "UpdatedAt"}
+}
