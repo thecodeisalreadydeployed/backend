@@ -14,21 +14,21 @@ func TestGetDeploymentByAppID(t *testing.T) {
 	fmt.Println(datamodel.DeploymentStructString())
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `deployments` WHERE `deployments`.`app_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("app_test").
-		WillReturnRows(getDeploymentRows())
+		WillReturnRows(GetDeploymentRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetDeploymentsByAppID(gdb, "app_test")
 	assert.Nil(t, err)
 
-	expected := &[]model.Deployment{*getExpectedDeployment()}
+	expected := &[]model.Deployment{*GetExpectedDeployment()}
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -41,21 +41,21 @@ func TestGetDeploymentByAppID(t *testing.T) {
 func TestGetDeploymentByID(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `deployments` WHERE id = ? ORDER BY `deployments`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("dpl_test").
-		WillReturnRows(getDeploymentRows())
+		WillReturnRows(GetDeploymentRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetDeploymentByID(gdb, "dpl_test")
 	assert.Nil(t, err)
 
-	expected := getExpectedDeployment()
+	expected := GetExpectedDeployment()
 	assert.Equal(t, expected, actual)
 
 	err = db.Close()
@@ -68,7 +68,7 @@ func TestGetDeploymentByID(t *testing.T) {
 func TestSetDeploymentState(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 	fmt.Println(datamodel.DeploymentStructString())
 
 	exec := "UPDATE `deployments` SET `state`=? WHERE `deployments`.`id` = ?"
@@ -80,7 +80,7 @@ func TestSetDeploymentState(t *testing.T) {
 	mock.ExpectCommit()
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	err = SetDeploymentState(gdb, "dpl_test", model.DeploymentStateReady)

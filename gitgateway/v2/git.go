@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -27,6 +28,9 @@ type GitGateway interface {
 	Log() error
 	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
+
+	// Calculate average commit duration for the last 3 commit intervals
+	CommitDuration() (time.Duration, error)
 }
 
 type gitGateway struct {
@@ -262,4 +266,47 @@ func (g *gitGateway) Log() error {
 
 	return nil
 
+}
+
+const DefaultCommitDuration = 3 * time.Minute
+
+func (g *gitGateway) CommitDuration() (time.Duration, error) {
+	ref, refErr := g.repo.Head()
+	if refErr != nil {
+		return -1, errutil.ErrFailedPrecondition
+	}
+
+	cIter, logErr := g.repo.Log(&git.LogOptions{From: ref.Hash()})
+	if logErr != nil {
+		return -1, errutil.ErrFailedPrecondition
+	}
+
+	//Latest commit
+	commit, err := cIter.Next()
+	if err != nil {
+		return DefaultCommitDuration, nil
+	}
+	latest := commit.Author.When
+
+	//1 commit before
+	commit, err = cIter.Next()
+	if err != nil {
+		return DefaultCommitDuration, nil
+	}
+	prev := commit.Author.When
+
+	//2 commit before
+	commit, err = cIter.Next()
+	if err != nil {
+		return latest.Sub(prev), nil
+	}
+	prev = commit.Author.When
+
+	//3 commit before
+	commit, err = cIter.Next()
+	if err != nil {
+		return latest.Sub(prev) / 2, nil
+	}
+	prev = commit.Author.When
+	return latest.Sub(prev) / 3, nil
 }

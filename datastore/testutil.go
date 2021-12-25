@@ -1,13 +1,28 @@
 package datastore
 
 import (
+	"database/sql"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"time"
 )
 
-func getDeploymentRows() *sqlmock.Rows {
+func ExpectVersionQuery(mock sqlmock.Sqlmock) {
+	mock.ExpectQuery("SELECT VERSION()").WithArgs().WillReturnRows(
+		mock.NewRows([]string{"version"}).FromCSVString("1"),
+	)
+}
+
+func OpenGormDB(db *sql.DB) (*gorm.DB, error) {
+	return gorm.Open(mysql.New(mysql.Config{
+		Conn: db,
+	}), &gorm.Config{})
+}
+
+func GetDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.DeploymentStructString()).
 		AddRow(
 			"dpl_test",
@@ -25,7 +40,7 @@ func getDeploymentRows() *sqlmock.Rows {
 		)
 }
 
-func getAppRows() *sqlmock.Rows {
+func GetAppRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.AppStructString()).
 		AddRow(
 			"app_test",
@@ -39,12 +54,12 @@ func getAppRows() *sqlmock.Rows {
 		)
 }
 
-func getProjectRows() *sqlmock.Rows {
+func GetProjectRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.ProjectStructString()).
 		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
 }
 
-func getExpectedDeployment() *model.Deployment {
+func GetExpectedDeployment() *model.Deployment {
 	return &model.Deployment{
 		ID:                 "dpl_test",
 		AppID:              "app_test",
@@ -61,7 +76,7 @@ func getExpectedDeployment() *model.Deployment {
 	}
 }
 
-func getExpectedApp() *model.App {
+func GetExpectedApp() *model.App {
 	return &model.App{
 		ID:                 "app_test",
 		ProjectID:          "prj_test",
@@ -74,7 +89,7 @@ func getExpectedApp() *model.App {
 	}
 }
 
-func getExpectedProject() *model.Project {
+func GetExpectedProject() *model.Project {
 	return &model.Project{
 		ID:        "prj_test",
 		Name:      "Best Project",
