@@ -9,6 +9,7 @@ on:
       - ".github/workflows/build-imagebuilder.yaml"
     branches:
       - main
+      - v2/kanikogateway
       - dev/imagebuilder
       - dev/imagebuilder-docker
 jobs:
