@@ -1,9 +1,6 @@
 package kanikogateway
 
 import (
-	"fmt"
-	"path/filepath"
-
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
@@ -26,7 +23,7 @@ type kanikoGateway struct {
 	registry           *containerregistry.ContainerRegistry
 }
 
-const busyboxImage = "busybox:1.33.1"
+const imageTag = "latest"
 
 func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, buildConfiguration model.BuildConfiguration) (KanikoGateway, error) {
 	it, err := kubernetesinteractor.NewKubernetesInteractor()
@@ -44,14 +41,9 @@ func (kanikoGateway) BuildContainerImage() (string, error) {
 }
 
 func (it kanikoGateway) kanikoPod() apiv1.Pod {
-	workingDirectory := apiv1.VolumeMount{
-		Name:      "workingDirectory",
-		MountPath: "/__w",
-	}
-
-	dotSSH := apiv1.VolumeMount{
-		Name:      "dotSSH",
-		MountPath: "/root/.ssh",
+	workspace := apiv1.VolumeMount{
+		Name:      "workspace",
+		MountPath: "/workspace",
 	}
 
 	podLabel := map[string]string{
@@ -59,8 +51,7 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 		"thecodeisalreadydeployed.github/component":     "KANIKO",
 	}
 
-	buildScript := it.buildConfiguration.BuildScript
-	buildScriptPath := filepath.Join(workingDirectory.MountPath, "Dockerfile")
+	_ = it.buildConfiguration.BuildScript
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -71,13 +62,7 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 			RestartPolicy: apiv1.RestartPolicyNever,
 			Volumes: []apiv1.Volume{
 				{
-					Name: workingDirectory.Name,
-					VolumeSource: apiv1.VolumeSource{
-						EmptyDir: &apiv1.EmptyDirVolumeSource{},
-					},
-				},
-				{
-					Name: dotSSH.Name,
+					Name: workspace.Name,
 					VolumeSource: apiv1.VolumeSource{
 						EmptyDir: &apiv1.EmptyDirVolumeSource{},
 					},
@@ -85,27 +70,9 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 			},
 			InitContainers: []apiv1.Container{
 				{
-					Name:         "init-build-script",
-					Image:        busyboxImage,
-					VolumeMounts: []apiv1.VolumeMount{workingDirectory},
-					Command: []string{
-						"sh",
-						"-c",
-						fmt.Sprintf(`cat << EOF >> %s
-%s
-EOF`, buildScriptPath, buildScript),
-					},
-				},
-				// {
-				// 	Name: "init-ssh",
-				// 	Image: busyboxImage,
-				// 	VolumeMounts: []apiv1.VolumeMount{dotSSH}
-				// },
-				{
-					Name:         "init-repository",
-					Image:        "alpine/git:v2.30.2",
-					Args:         []string{"clone", "--single-branch", "--", it.branch, filepath.Join(workingDirectory.MountPath, "code")},
-					VolumeMounts: []apiv1.VolumeMount{workingDirectory, dotSSH},
+					Name:         "imagebuilder-workspace",
+					Image:        "ghcr.io/thecodeisalreadydeployed/imagebuilder-workspace:" + imageTag,
+					VolumeMounts: []apiv1.VolumeMount{workspace},
 				},
 			},
 		},
