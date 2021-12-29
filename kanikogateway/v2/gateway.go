@@ -46,17 +46,29 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 		MountPath: "/workspace",
 	}
 
-	podLabel := map[string]string{
+	objectLabel := map[string]string{
 		"deployment.api.deploys.dev/id":        it.deploymentID,
 		"deployment.api.deploys.dev/component": "imagebuilder",
 	}
 
-	_ = it.buildConfiguration.BuildScript
+	buildScript := it.buildConfiguration.BuildScript
+
+	configMap := apiv1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   "imagebuilder-" + it.deploymentID,
+			Labels: objectLabel,
+		},
+		Data: map[string]string{
+			"Dockerfile": buildScript,
+		},
+	}
+
+	_ = configMap
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "imagebuilder-" + it.deploymentID,
-			Labels: podLabel,
+			Labels: objectLabel,
 		},
 		Spec: apiv1.PodSpec{
 			RestartPolicy: apiv1.RestartPolicyNever,
