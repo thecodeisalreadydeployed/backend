@@ -24,6 +24,6 @@ services:
       CODEDEPLOY_API_URL: http://host.docker.internal:3000
       CODEDEPLOY_DEPLOYMENT_ID: testdata
       CODEDEPLOY_KANIKO_LOG_VERBOSITY: info
-      CODEDEPLOY_KANIKO_CONTEXT: dir:///workspace
+      CODEDEPLOY_KANIKO_CONTEXT: dir:///workspace/testdata
 volumes:
   workspace:
