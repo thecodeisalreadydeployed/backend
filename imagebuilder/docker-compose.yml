@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  imagebuilder-workspace:
+    container_name: imagebuilder-workspace
+    image: ghcr.io/thecodeisalreadydeployed/imagebuilder-workspace:latest
+    pull_policy: always
+  imagebuilder:
+    container_name: imagebuilder
+    image: ghcr.io/thecodeisalreadydeployed/imagebuilder:latest
+    pull_policy: always
+    depends_on:
+      imagebuilder-workspace:
+        condition: service_completed_successfully
+
