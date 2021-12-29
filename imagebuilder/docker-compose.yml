@@ -4,6 +4,11 @@ services:
     container_name: imagebuilder-workspace
     image: ghcr.io/thecodeisalreadydeployed/imagebuilder-workspace:latest
     pull_policy: always
+    volumes:
+      - workspace:/workspace
+    environment:
+      CODEDEPLOY_API_URL: http://host.docker.internal:3000
+      CODEDEPLOY_DEPLOYMENT_ID: testdata
   imagebuilder:
     container_name: imagebuilder
     image: ghcr.io/thecodeisalreadydeployed/imagebuilder:latest
@@ -11,4 +16,12 @@ services:
     depends_on:
       imagebuilder-workspace:
         condition: service_completed_successfully
-
+    volumes:
+      - workspace:/workspace
+    environment:
+      CODEDEPLOY_API_URL: http://host.docker.internal:3000
+      CODEDEPLOY_DEPLOYMENT_ID: testdata
+      CODEDEPLOY_KANIKO_LOG_VERBOSITY: info
+      CODEDEPLOY_KANIKO_CONTEXT: dir:///workspace
+volumes:
+  workspace:
