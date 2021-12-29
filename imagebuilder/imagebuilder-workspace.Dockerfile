@@ -1,4 +1,4 @@
-FROM gcr.io/kaniko-project/executor:v1.7.0-debug
+FROM alpine/git:v2.30.2
 COPY ./logexporter-linux-amd64 /kaniko/deploys-dev/logexporter
-COPY ./imagebuilder/kaniko.sh /kaniko/deploys-dev/kaniko.sh
-ENTRYPOINT /bin/sh /kaniko/deploys-dev/kaniko.sh
+COPY ./imagebuilder/workspace.sh /deploys-dev/workspace.sh
+ENTRYPOINT /bin/sh /deploys-dev/workspace.sh
