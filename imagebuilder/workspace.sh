@@ -1,7 +1,7 @@
 [[ -z $CODEDEPLOY_GIT_REPOSITORY ]] && exit 1
 [[ -z $CODEDEPLOY_GIT_REFERENCE ]] && exit 1
 
-git clone $CODEDEPLOY_GIT_REPOSITORY \
+rm -rf /workspace/* && git clone $CODEDEPLOY_GIT_REPOSITORY \
   --branch $CODEDEPLOY_GIT_REFERENCE \
   --single-branch \
   --depth 1 \
