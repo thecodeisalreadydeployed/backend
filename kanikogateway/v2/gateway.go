@@ -55,7 +55,7 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   it.deploymentID,
+			Name:   "imagebuilder-" + it.deploymentID,
 			Labels: podLabel,
 		},
 		Spec: apiv1.PodSpec{
@@ -73,6 +73,23 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 					Name:         "imagebuilder-workspace",
 					Image:        "ghcr.io/thecodeisalreadydeployed/imagebuilder-workspace:" + imageTag,
 					VolumeMounts: []apiv1.VolumeMount{workspace},
+					Env: []apiv1.EnvVar{
+						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: it.deploymentID},
+						{Name: "CODEDEPLOY_GIT_REPOSITORY", Value: it.repositoryURL},
+						{Name: "CODEDEPLOY_GIT_REFERENCE", Value: it.branch},
+					},
+				},
+			},
+			Containers: []apiv1.Container{
+				{
+					Name:         "imagebuilder",
+					Image:        "ghcr.io/thecodeisalreadydeployed/imagebuilder:" + imageTag,
+					VolumeMounts: []apiv1.VolumeMount{workspace},
+					Env: []apiv1.EnvVar{
+						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: it.deploymentID},
+						{Name: "CODEDEPLOY_KANIKO_LOG_VERBOSITY", Value: "info"},
+						{Name: "CODEDEPLOY_KANIKO_CONTEXT", Value: "/workspace/" + it.deploymentID},
+					},
 				},
 			},
 		},
