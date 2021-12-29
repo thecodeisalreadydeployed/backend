@@ -47,8 +47,8 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 	}
 
 	podLabel := map[string]string{
-		"thecodeisalreadydeployed.github/deployment-id": it.deploymentID,
-		"thecodeisalreadydeployed.github/component":     "KANIKO",
+		"deployment.api.deploys.dev/id":        it.deploymentID,
+		"deployment.api.deploys.dev/component": "imagebuilder",
 	}
 
 	_ = it.buildConfiguration.BuildScript
