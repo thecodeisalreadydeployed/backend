@@ -10,7 +10,7 @@ services:
       CODEDEPLOY_API_URL: http://host.docker.internal:3000
       CODEDEPLOY_DEPLOYMENT_ID: testdata
       CODEDEPLOY_GIT_REPOSITORY: https://github.com/thecodeisalreadydeployed/fixture-nest.git
-      CODEDEPLOY_GIT_REFERENCE: 14bc77fc515e6d66b8d9c15126ee49ca55faf879
+      CODEDEPLOY_GIT_REFERENCE: v2
   imagebuilder:
     container_name: imagebuilder
     image: ghcr.io/thecodeisalreadydeployed/imagebuilder:latest
