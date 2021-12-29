@@ -20,6 +20,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - workspace:/workspace
+      - ./testdata/fixture-nest.Dockerfile:/kaniko/deploys-dev/Dockerfile
     environment:
       CODEDEPLOY_API_URL: http://host.docker.internal:3000
       CODEDEPLOY_DEPLOYMENT_ID: testdata
