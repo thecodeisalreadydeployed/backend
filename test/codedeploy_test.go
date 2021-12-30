@@ -77,6 +77,7 @@ CMD node main
 			BuildCommand:    "yarn build",
 			OutputDirectory: "dist",
 			StartCommand:    "node main",
+			Branch:          "main",
 		}).Expect().Status(http.StatusOK)
 
 	apps := expect.GET("/projects/" + projectID + "/apps").
