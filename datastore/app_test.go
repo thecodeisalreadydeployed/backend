@@ -1,13 +1,14 @@
 package datastore
 
 import (
+	"regexp"
+	"testing"
+	"time"
+
 	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/model"
-	"regexp"
-	"testing"
-	"time"
 )
 
 func TestGetAllApps(t *testing.T) {
@@ -67,14 +68,14 @@ func TestGetAppByProjectID(t *testing.T) {
 
 	query := "SELECT * FROM `apps` WHERE `apps`.`project_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj_test").
+		WithArgs("prj-test").
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
 	gdb, err := openGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAppsByProjectID(gdb, "prj_test")
+	actual, err := GetAppsByProjectID(gdb, "prj-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.App{*getExpectedApp()}
@@ -94,14 +95,14 @@ func TestGetAppByID(t *testing.T) {
 
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("app_test").
+		WithArgs("app-test").
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
 	gdb, err := openGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAppByID(gdb, "app_test")
+	actual, err := GetAppByID(gdb, "app-test")
 	assert.Nil(t, err)
 
 	expected := getExpectedApp()
@@ -130,18 +131,18 @@ func TestSaveApp(t *testing.T) {
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
 		WithArgs(
-			"prj_test",
+			"prj-test",
 			"Best App",
 			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
-			"app_test").
+			"app-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("app_test").
+		WithArgs("app-test").
 		WillReturnRows(getAppRows())
 	mock.ExpectClose()
 
@@ -175,12 +176,12 @@ func TestRemoveApp(t *testing.T) {
 	exec := "DELETE FROM `apps` WHERE `apps`.`id` = ?"
 
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("app_test").
+		WithArgs("app-test").
 		WillReturnRows(getAppRows())
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("app_test").
+		WithArgs("app-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
@@ -189,7 +190,7 @@ func TestRemoveApp(t *testing.T) {
 	gdb, err := openGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemoveApp(gdb, "app_test")
+	err = RemoveApp(gdb, "app-test")
 	assert.Nil(t, err)
 
 	err = db.Close()
