@@ -41,7 +41,28 @@ jobs:
           ARGOCD_SERVER=http://$ARGOCD_HOST
           ARGOCD_USERNAME=admin
           ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-          argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
+
+          function retry {
+            local retries=$1
+            shift
+
+            local count=0
+            until "$@"; do
+              exit=$?
+              wait=$((2 ** $count))
+              count=$(($count + 1))
+              if [ $count -lt $retries ]; then
+                echo "Retry $count/$retries exited $exit, retrying in $wait seconds..."
+                sleep $wait
+              else
+                echo "Retry $count/$retries exited $exit, no more retries left."
+                return $exit
+              fi
+            done
+            return 0
+          }
+
+          retry 5 argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
           argocd version
       - run: argocd app sync codedeploy
       - run: argocd app wait codedeploy --timeout 300
