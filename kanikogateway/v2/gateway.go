@@ -11,22 +11,32 @@ import (
 )
 
 type KanikoGateway interface {
-	BuildContainerImage() (string, error)
+	Deploy() (string, error)
 }
 
 type kanikoGateway struct {
+	projectID          string
+	appID              string
 	deploymentID       string
 	repositoryURL      string
 	branch             string
 	buildConfiguration model.BuildConfiguration
-	kubernetes         *kubernetesinteractor.KubernetesInteractor
+	kubernetes         kubernetesinteractor.KubernetesInteractor
 	registry           *containerregistry.ContainerRegistry
 	logger             *zap.SugaredLogger
 }
 
 const imageTag = "latest"
 
-func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, buildConfiguration model.BuildConfiguration, containerRegistry containerregistry.ContainerRegistry) (KanikoGateway, error) {
+func NewKanikoGateway(
+	projectID string,
+	appID string,
+	deploymentID string,
+	repositoryURL string,
+	branch string,
+	buildConfiguration model.BuildConfiguration,
+	containerRegistry containerregistry.ContainerRegistry,
+) (KanikoGateway, error) {
 	logger := zap.L().Sugar().With("deploymentID", deploymentID)
 	it, err := kubernetesinteractor.NewKubernetesInteractor()
 
@@ -36,21 +46,19 @@ func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, 
 	}
 
 	return kanikoGateway{
+		projectID:          projectID,
+		appID:              appID,
 		deploymentID:       deploymentID,
 		repositoryURL:      repositoryURL,
 		branch:             branch,
 		buildConfiguration: buildConfiguration,
-		kubernetes:         &it,
+		kubernetes:         it,
 		registry:           &containerRegistry,
 		logger:             logger,
 	}, nil
 }
 
-func (kanikoGateway) BuildContainerImage() (string, error) {
-	return "", errutil.ErrNotImplemented
-}
-
-func (it kanikoGateway) kanikoPod() apiv1.Pod {
+func (it kanikoGateway) Deploy() (string, error) {
 	workspace := apiv1.VolumeMount{
 		Name:      "workspace",
 		MountPath: "/workspace",
@@ -117,5 +125,7 @@ func (it kanikoGateway) kanikoPod() apiv1.Pod {
 		},
 	}
 
-	return pod
+	it.kubernetes.CreatePod(pod, it.projectID)
+
+	return it.deploymentID, nil
 }
