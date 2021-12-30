@@ -33,5 +33,5 @@ type Deployment struct {
 }
 
 func GenerateDeploymentID() string {
-	return fmt.Sprintf("dpl_%s", util.RandomString(25))
+	return fmt.Sprintf("dpl-%s", util.RandomString(25))
 }

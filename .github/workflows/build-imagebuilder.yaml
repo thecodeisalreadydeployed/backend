@@ -9,6 +9,7 @@ on:
       - ".github/workflows/build-imagebuilder.yaml"
     branches:
       - main
+      - v2/kanikogateway
       - dev/imagebuilder
       - dev/imagebuilder-docker
 jobs:
@@ -17,6 +18,12 @@ jobs:
     concurrency:
       group: build/imagebuilder:${{ github.head_ref }}
       cancel-in-progress: true
+    strategy:
+      matrix:
+        pkg: [
+          'imagebuilder',
+          'imagebuilder-workspace'
+        ]
     env:
       SHA7: ${GITHUB_SHA::7}
     steps:
@@ -37,14 +44,14 @@ jobs:
         id: metadata-action
         with:
           images: |
-            ghcr.io/thecodeisalreadydeployed/imagebuilder
+            ghcr.io/thecodeisalreadydeployed/${{ matrix.pkg }}
           tags: |
             type=sha
             type=raw,value=latest
       - uses: docker/build-push-action@v2
         with:
           context: .
-          file: imagebuilder/Dockerfile
+          file: imagebuilder/${{ matrix.pkg }}.Dockerfile
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max

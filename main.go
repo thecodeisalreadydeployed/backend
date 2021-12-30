@@ -19,7 +19,7 @@ func main() {
 		}
 	}
 
-	config := zap.NewProductionConfig()
+	config := zap.NewDevelopmentConfig()
 	config.OutputPaths = []string{"stdout"}
 	logger, err := config.Build()
 

@@ -13,7 +13,7 @@ type CreateAppRequest struct {
 	BuildCommand    string `validate:"required"`
 	OutputDirectory string `validate:"required"`
 	StartCommand    string `validate:"required"`
-	CommitSHA       string `json:"commit_sha"`
+	Branch          string `validate:"required"`
 }
 
 func (req *CreateAppRequest) ToModel() model.App {
@@ -30,7 +30,7 @@ func (req *CreateAppRequest) ToModel() model.App {
 		},
 		GitSource: model.GitSource{
 			RepositoryURL: req.RepositoryURL,
-			CommitSHA:     req.CommitSHA,
+			Branch:        req.Branch,
 		},
 		Observable: false,
 	}

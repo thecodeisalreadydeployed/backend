@@ -1,14 +1,16 @@
 package datastore
 
 import (
-	"bou.ke/monkey"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"bou.ke/monkey"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/thecodeisalreadydeployed/model"
+
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetAllProjects(t *testing.T) {
@@ -44,14 +46,14 @@ func TestGetProjectByID(t *testing.T) {
 
 	query := "SELECT * FROM `projects` WHERE id = ? ORDER BY `projects`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj_test").
+		WithArgs("prj-test").
 		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetProjectByID(gdb, "prj_test")
+	actual, err := GetProjectByID(gdb, "prj-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedProject()
@@ -80,11 +82,11 @@ func TestSaveProject(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("Best Project", time.Unix(0, 0), time.Unix(0, 0), "prj_test").
+		WithArgs("Best Project", time.Unix(0, 0), time.Unix(0, 0), "prj-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj_test").
+		WithArgs("prj-test").
 		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
@@ -118,11 +120,11 @@ func TestRemoveProject(t *testing.T) {
 	exec := "DELETE FROM `projects` WHERE `projects`.`id` = ?"
 
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj_test").
+		WithArgs("prj-test").
 		WillReturnRows(GetProjectRows())
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("prj_test").
+		WithArgs("prj-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
@@ -131,7 +133,7 @@ func TestRemoveProject(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemoveProject(gdb, "prj_test")
+	err = RemoveProject(gdb, "prj-test")
 	assert.Nil(t, err)
 
 	err = db.Close()

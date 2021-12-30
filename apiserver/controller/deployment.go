@@ -8,13 +8,26 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 	"go.uber.org/zap"
 )
 
 func NewDeploymentController(api fiber.Router) {
+	// Create a new deployment
+	api.Post("/", createDeployment)
+
 	api.Get("/:deploymentID", getDeployment)
 	api.Get("/:deploymentID/events", getDeploymentEvents)
 	api.Post("/:deploymentID/events", createDeploymentEvents)
+}
+
+func createDeployment(ctx *fiber.Ctx) error {
+	appID := ctx.Params("appID")
+	err := workloadcontroller.NewDeployment(appID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError)
+	}
+	return ctx.JSON(map[string]bool{"ok": true})
 }
 
 func getDeployment(ctx *fiber.Ctx) error {

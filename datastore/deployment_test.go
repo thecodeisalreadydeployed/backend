@@ -2,12 +2,13 @@ package datastore
 
 import (
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
-	"regexp"
-	"testing"
 )
 
 func TestGetDeploymentByAppID(t *testing.T) {
@@ -18,14 +19,14 @@ func TestGetDeploymentByAppID(t *testing.T) {
 
 	query := "SELECT * FROM `deployments` WHERE `deployments`.`app_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("app_test").
+		WithArgs("app-test").
 		WillReturnRows(GetDeploymentRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetDeploymentsByAppID(gdb, "app_test")
+	actual, err := GetDeploymentsByAppID(gdb, "app-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.Deployment{*GetExpectedDeployment()}
@@ -45,14 +46,14 @@ func TestGetDeploymentByID(t *testing.T) {
 
 	query := "SELECT * FROM `deployments` WHERE id = ? ORDER BY `deployments`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("dpl_test").
+		WithArgs("dpl-test").
 		WillReturnRows(GetDeploymentRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetDeploymentByID(gdb, "dpl_test")
+	actual, err := GetDeploymentByID(gdb, "dpl-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedDeployment()
@@ -75,7 +76,7 @@ func TestSetDeploymentState(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs(model.DeploymentStateReady, "dpl_test").
+		WithArgs(model.DeploymentStateReady, "dpl-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	mock.ExpectClose()
@@ -83,7 +84,7 @@ func TestSetDeploymentState(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = SetDeploymentState(gdb, "dpl_test", model.DeploymentStateReady)
+	err = SetDeploymentState(gdb, "dpl-test", model.DeploymentStateReady)
 	assert.Nil(t, err)
 
 	err = db.Close()
