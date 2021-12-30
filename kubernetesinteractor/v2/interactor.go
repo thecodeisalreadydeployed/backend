@@ -17,6 +17,7 @@ import (
 
 type KubernetesInteractor interface {
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
+	CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error)
 	GetDeploymentState(name string, namespace string) (model.DeploymentState, error)
 }
 

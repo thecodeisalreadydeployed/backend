@@ -129,9 +129,16 @@ func (it kanikoGateway) Deploy() (string, error) {
 
 	it.logger.Info(pod)
 
-	_, err := it.kubernetes.CreatePod(pod, it.projectID)
+	_, err := it.kubernetes.CreateConfigMap(configMap, it.projectID)
+	if err != nil {
+		it.logger.Error("failed to create imagebuilder ConfigMap")
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	_, err = it.kubernetes.CreatePod(pod, it.projectID)
 	if err != nil {
 		it.logger.Error("failed to create imagebuilder pod")
+		return "", errutil.ErrFailedPrecondition
 	}
 
 	return it.deploymentID, nil
