@@ -2,12 +2,13 @@ package datastore
 
 import (
 	"database/sql"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
 )
 
 func ExpectVersionQuery(mock sqlmock.Sqlmock) {
@@ -25,8 +26,8 @@ func OpenGormDB(db *sql.DB) (*gorm.DB, error) {
 func GetDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.DeploymentStructString()).
 		AddRow(
-			"dpl_test",
-			"app_test",
+			"dpl-test",
+			"app-test",
 			model.GetCreatorString(model.Actor{}),
 			"dummy_meta",
 			model.GetGitSourceString(model.GitSource{}),
@@ -43,8 +44,8 @@ func GetDeploymentRows() *sqlmock.Rows {
 func GetAppRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.AppStructString()).
 		AddRow(
-			"app_test",
-			"prj_test",
+			"app-test",
+			"prj-test",
 			"Best App",
 			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
@@ -56,13 +57,13 @@ func GetAppRows() *sqlmock.Rows {
 
 func GetProjectRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.ProjectStructString()).
-		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
+		AddRow("prj-test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
 }
 
 func GetExpectedDeployment() *model.Deployment {
 	return &model.Deployment{
-		ID:                 "dpl_test",
-		AppID:              "app_test",
+		ID:                 "dpl-test",
+		AppID:              "app-test",
 		Creator:            model.Actor{},
 		Meta:               "dummy_meta",
 		GitSource:          model.GitSource{},
@@ -78,8 +79,8 @@ func GetExpectedDeployment() *model.Deployment {
 
 func GetExpectedApp() *model.App {
 	return &model.App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
+		ID:                 "app-test",
+		ProjectID:          "prj-test",
 		Name:               "Best App",
 		GitSource:          model.GitSource{},
 		CreatedAt:          time.Unix(0, 0),
@@ -91,7 +92,7 @@ func GetExpectedApp() *model.App {
 
 func GetExpectedProject() *model.Project {
 	return &model.Project{
-		ID:        "prj_test",
+		ID:        "prj-test",
 		Name:      "Best Project",
 		CreatedAt: time.Unix(0, 0),
 		UpdatedAt: time.Unix(0, 0),
