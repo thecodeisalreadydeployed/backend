@@ -69,6 +69,8 @@ func (it kanikoGateway) Deploy() (string, error) {
 		"deployment.api.deploys.dev/component": "imagebuilder",
 	}
 
+	it.logger.Info(objectLabel)
+
 	buildScript := it.buildConfiguration.BuildScript
 
 	configMap := apiv1.ConfigMap{
@@ -81,7 +83,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 		},
 	}
 
-	_ = configMap
+	it.logger.Info(configMap)
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -124,6 +126,8 @@ func (it kanikoGateway) Deploy() (string, error) {
 			},
 		},
 	}
+
+	it.logger.Info(pod)
 
 	it.kubernetes.CreatePod(pod, it.projectID)
 
