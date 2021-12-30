@@ -32,9 +32,22 @@ func TestHealth(t *testing.T) {
 }
 
 func TestIntegration(t *testing.T) {
-	projectName := "Test Project"
-	appName := "Test App"
-	fake := "Fake Data"
+	projectName := "deploys-dev"
+	appName := "fixture-nest"
+	fixtureNest := `
+FROM node:14-alpine as build-env
+ADD . /app
+WORKDIR /app
+RUN yarn install --frozen-lockfile
+RUN yarn build
+
+FROM node:14-alpine
+WORKDIR /app
+COPY --from=build-env /app/package.json /app/yarn.lock ./
+COPY --from=build-env /app/node_modules ./node_modules
+COPY --from=build-env /app/dist ./
+CMD node main
+`
 
 	expect := Setup(t)
 
@@ -58,12 +71,12 @@ func TestIntegration(t *testing.T) {
 		WithForm(dto.CreateAppRequest{
 			ProjectID:       projectID,
 			Name:            appName,
-			RepositoryURL:   fake,
-			BuildScript:     fake,
-			InstallCommand:  fake,
-			BuildCommand:    fake,
-			OutputDirectory: fake,
-			StartCommand:    fake,
+			RepositoryURL:   "https://github.com/thecodeisalreadydeployed/fixture-nest.git",
+			BuildScript:     fixtureNest,
+			InstallCommand:  "yarn install --frozen-lockfile",
+			BuildCommand:    "yarn build",
+			OutputDirectory: "dist",
+			StartCommand:    "node main",
 		}).Expect().Status(http.StatusOK)
 
 	apps := expect.GET("/projects/" + projectID + "/apps").
