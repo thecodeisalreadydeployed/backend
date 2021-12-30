@@ -25,7 +25,7 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
         env:
           KO_DOCKER_REPO: kind.local
-      - run: ko publish ./
+      - run: ko publish ./ --bare
       - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: |
