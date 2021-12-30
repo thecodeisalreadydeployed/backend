@@ -13,7 +13,7 @@ import (
 
 func NewDeploymentController(api fiber.Router) {
 	// Create a new deployment
-	api.Post("/:deploymentID", createDeployment)
+	api.Post("/", createDeployment)
 
 	api.Get("/:deploymentID", getDeployment)
 	api.Get("/:deploymentID/events", getDeploymentEvents)
