@@ -149,7 +149,7 @@ func getCreator() string {
 }
 
 func withPrefix(body string, prefix string) string {
-	return fmt.Sprintf("%s_%s", prefix, body)
+	return fmt.Sprintf("%s-%s", prefix, body)
 }
 
 func getState() string {
