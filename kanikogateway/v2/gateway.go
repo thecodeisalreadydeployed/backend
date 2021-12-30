@@ -131,7 +131,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 		},
 	}
 
-	it.logger.Info(pod)
+	it.logger.Infof("%#v", pod)
 
 	_, err := it.kubernetes.CreateConfigMap(configMap, it.projectID)
 	if err != nil {
