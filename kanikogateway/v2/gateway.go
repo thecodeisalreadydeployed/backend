@@ -100,7 +100,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 					},
 				},
 				{
-					Name: "Dockerfile",
+					Name: "dockerfile",
 					VolumeSource: apiv1.VolumeSource{
 						ConfigMap: &apiv1.ConfigMapVolumeSource{
 							LocalObjectReference: apiv1.LocalObjectReference{
@@ -109,7 +109,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 							Items: []apiv1.KeyToPath{
 								{
 									Key:  "Dockerfile",
-									Path: "/kaniko/deploys-dev/Dockerfile",
+									Path: "kaniko/deploys-dev/Dockerfile",
 								},
 							},
 						},
@@ -137,7 +137,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 					VolumeMounts: []apiv1.VolumeMount{
 						workspace,
 						{
-							Name:      "Dockerfile",
+							Name:      "dockerfile",
 							MountPath: "/",
 						},
 					},
