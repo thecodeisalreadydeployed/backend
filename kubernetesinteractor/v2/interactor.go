@@ -118,3 +118,19 @@ func (it kubernetesInteractor) GetDeploymentState(deploymentID string, namespace
 
 	return model.DeploymentStateError, nil
 }
+
+func (it kubernetesInteractor) createNamespace(namespace string) (string, error) {
+	n := apiv1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name: namespace,
+		},
+	}
+
+	create, createErr := it.client.CoreV1().Namespaces().Create(context.TODO(), &n, v1.CreateOptions{})
+	if createErr != nil {
+		zap.L().Sugar().Errorf("error creating namespace: %s", namespace)
+		return "", errutil.ErrUnknown
+	}
+
+	return create.Name, nil
+}
