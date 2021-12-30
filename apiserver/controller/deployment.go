@@ -12,9 +12,16 @@ import (
 )
 
 func NewDeploymentController(api fiber.Router) {
+	// Create a new deployment
+	api.Post("/:deploymentID", createDeployment)
+
 	api.Get("/:deploymentID", getDeployment)
 	api.Get("/:deploymentID/events", getDeploymentEvents)
 	api.Post("/:deploymentID/events", createDeploymentEvents)
+}
+
+func createDeployment(ctx *fiber.Ctx) error {
+	return fiber.NewError(fiber.StatusNotImplemented)
 }
 
 func getDeployment(ctx *fiber.Ctx) error {

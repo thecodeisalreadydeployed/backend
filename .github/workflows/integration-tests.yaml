@@ -18,29 +18,31 @@ jobs:
             ~/.cache/go-build
             ~/go/pkg/mod
           key: go-${{ hashFiles('**/go.sum') }}
-      - run: make kind
-      - uses: docker/setup-buildx-action@v1
-      - uses: docker/build-push-action@v2
-        with:
-          push: false
-          load: true
-          tags: thecodeisalreadydeployed/backend:dev
-          context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
-      - run: kind load docker-image thecodeisalreadydeployed/backend:dev
+      - run: |
+          sudo apt update
+          sudo apt install wait-for-it
+          make kind
+      - uses: imjasonh/setup-ko@v0.4
+        env:
+          KO_DOCKER_REPO: kind.local
+      - run: ko publish ./
       - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
         timeout-minutes: 5
-      - run: kubectl -n argocd port-forward svc/argocd-server 8080:443 &
+      - run: |
+          kubectl -n argocd port-forward svc/argocd-server 8080:443 &
+          wait-for-it localhost:8080 --timeout=15 --strict
+      - run: |
+          ARGOCD_HOST=localhost:8080
+          ARGOCD_SERVER=http://$ARGOCD_HOST
+          sudo curl -k -sSL -o /usr/local/bin/argocd "$ARGOCD_SERVER/download/argocd-linux-amd64"
+          sudo chmod +x /usr/local/bin/argocd
       - run: |
           ARGOCD_HOST=localhost:8080
           ARGOCD_SERVER=http://$ARGOCD_HOST
           ARGOCD_USERNAME=admin
           ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-          sudo curl -k -sSL -o /usr/local/bin/argocd "$ARGOCD_SERVER/download/argocd-linux-amd64"
-          sudo chmod +x /usr/local/bin/argocd
           argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
-      - run: argocd version
+          argocd version
       - run: argocd app sync codedeploy
       - run: argocd app wait codedeploy --timeout 300
         timeout-minutes: 5
@@ -52,9 +54,10 @@ jobs:
           kubectl -n default wait pod/postgres-1-0 --for condition=Ready --timeout 5m
         timeout-minutes: 5
       - run: |
-          kubectl -n default apply -f hack/ci/backend.yaml
+          ko resolve -f hack/ci/backend.yaml | kubectl -n default apply -f -
       - run: |
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
       - run: make test
+      - run: kubectl -n default logs deploy/codedeploy
