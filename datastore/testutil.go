@@ -1,17 +1,18 @@
 package datastore
 
 import (
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
-	"time"
 )
 
 func getDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.DeploymentStructString()).
 		AddRow(
-			"dpl_test",
-			"app_test",
+			"dpl-test",
+			"app-test",
 			model.GetCreatorString(model.Actor{}),
 			"dummy_meta",
 			model.GetGitSourceString(model.GitSource{}),
@@ -28,8 +29,8 @@ func getDeploymentRows() *sqlmock.Rows {
 func getAppRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.AppStructString()).
 		AddRow(
-			"app_test",
-			"prj_test",
+			"app-test",
+			"prj-test",
 			"Best App",
 			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
@@ -41,13 +42,13 @@ func getAppRows() *sqlmock.Rows {
 
 func getProjectRows() *sqlmock.Rows {
 	return sqlmock.NewRows(datamodel.ProjectStructString()).
-		AddRow("prj_test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
+		AddRow("prj-test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
 }
 
 func getExpectedDeployment() *model.Deployment {
 	return &model.Deployment{
-		ID:                 "dpl_test",
-		AppID:              "app_test",
+		ID:                 "dpl-test",
+		AppID:              "app-test",
 		Creator:            model.Actor{},
 		Meta:               "dummy_meta",
 		GitSource:          model.GitSource{},
@@ -63,8 +64,8 @@ func getExpectedDeployment() *model.Deployment {
 
 func getExpectedApp() *model.App {
 	return &model.App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
+		ID:                 "app-test",
+		ProjectID:          "prj-test",
 		Name:               "Best App",
 		GitSource:          model.GitSource{},
 		CreatedAt:          time.Unix(0, 0),
@@ -76,7 +77,7 @@ func getExpectedApp() *model.App {
 
 func getExpectedProject() *model.Project {
 	return &model.Project{
-		ID:        "prj_test",
+		ID:        "prj-test",
 		Name:      "Best Project",
 		CreatedAt: time.Unix(0, 0),
 		UpdatedAt: time.Unix(0, 0),
