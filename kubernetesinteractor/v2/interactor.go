@@ -55,11 +55,13 @@ func NewKubernetesInteractor() (KubernetesInteractor, error) {
 func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (string, error) {
 	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
 	if err != nil {
-		zap.L().Error("namespace not found: " + namespace)
+		zap.L().Debug("namespace not found: " + namespace)
 		if _, err := it.createNamespace(namespace); err != nil {
 			return "", errutil.ErrFailedPrecondition
 		}
 	}
+
+	zap.L().Debug("created namespace: " + namespace)
 
 	_, err = it.client.CoreV1().Pods(namespace).Get(context.TODO(), pod.Name, v1.GetOptions{})
 	if err != nil {
