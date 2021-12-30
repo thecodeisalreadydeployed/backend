@@ -2,6 +2,7 @@ package workloadcontroller
 
 import (
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/kanikogateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 )
@@ -28,7 +29,17 @@ func NewDeployment(appID string) error {
 		return err
 	}
 
-	_ = deployment
+	kaniko, err := kanikogateway.NewKanikoGateway(app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
+	if err != nil {
+		return err
+	}
+
+	podName, err := kaniko.Deploy()
+	if err != nil {
+		return err
+	}
+
+	_ = podName
 
 	return nil
 }
