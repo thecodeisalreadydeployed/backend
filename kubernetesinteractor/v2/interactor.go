@@ -64,7 +64,7 @@ func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (strin
 	zap.L().Debug("created namespace: " + namespace)
 
 	_, err = it.client.CoreV1().Pods(namespace).Get(context.TODO(), pod.Name, v1.GetOptions{})
-	if err != nil {
+	if err == nil {
 		zap.L().Sugar().Errorf("pod already exists: %s/%s", namespace, pod.Name)
 		return "", errutil.ErrAlreadyExists
 	}
@@ -89,7 +89,7 @@ func (it kubernetesInteractor) CreateConfigMap(configMap apiv1.ConfigMap, namesp
 	}
 
 	_, err = it.client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMap.Name, v1.GetOptions{})
-	if err != nil {
+	if err == nil {
 		zap.L().Sugar().Errorf("ConfigMap already exists: %s/%s", namespace, configMap.Name)
 		return "", errutil.ErrAlreadyExists
 	}
