@@ -107,7 +107,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 					VolumeMounts: []apiv1.VolumeMount{workspace},
 					Env: []apiv1.EnvVar{
 						// TODO(trif0lium): use environment variable
-						{Name: "CODEDEPLOY_API_URL", Value: "http://backend.default.svc.cluster.local:3000"},
+						{Name: "CODEDEPLOY_API_URL", Value: "http://codedeploy.default.svc.cluster.local:3000"},
 						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: it.deploymentID},
 						{Name: "CODEDEPLOY_GIT_REPOSITORY", Value: it.repositoryURL},
 						{Name: "CODEDEPLOY_GIT_REFERENCE", Value: it.branch},
@@ -121,7 +121,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 					VolumeMounts: []apiv1.VolumeMount{workspace},
 					Env: []apiv1.EnvVar{
 						// TODO(trif0lium): use environment variable
-						{Name: "CODEDEPLOY_API_URL", Value: "http://backend.default.svc.cluster.local:3000"},
+						{Name: "CODEDEPLOY_API_URL", Value: "http://codedeploy.default.svc.cluster.local:3000"},
 						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: it.deploymentID},
 						{Name: "CODEDEPLOY_KANIKO_LOG_VERBOSITY", Value: "info"},
 						{Name: "CODEDEPLOY_KANIKO_CONTEXT", Value: "/workspace/" + it.deploymentID},
