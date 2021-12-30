@@ -26,7 +26,7 @@ func TestGetDeploymentByAppID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetDeploymentsByAppID(gdb, "app_test")
+	actual, err := GetDeploymentsByAppID(gdb, "app-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.Deployment{*GetExpectedDeployment()}
