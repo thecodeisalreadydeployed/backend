@@ -72,6 +72,7 @@ func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (strin
 	create, createErr := it.client.CoreV1().Pods(namespace).Create(context.TODO(), &pod, v1.CreateOptions{})
 	if createErr != nil {
 		zap.L().Sugar().Errorf("error creating pod: %s/%s", namespace, pod.Name)
+		zap.L().Sugar().Error(createErr)
 		return "", errutil.ErrUnknown
 
 	}
