@@ -32,7 +32,7 @@ spec:
         app: codedeploy
     spec:
       containers:
-        - image: thecodeisalreadydeployed/backend:dev
+        - image: ko://github.com/thecodeisalreadydeployed
           name: backend
           ports:
             - containerPort: 3000
