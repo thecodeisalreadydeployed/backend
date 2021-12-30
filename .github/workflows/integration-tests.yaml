@@ -34,11 +34,13 @@ jobs:
       - run: |
           ARGOCD_HOST=localhost:8080
           ARGOCD_SERVER=http://$ARGOCD_HOST
-          ARGOCD_USERNAME=admin
-          ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
           sudo curl -k -sSL -o /usr/local/bin/argocd "$ARGOCD_SERVER/download/argocd-linux-amd64"
           sudo chmod +x /usr/local/bin/argocd
       - run: |
+          ARGOCD_HOST=localhost:8080
+          ARGOCD_SERVER=http://$ARGOCD_HOST
+          ARGOCD_USERNAME=admin
+          ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
           argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
           argocd version
       - run: argocd app sync codedeploy
