@@ -56,7 +56,9 @@ func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (strin
 	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
 	if err != nil {
 		zap.L().Error("namespace not found: " + namespace)
-		return "", errutil.ErrFailedPrecondition
+		if _, err := it.createNamespace(namespace); err != nil {
+			return "", errutil.ErrFailedPrecondition
+		}
 	}
 
 	_, err = it.client.CoreV1().Pods(namespace).Get(context.TODO(), pod.Name, v1.GetOptions{})
@@ -79,7 +81,9 @@ func (it kubernetesInteractor) CreateConfigMap(configMap apiv1.ConfigMap, namesp
 	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
 	if err != nil {
 		zap.L().Error("namespace not found: " + namespace)
-		return "", errutil.ErrFailedPrecondition
+		if _, err := it.createNamespace(namespace); err != nil {
+			return "", errutil.ErrFailedPrecondition
+		}
 	}
 
 	_, err = it.client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMap.Name, v1.GetOptions{})
