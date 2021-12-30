@@ -106,12 +106,6 @@ func (it kanikoGateway) Deploy() (string, error) {
 							LocalObjectReference: apiv1.LocalObjectReference{
 								Name: "imagebuilder-" + it.deploymentID,
 							},
-							Items: []apiv1.KeyToPath{
-								{
-									Key:  "Dockerfile",
-									Path: "kaniko/deploys-dev/Dockerfile",
-								},
-							},
 						},
 					},
 				},
@@ -138,7 +132,8 @@ func (it kanikoGateway) Deploy() (string, error) {
 						workspace,
 						{
 							Name:      "dockerfile",
-							MountPath: "/",
+							MountPath: "/kaniko/deploys-dev/Dockerfile",
+							SubPath:   "Dockerfile",
 						},
 					},
 					Env: []apiv1.EnvVar{
