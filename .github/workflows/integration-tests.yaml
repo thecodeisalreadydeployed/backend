@@ -38,8 +38,9 @@ jobs:
           ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
           sudo curl -k -sSL -o /usr/local/bin/argocd "$ARGOCD_SERVER/download/argocd-linux-amd64"
           sudo chmod +x /usr/local/bin/argocd
+      - run: |
           argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
-      - run: argocd version
+          argocd version
       - run: argocd app sync codedeploy
       - run: argocd app wait codedeploy --timeout 300
         timeout-minutes: 5
