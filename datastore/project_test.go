@@ -1,34 +1,32 @@
 package datastore
 
 import (
-	"regexp"
-	"time"
-
 	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/model"
-
-	"testing"
+	"regexp"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestGetAllProjects(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects`")).
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetAllProjects(gdb)
 	assert.Nil(t, err)
 
-	expected := &[]model.Project{*getExpectedProject()}
+	expected := &[]model.Project{*GetExpectedProject()}
 
 	assert.Equal(t, expected, actual)
 
@@ -42,21 +40,21 @@ func TestGetAllProjects(t *testing.T) {
 func TestGetProjectByID(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `projects` WHERE id = ? ORDER BY `projects`.`id` LIMIT 1"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj-test").
-		WillReturnRows(getProjectRows())
+		WithArgs("prj_test").
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetProjectByID(gdb, "prj-test")
+	actual, err := GetProjectByID(gdb, "prj_test")
 	assert.Nil(t, err)
 
-	expected := getExpectedProject()
+	expected := GetExpectedProject()
 
 	assert.Equal(t, expected, actual)
 
@@ -75,25 +73,25 @@ func TestSaveProject(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `projects` WHERE id = ? ORDER BY `projects`.`id` LIMIT 1"
 	exec := "UPDATE `projects` SET `name`=?,`created_at`=?,`updated_at`=? WHERE `id` = ?"
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("Best Project", time.Unix(0, 0), time.Unix(0, 0), "prj-test").
+		WithArgs("Best Project", time.Unix(0, 0), time.Unix(0, 0), "prj_test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj-test").
-		WillReturnRows(getProjectRows())
+		WithArgs("prj_test").
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	expected := getExpectedProject()
+	expected := GetExpectedProject()
 
 	actual, err := SaveProject(gdb, expected)
 	assert.Nil(t, err)
@@ -114,26 +112,26 @@ func TestRemoveProject(t *testing.T) {
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `projects` WHERE `projects`.`id` = ? ORDER BY `projects`.`id` LIMIT 1"
 	exec := "DELETE FROM `projects` WHERE `projects`.`id` = ?"
 
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj-test").
-		WillReturnRows(getProjectRows())
+		WithArgs("prj_test").
+		WillReturnRows(GetProjectRows())
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("prj-test").
+		WithArgs("prj_test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemoveProject(gdb, "prj-test")
+	err = RemoveProject(gdb, "prj_test")
 	assert.Nil(t, err)
 
 	err = db.Close()
@@ -146,20 +144,20 @@ func TestRemoveProject(t *testing.T) {
 func TestGetProjectByName(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
-	expectVersionQuery(mock)
+	ExpectVersionQuery(mock)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects` WHERE `projects`.`name` = ?")).
 		WithArgs("Best Project").
-		WillReturnRows(getProjectRows())
+		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 
-	gdb, err := openGormDB(db)
+	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
 	actual, err := GetProjectsByName(gdb, "Best Project")
 	assert.Nil(t, err)
 
-	expected := &[]model.Project{*getExpectedProject()}
+	expected := &[]model.Project{*GetExpectedProject()}
 
 	assert.Equal(t, expected, actual)
 
