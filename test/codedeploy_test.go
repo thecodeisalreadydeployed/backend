@@ -103,7 +103,7 @@ CMD node main
 		ContainsKey("name").ValueEqual("name", appName)
 
 	expect.GET(fmt.Sprintf("/apps/%s/deployments", appID)).
-		Expect().Status(http.StatusOK).JSON()
+		Expect().Status(http.StatusOK).JSON().Null()
 
 	expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).
