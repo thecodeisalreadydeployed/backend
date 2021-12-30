@@ -133,6 +133,7 @@ func (it kubernetesInteractor) createNamespace(namespace string) (string, error)
 	create, createErr := it.client.CoreV1().Namespaces().Create(context.TODO(), &n, v1.CreateOptions{})
 	if createErr != nil {
 		zap.L().Sugar().Errorf("error creating namespace: %s", namespace)
+		zap.L().Sugar().Error(createErr)
 		return "", errutil.ErrUnknown
 	}
 
