@@ -74,6 +74,29 @@ func (it kubernetesInteractor) CreatePod(pod apiv1.Pod, namespace string) (strin
 	return create.Name, nil
 }
 
+func (it kubernetesInteractor) CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error) {
+	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
+	if err != nil {
+		zap.L().Error("namespace not found: " + namespace)
+		return "", errutil.ErrFailedPrecondition
+	}
+
+	_, err = it.client.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMap.Name, v1.GetOptions{})
+	if err != nil {
+		zap.L().Sugar().Errorf("ConfigMap already exists: %s/%s", namespace, configMap.Name)
+		return "", errutil.ErrAlreadyExists
+	}
+
+	create, createErr := it.client.CoreV1().ConfigMaps(namespace).Create(context.TODO(), &configMap, v1.CreateOptions{})
+	if createErr != nil {
+		zap.L().Sugar().Errorf("error creating ConfigMap: %s/%s", namespace, &configMap.Name)
+		return "", errutil.ErrUnknown
+
+	}
+
+	return create.Name, nil
+}
+
 func (it kubernetesInteractor) GetDeploymentState(deploymentID string, namespace string) (model.DeploymentState, error) {
 	_, err := it.client.CoreV1().Namespaces().Get(context.TODO(), namespace, v1.GetOptions{})
 	if err != nil {
