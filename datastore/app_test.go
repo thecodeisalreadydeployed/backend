@@ -68,14 +68,14 @@ func TestGetAppByProjectID(t *testing.T) {
 
 	query := "SELECT * FROM `apps` WHERE `apps`.`project_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
-		WithArgs("prj_test").
+		WithArgs("prj-test").
 		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAppsByProjectID(gdb, "prj_test")
+	actual, err := GetAppsByProjectID(gdb, "prj-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.App{*GetExpectedApp()}
@@ -131,7 +131,7 @@ func TestSaveApp(t *testing.T) {
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
 		WithArgs(
-			"prj_test",
+			"prj-test",
 			"Best App",
 			model.GetGitSourceString(model.GitSource{}),
 			time.Unix(0, 0),
