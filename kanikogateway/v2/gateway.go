@@ -99,6 +99,22 @@ func (it kanikoGateway) Deploy() (string, error) {
 						EmptyDir: &apiv1.EmptyDirVolumeSource{},
 					},
 				},
+				{
+					Name: "Dockerfile",
+					VolumeSource: apiv1.VolumeSource{
+						ConfigMap: &apiv1.ConfigMapVolumeSource{
+							LocalObjectReference: apiv1.LocalObjectReference{
+								Name: "imagebuilder-" + it.deploymentID,
+							},
+							Items: []apiv1.KeyToPath{
+								{
+									Key:  "Dockerfile",
+									Path: "/kaniko/deploys-dev/Dockerfile",
+								},
+							},
+						},
+					},
+				},
 			},
 			InitContainers: []apiv1.Container{
 				{
@@ -116,9 +132,15 @@ func (it kanikoGateway) Deploy() (string, error) {
 			},
 			Containers: []apiv1.Container{
 				{
-					Name:         "imagebuilder",
-					Image:        "ghcr.io/thecodeisalreadydeployed/imagebuilder:" + imageTag,
-					VolumeMounts: []apiv1.VolumeMount{workspace},
+					Name:  "imagebuilder",
+					Image: "ghcr.io/thecodeisalreadydeployed/imagebuilder:" + imageTag,
+					VolumeMounts: []apiv1.VolumeMount{
+						workspace,
+						{
+							Name:      "Dockerfile",
+							MountPath: "/",
+						},
+					},
 					Env: []apiv1.EnvVar{
 						// TODO(trif0lium): use environment variable
 						{Name: "CODEDEPLOY_API_URL", Value: "http://codedeploy.default.svc.cluster.local:3000"},
