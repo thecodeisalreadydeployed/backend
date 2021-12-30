@@ -14,7 +14,7 @@ import (
 )
 
 func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, error) {
-	if !strings.HasPrefix(appID, "app_") {
+	if !strings.HasPrefix(appID, "app-") {
 		zap.L().Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
@@ -38,7 +38,7 @@ func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, erro
 }
 
 func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, error) {
-	if !strings.HasPrefix(deploymentID, "dpl_") {
+	if !strings.HasPrefix(deploymentID, "dpl-") {
 		zap.L().Error(MsgDeploymentPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
@@ -69,7 +69,7 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 
 func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deployment, error) {
 	if deployment.ID != "" {
-		if !strings.HasPrefix(deployment.ID, "dpl_") {
+		if !strings.HasPrefix(deployment.ID, "dpl-") {
 			return nil, errutil.ErrInvalidArgument
 		}
 	} else {
