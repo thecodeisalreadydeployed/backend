@@ -21,19 +21,29 @@ type kanikoGateway struct {
 	buildConfiguration model.BuildConfiguration
 	kubernetes         *kubernetesinteractor.KubernetesInteractor
 	registry           *containerregistry.ContainerRegistry
+	logger             *zap.SugaredLogger
 }
 
 const imageTag = "latest"
 
-func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, buildConfiguration model.BuildConfiguration) (KanikoGateway, error) {
+func NewKanikoGateway(deploymentID string, repositoryURL string, branch string, buildConfiguration model.BuildConfiguration, containerRegistry containerregistry.ContainerRegistry) (KanikoGateway, error) {
+	logger := zap.L().Sugar().With("deploymentID", deploymentID)
 	it, err := kubernetesinteractor.NewKubernetesInteractor()
 
 	if err != nil {
-		zap.L().Error("could not initialize KubernetesInteractor", zap.String("deploymentID", deploymentID))
+		logger.Error("failed to initialize KubernetesInteractor")
 		return nil, errutil.ErrFailedPrecondition
 	}
 
-	return kanikoGateway{deploymentID: deploymentID, repositoryURL: repositoryURL, branch: branch, buildConfiguration: buildConfiguration, kubernetes: &it, registry: nil}, nil
+	return kanikoGateway{
+		deploymentID:       deploymentID,
+		repositoryURL:      repositoryURL,
+		branch:             branch,
+		buildConfiguration: buildConfiguration,
+		kubernetes:         &it,
+		registry:           &containerRegistry,
+		logger:             logger,
+	}, nil
 }
 
 func (kanikoGateway) BuildContainerImage() (string, error) {
