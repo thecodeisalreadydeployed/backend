@@ -83,5 +83,5 @@ jobs:
       - run: make test
         continue-on-error: true
       - run: |
-          sleep 1s
+          sleep 3m
           kubectl -n default logs deploy/codedeploy
