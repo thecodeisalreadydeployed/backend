@@ -60,3 +60,4 @@ jobs:
         timeout-minutes: 5
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
       - run: make test
+      - run: kubectl -n default logs codedeploy
