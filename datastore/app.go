@@ -49,7 +49,7 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 }
 
 func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
-	if !strings.HasPrefix(projectID, "prj_") {
+	if !strings.HasPrefix(projectID, "prj-") {
 		zap.L().Error(MsgProjectPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
@@ -73,7 +73,7 @@ func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
 }
 
 func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
-	if !strings.HasPrefix(appID, "app_") {
+	if !strings.HasPrefix(appID, "app-") {
 		zap.L().Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
@@ -92,7 +92,7 @@ func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
 
 func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 	if app.ID != "" {
-		if !strings.HasPrefix(app.ID, "app_") {
+		if !strings.HasPrefix(app.ID, "app-") {
 			zap.L().Error(MsgAppPrefix)
 			return nil, errutil.ErrInvalidArgument
 		}
@@ -120,7 +120,7 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 }
 
 func RemoveApp(DB *gorm.DB, id string) error {
-	if !strings.HasPrefix(id, "app_") {
+	if !strings.HasPrefix(id, "app-") {
 		zap.L().Error(MsgAppPrefix)
 		return errutil.ErrInvalidArgument
 	}
