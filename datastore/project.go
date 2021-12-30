@@ -1,8 +1,9 @@
 package datastore
 
 import (
-	"gorm.io/gorm"
 	"strings"
+
+	"gorm.io/gorm"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
@@ -29,7 +30,7 @@ func GetAllProjects(DB *gorm.DB) (*[]model.Project, error) {
 }
 
 func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
-	if !strings.HasPrefix(id, "prj_") {
+	if !strings.HasPrefix(id, "prj-") {
 		zap.L().Error(MsgProjectPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
@@ -49,7 +50,7 @@ func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
 
 func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
 	if project.ID != "" {
-		if !strings.HasPrefix(project.ID, "prj_") {
+		if !strings.HasPrefix(project.ID, "prj-") {
 			zap.L().Error(MsgProjectPrefix)
 			return nil, errutil.ErrInvalidArgument
 		}
@@ -68,7 +69,7 @@ func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
 }
 
 func RemoveProject(DB *gorm.DB, id string) error {
-	if !strings.HasPrefix(id, "prj_") {
+	if !strings.HasPrefix(id, "prj-") {
 		zap.L().Error(MsgProjectPrefix)
 		return errutil.ErrInvalidArgument
 	}
