@@ -1,8 +1,10 @@
 package datastore
 
 import (
-	"gorm.io/gorm"
+	"errors"
 	"strings"
+
+	"gorm.io/gorm"
 
 	"go.uber.org/zap"
 
@@ -63,4 +65,32 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 	}
 
 	return nil
+}
+
+func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deployment, error) {
+	if deployment.ID != "" {
+		if !strings.HasPrefix(deployment.ID, "dpl_") {
+			return nil, errutil.ErrInvalidArgument
+		}
+	} else {
+		deployment.ID = model.GenerateDeploymentID()
+	}
+
+	a := datamodel.NewDeploymentFromModel(deployment)
+	err := DB.Save(a).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+
+		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
+			return nil, errutil.ErrInvalidArgument
+		}
+
+		if errors.Is(err, gorm.ErrMissingWhereClause) {
+			return nil, errutil.ErrFailedPrecondition
+		}
+
+		return nil, errutil.ErrUnknown
+	}
+	return GetDeploymentByID(DB, deployment.ID)
 }
