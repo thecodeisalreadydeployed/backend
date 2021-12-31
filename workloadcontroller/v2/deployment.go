@@ -22,6 +22,11 @@ func NewDeployment(appID string) (*model.Deployment, error) {
 		return nil, err
 	}
 
+	err = git.Checkout(app.GitSource.Branch)
+	if err != nil {
+		return nil, err
+	}
+
 	commitHash, err := git.Head()
 	if err != nil {
 		return nil, err
