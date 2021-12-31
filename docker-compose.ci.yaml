@@ -22,6 +22,12 @@ services:
     volumes:
       - ./:/app
       - ${GOPATH}/pkg/mod:${GOPATH}/pkg/mod
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 networks:
   codedeploy:
