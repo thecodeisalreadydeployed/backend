@@ -63,3 +63,16 @@ func GetBuildConfigurationObject(bc string) BuildConfiguration {
 
 	return buildConfiguration
 }
+
+func GetEncodedString(plain string) string {
+	return base64.StdEncoding.EncodeToString([]byte(plain))
+}
+
+func GetDecodedString(cipher string) string {
+	text, err := base64.StdEncoding.DecodeString(cipher)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
+
+	return cast.ToString(text)
+}
