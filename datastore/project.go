@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"errors"
 	"strings"
 
 	"gorm.io/gorm"
@@ -62,6 +63,15 @@ func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
 
 	if err != nil {
 		zap.L().Error(err.Error())
+
+		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
+			return nil, errutil.ErrInvalidArgument
+		}
+
+		if errors.Is(err, gorm.ErrMissingWhereClause) {
+			return nil, errutil.ErrFailedPrecondition
+		}
+
 		return nil, errutil.ErrUnknown
 	}
 
