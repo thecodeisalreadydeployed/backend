@@ -21,3 +21,5 @@ jobs:
       - run: |
           sudo apt update
           sudo apt install wait-for-it
+      - run: make dev &
+      - run: wait-for-it localhost:3000 --timeout=15 --strict
