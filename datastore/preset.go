@@ -28,14 +28,14 @@ func GetAllPresets(DB *gorm.DB) (*[]model.Preset, error) {
 	return ret, nil
 }
 
-func GetPresetByID(DB *gorm.DB, id string) (*model.Preset, error) {
-	if !strings.HasPrefix(id, "pst-") {
+func GetPresetByID(DB *gorm.DB, presetID string) (*model.Preset, error) {
+	if !strings.HasPrefix(presetID, "pst-") {
 		zap.L().Error(MsgPresetPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.Preset
-	err := DB.First(&_data, "id = ?", id).Error
+	err := DB.First(&_data, "id = ?", presetID).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
