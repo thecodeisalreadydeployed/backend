@@ -82,7 +82,7 @@ func createDeploymentEvents(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	if len(*events) == 0 {
+	if len(*events) == 0 && deployment.State == model.DeploymentStateQueueing {
 		err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuilding)
 		if err != nil {
 			return err
