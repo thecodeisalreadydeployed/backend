@@ -5,7 +5,6 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
-	"github.com/thecodeisalreadydeployed/scheduler"
 	"github.com/thecodeisalreadydeployed/util"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
@@ -30,7 +29,6 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	datastore.Init()
-	scheduler.Watch()
 	go repositoryobserver.ObserveGitSources(datastore.GetDB())
 	apiserver.APIServer(3000)
 }
