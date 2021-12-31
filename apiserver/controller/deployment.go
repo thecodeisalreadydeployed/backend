@@ -76,7 +76,6 @@ func createDeploymentEvents(ctx *fiber.Ctx) error {
 
 	zap.L().Sugar().Debug(inputModel.Text)
 
-	_ = datastore.SaveEvent(datastore.GetDB(), &inputModel)
-
-	return ctx.SendStatus(fiber.StatusOK)
+	event, createErr := datastore.SaveEvent(datastore.GetDB(), &inputModel)
+	return writeResponse(ctx, event, createErr)
 }
