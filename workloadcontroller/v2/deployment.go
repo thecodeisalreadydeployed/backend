@@ -35,6 +35,9 @@ func NewDeployment(appID string) (*model.Deployment, error) {
 
 	app.GitSource = gitSource
 	app, err = datastore.SaveApp(datastore.GetDB(), app)
+	if err != nil {
+		return nil, err
+	}
 
 	deployment, err := datastore.SaveDeployment(datastore.GetDB(), &model.Deployment{
 		AppID:              appID,
