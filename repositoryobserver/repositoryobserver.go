@@ -1,7 +1,6 @@
 package repositoryobserver
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"sync"
@@ -43,14 +42,14 @@ func fetchObservableApps(DB *gorm.DB, aChan chan *model.App, wgFetch *sync.WaitG
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		fmt.Println("Unable to fetch observable apps, waiting for the next fetch of observables.")
+		zap.L().Info("Unable to fetch observable apps, waiting for the next fetch of observables.")
 		time.Sleep(WaitAfterErrorInterval)
 		wgFetch.Done()
 		return
 	}
 
 	if len(*apps) == 0 {
-		fmt.Println("All apps are set to not be observed, waiting for the next fetch of observables.")
+		zap.L().Info("All apps are set to not be observed, waiting for the next fetch of observables.")
 		time.Sleep(FetchObservableAppsInterval)
 		wgFetch.Done()
 		return
@@ -87,10 +86,10 @@ func checkGitSource(DB *gorm.DB, app model.App, cChan chan bool, observables *sy
 	}
 	if commit == nil {
 		if duration == -1 {
-			fmt.Println("An error occurred while fetching the repository, waiting for next repository check.")
+			zap.L().Info("An error occurred while fetching the repository, waiting for next repository check.")
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
-			fmt.Println("There are no changes in the application, waiting for next repository check.")
+			zap.L().Info("There are no changes in the application, waiting for next repository check.")
 			time.Sleep(duration)
 		}
 		cChan <- true
@@ -166,6 +165,6 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 // TODO: Integrate with workload controller
 
 func deployNewRevision() {
-	fmt.Println("Deploying new revision...")
+	zap.L().Info("Deploying new revision...")
 	// direct to workload controller
 }

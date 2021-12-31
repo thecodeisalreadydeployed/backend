@@ -20,6 +20,7 @@ func NewDeploymentController(api fiber.Router) {
 	api.Get("/:deploymentID", getDeployment)
 	api.Get("/:deploymentID/events", getDeploymentEvents)
 	api.Post("/:deploymentID/events", createDeploymentEvents)
+	api.Delete("/:deploymentID", deleteDeployment)
 }
 
 func createDeployment(ctx *fiber.Ctx) error {
@@ -94,7 +95,15 @@ func createDeploymentEvents(ctx *fiber.Ctx) error {
 
 	zap.L().Sugar().Debug(inputModel.Text)
 
-	_ = datastore.SaveEvent(datastore.GetDB(), &inputModel)
+	event, createErr := datastore.SaveEvent(datastore.GetDB(), &inputModel)
+	return writeResponse(ctx, event, createErr)
+}
 
+func deleteDeployment(ctx *fiber.Ctx) error {
+	deploymentID := ctx.Params("deploymentID")
+	err := datastore.RemoveDeployment(datastore.GetDB(), deploymentID)
+	if err != nil {
+		return fiber.NewError(errutil.MapStatusCode(err))
+	}
 	return ctx.SendStatus(fiber.StatusOK)
 }

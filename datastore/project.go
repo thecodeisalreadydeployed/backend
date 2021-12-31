@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"errors"
 	"strings"
 
 	"gorm.io/gorm"
@@ -49,19 +50,28 @@ func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
 }
 
 func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
-	if project.ID != "" {
-		if !strings.HasPrefix(project.ID, "prj-") {
-			zap.L().Error(MsgProjectPrefix)
-			return nil, errutil.ErrInvalidArgument
-		}
-	} else {
+	if project.ID == "" {
 		project.ID = model.GenerateProjectID()
 	}
+	if !strings.HasPrefix(project.ID, "prj-") {
+		zap.L().Error(MsgProjectPrefix)
+		return nil, errutil.ErrInvalidArgument
+	}
+
 	p := datamodel.NewProjectFromModel(project)
 	err := DB.Save(p).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
+
+		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
+			return nil, errutil.ErrInvalidArgument
+		}
+
+		if errors.Is(err, gorm.ErrMissingWhereClause) {
+			return nil, errutil.ErrFailedPrecondition
+		}
+
 		return nil, errutil.ErrUnknown
 	}
 

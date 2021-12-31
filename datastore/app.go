@@ -105,13 +105,12 @@ func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
 }
 
 func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
-	if app.ID != "" {
-		if !strings.HasPrefix(app.ID, "app-") {
-			zap.L().Error(MsgAppPrefix)
-			return nil, errutil.ErrInvalidArgument
-		}
-	} else {
+	if app.ID == "" {
 		app.ID = model.GenerateAppID()
+	}
+	if !strings.HasPrefix(app.ID, "app-") {
+		zap.L().Error(MsgAppPrefix)
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	a := datamodel.NewAppFromModel(app)

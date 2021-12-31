@@ -68,12 +68,12 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 }
 
 func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deployment, error) {
-	if deployment.ID != "" {
-		if !strings.HasPrefix(deployment.ID, "dpl-") {
-			return nil, errutil.ErrInvalidArgument
-		}
-	} else {
+	if deployment.ID == "" {
 		deployment.ID = model.GenerateDeploymentID()
+	}
+	if !strings.HasPrefix(deployment.ID, "dpl-") {
+		zap.L().Error(MsgDeploymentPrefix)
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	a := datamodel.NewDeploymentFromModel(deployment)
@@ -93,4 +93,22 @@ func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deploymen
 		return nil, errutil.ErrUnknown
 	}
 	return GetDeploymentByID(DB, deployment.ID)
+}
+
+func RemoveDeployment(DB *gorm.DB, id string) error {
+	if !strings.HasPrefix(id, "dpl-") {
+		zap.L().Error(MsgDeploymentPrefix)
+		return errutil.ErrInvalidArgument
+	}
+	var dpl datamodel.Deployment
+	err := DB.Table("deployments").Where(datamodel.Deployment{ID: id}).First(&dpl).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+	if err := DB.Delete(&dpl).Error; err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrUnknown
+	}
+	return nil
 }
