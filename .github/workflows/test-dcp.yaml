@@ -24,6 +24,6 @@ jobs:
       - run: make dcp
       - run: wait-for-it localhost:5432 --timeout=60 --strict
       - run: go mod download
-      - run: APP_ENV=DEV go run main.go &
+      - run: DATABASE_HOST=localhost DATABASE_USERNAME=user DATABASE_PASSWORD=password DATABASE_NAME=codedeploy DATABASE_PORT=5432 APP_ENV=PROD go run main.go &
       - run: wait-for-it localhost:3000 --timeout=120 --strict
       - run: make test
