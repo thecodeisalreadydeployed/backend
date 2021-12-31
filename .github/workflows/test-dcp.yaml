@@ -25,5 +25,6 @@ jobs:
       - run: wait-for-it localhost:5432 --timeout=60 --strict
       - run: go mod download
       - run: docker compose -f docker-compose.yaml -f docker-compose.ci.yaml up -d
+      - run: docker logs backend
       - run: wait-for-it localhost:3000 --timeout=120 --strict
       - run: make test
