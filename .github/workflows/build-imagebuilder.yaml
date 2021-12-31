@@ -1,4 +1,4 @@
-name: build/imagebuilder
+name: 'build: imagebuilder'
 on:
   push:
     paths:

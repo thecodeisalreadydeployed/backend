@@ -1,0 +1,28 @@
+name: 'test: docker-compose'
+on:
+  push:
+jobs:
+  integration-tests:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: test/docker-compose:${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - run: |
+          sudo apt update
+          sudo apt install wait-for-it
+      - run: make dcp
+      - run: wait-for-it localhost:5432 --timeout=60 --strict
+      - run: go mod download
+      - run: APP_ENV=DEV go run main.go &
+      - run: wait-for-it localhost:3000 --timeout=120 --strict
