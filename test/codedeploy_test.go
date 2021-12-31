@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -115,21 +116,23 @@ CMD node main
 		ContainsKey("state").
 		ValueEqual("state", model.DeploymentStateQueueing)
 
-	time.Sleep(2 * time.Minute)
+	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
+		time.Sleep(2 * time.Minute)
 
-	deploymentID := deployment.Object().Value("id").String().Raw()
+		deploymentID := deployment.Object().Value("id").String().Raw()
 
-	expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
-		Expect().Status(http.StatusOK).JSON().
-		Object().
-		ContainsKey("state").ValueEqual("state", model.DeploymentStateBuilding)
+		expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
+			Expect().Status(http.StatusOK).JSON().
+			Object().
+			ContainsKey("state").ValueEqual("state", model.DeploymentStateBuilding)
 
-	events := expect.GET("/deployments/" + deploymentID + "/events").
-		Expect().
-		Status(http.StatusOK).
-		JSON()
+		events := expect.GET("/deployments/" + deploymentID + "/events").
+			Expect().
+			Status(http.StatusOK).
+			JSON()
 
-	events.Array().Length().Gt(0)
+		events.Array().Length().Gt(0)
+	}
 
 	expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
 		Expect().Status(http.StatusOK)
