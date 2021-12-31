@@ -24,7 +24,7 @@ jobs:
       - run: make dcp
       - run: wait-for-it localhost:5432 --timeout=60 --strict
       - run: go mod download
-      - run: docker compose -f docker-compose.yaml -f docker-compose.ci.yaml up -d
+      - run: docker compose -f docker-compose.ci.yaml up -d
       - run: sleep 30s
       - run: docker ps -a
       - run: docker logs backend
