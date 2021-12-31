@@ -17,8 +17,9 @@ func NewDeployment(appID string) error {
 	}
 
 	deployment, err := datastore.SaveDeployment(datastore.GetDB(), &model.Deployment{
-		AppID:     appID,
-		GitSource: app.GitSource,
+		AppID:              appID,
+		GitSource:          app.GitSource,
+		BuildConfiguration: app.BuildConfiguration,
 	})
 	if err != nil {
 		return err
