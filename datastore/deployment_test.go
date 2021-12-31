@@ -9,12 +9,10 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
-	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 )
 
 func TestGetDeploymentByAppID(t *testing.T) {
-	fmt.Println(datamodel.DeploymentStructString())
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -72,7 +70,7 @@ func TestSetDeploymentState(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
-	fmt.Println(datamodel.DeploymentStructString())
+	fmt.Println(DeploymentStructString())
 
 	exec := "UPDATE `deployments` SET `state`=? WHERE `deployments`.`id` = ?"
 
