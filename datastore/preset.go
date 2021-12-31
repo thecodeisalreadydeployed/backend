@@ -67,10 +67,10 @@ func GetPresetsByName(DB *gorm.DB, name string) (*[]model.Preset, error) {
 }
 
 func SavePreset(DB *gorm.DB, preset *model.Preset) (*model.Preset, error) {
-	if preset.ID != "" {
+	if preset.ID == "" {
 		preset.ID = model.GeneratePresetID()
 	}
-	if !IsValidKSUID(preset.ID) {
+	if !strings.HasPrefix(preset.ID, "pst-") {
 		zap.L().Error(MsgPresetPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
@@ -95,7 +95,7 @@ func SavePreset(DB *gorm.DB, preset *model.Preset) (*model.Preset, error) {
 }
 
 func RemovePreset(DB *gorm.DB, id string) error {
-	if !IsValidKSUID(id) {
+	if !strings.HasPrefix(id, "pst-") {
 		zap.L().Error(MsgPresetPrefix)
 		return errutil.ErrInvalidArgument
 	}
