@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  backend:
+    container_name: backend
+    image: golang:1.16
+    depends_on:
+      - database
+    restart: unless-stopped
+    environment:
+      DATABASE_HOST: database
+      DATABASE_USERNAME: user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: codedeploy
+      DATABASE_PORT: "5432"
+    ports:
+      - 3000:3000
+    networks:
+      - codedeploy
+    working_dir: /app
+    command: 'go run main.go'
+    volumes:
+      - ./:/app
+      - ${GOPATH}/pkg/mod:${GOPATH}/pkg/mod
+
+networks:
+  codedeploy:
+    name: codedeploy
