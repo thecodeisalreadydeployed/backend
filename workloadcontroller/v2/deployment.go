@@ -2,19 +2,39 @@ package workloadcontroller
 
 import (
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/kanikogateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 )
 
-func NewDeployment(appID string) error {
+func NewDeployment(appID string) (*model.Deployment, error) {
 	logger := zap.L().Sugar().With("appID", appID)
 	_ = logger
 
 	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	git, err := gitgateway.NewGitGatewayRemote(app.GitSource.RepositoryURL)
+	if err != nil {
+		return nil, err
+	}
+
+	commitHash, err := git.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	gitSource := model.GitSource{
+		CommitSHA:     commitHash,
+		RepositoryURL: app.GitSource.RepositoryURL,
+		Branch:        app.GitSource.Branch,
+	}
+
+	app.GitSource = gitSource
+	app, err = datastore.SaveApp(datastore.GetDB(), app)
 
 	deployment, err := datastore.SaveDeployment(datastore.GetDB(), &model.Deployment{
 		AppID:              appID,
@@ -22,25 +42,25 @@ func NewDeployment(appID string) error {
 		BuildConfiguration: app.BuildConfiguration,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateQueueing)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	kaniko, err := kanikogateway.NewKanikoGateway(app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
+	_, err = kanikogateway.NewKanikoGateway(app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	podName, err := kaniko.Deploy()
-	if err != nil {
-		return err
-	}
+	// podName, err := kaniko.Deploy()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	_ = podName
+	// _ = podName
 
-	return nil
+	return deployment, nil
 }
