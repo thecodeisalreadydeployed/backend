@@ -8,6 +8,7 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/model"
 )
 
 func Setup(t *testing.T) *httpexpect.Expect {
@@ -108,8 +109,8 @@ CMD node main
 	expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).
 		JSON().Object().
-		ContainsKey("ok").
-		ValueEqual("ok", true)
+		ContainsKey("state").
+		ValueEqual("state", model.DeploymentStateQueueing)
 
 	expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
 		Expect().Status(http.StatusOK)
