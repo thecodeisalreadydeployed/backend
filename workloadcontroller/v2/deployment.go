@@ -39,12 +39,8 @@ func NewDeployment(appID string) (*model.Deployment, error) {
 		AppID:              appID,
 		GitSource:          app.GitSource,
 		BuildConfiguration: app.BuildConfiguration,
+		State:              model.DeploymentStateQueueing,
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateQueueing)
 	if err != nil {
 		return nil, err
 	}
