@@ -4,6 +4,7 @@ dcp:
 
 .PHONY: dev
 dev: dcp
+	go mod download
 	APP_ENV=DEV go run main.go
 
 .PHONY: prod
