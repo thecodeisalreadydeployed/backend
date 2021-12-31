@@ -43,16 +43,3 @@ func NewAppFromModel(app *model.App) *App {
 		Observable:         app.Observable,
 	}
 }
-
-func AppStructString() []string {
-	return []string{
-		"ID",
-		"ProjectID",
-		"Name",
-		"GitSource",
-		"CreatedAt",
-		"UpdatedAt",
-		"BuildConfiguration",
-		"Observable",
-	}
-}
