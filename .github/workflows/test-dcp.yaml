@@ -23,5 +23,5 @@ jobs:
           sudo apt install wait-for-it
       - run: make dcp
       - run: wait-for-it localhost:5432 --timeout=60 --strict
-      - run: make dev &
+      - run: make dev
       - run: wait-for-it localhost:3000 --timeout=60 --strict
