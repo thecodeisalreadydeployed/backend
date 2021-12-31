@@ -1,4 +1,4 @@
-name: dev/integration-test
+name: 'test: kind'
 on:
   push:
 jobs:
@@ -83,5 +83,5 @@ jobs:
       - run: make test
         continue-on-error: true
       - run: |
-          sleep 5m
+          sleep 1m
           kubectl -n default logs deploy/codedeploy
