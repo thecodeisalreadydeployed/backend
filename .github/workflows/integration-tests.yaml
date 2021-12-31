@@ -82,6 +82,4 @@ jobs:
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
       - run: make test
         continue-on-error: true
-      - run: |
-          sleep 1m
-          kubectl -n default logs deploy/codedeploy
+      - run: kubectl -n default logs deploy/codedeploy
