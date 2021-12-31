@@ -4,9 +4,6 @@ type BuildConfiguration struct {
 	// Dockerfile instructions for building container image.
 	BuildScript string `json:"buildScript"`
 
-	// Flag to specify whether the BuildScript should be parsed.
-	ParseBuildScript bool `json:"parseBuildScript"`
-
 	// Directory for running Dockerfile instructions.
 	// If not set, the working directory defaults to the root of the repository.
 	WorkingDirectory string `json:"workingDirectory"`
