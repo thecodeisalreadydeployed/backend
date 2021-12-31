@@ -50,14 +50,14 @@ func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
 }
 
 func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
-	if project.ID != "" {
-		if !strings.HasPrefix(project.ID, "prj-") {
-			zap.L().Error(MsgProjectPrefix)
-			return nil, errutil.ErrInvalidArgument
-		}
-	} else {
+	if project.ID == "" {
 		project.ID = model.GenerateProjectID()
 	}
+	if !strings.HasPrefix(project.ID, "prj-") {
+		zap.L().Error(MsgProjectPrefix)
+		return nil, errutil.ErrInvalidArgument
+	}
+
 	p := datamodel.NewProjectFromModel(project)
 	err := DB.Save(p).Error
 

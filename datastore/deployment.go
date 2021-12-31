@@ -71,7 +71,8 @@ func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deploymen
 	if deployment.ID == "" {
 		deployment.ID = model.GenerateDeploymentID()
 	}
-	if deployment.ID != "" && !strings.HasPrefix(deployment.ID, "dpl-") {
+	if !strings.HasPrefix(deployment.ID, "dpl-") {
+		zap.L().Error(MsgDeploymentPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 

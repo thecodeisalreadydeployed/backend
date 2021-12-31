@@ -52,7 +52,7 @@ func SaveEvent(DB *gorm.DB, event *model.Event) (*model.Event, error) {
 	if event.ID == "" {
 		event.ID = model.GenerateEventID(event.ExportedAt)
 	}
-	if event.ID != "" && !IsValidKSUID(event.ID) {
+	if !IsValidKSUID(event.ID) {
 		zap.L().Error(MsgEventPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
