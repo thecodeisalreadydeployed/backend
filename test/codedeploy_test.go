@@ -117,7 +117,7 @@ CMD node main
 		ValueEqual("state", model.DeploymentStateQueueing)
 
 	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
-		time.Sleep(2 * time.Minute)
+		time.Sleep(30 * time.Second)
 
 		deploymentID := deployment.Object().Value("id").String().Raw()
 
