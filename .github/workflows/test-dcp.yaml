@@ -1,4 +1,4 @@
-name: test/docker-compose
+name: 'test: docker-compose'
 on:
   push:
 jobs:
