@@ -26,3 +26,4 @@ jobs:
       - run: go mod download
       - run: APP_ENV=DEV go run main.go &
       - run: wait-for-it localhost:3000 --timeout=120 --strict
+      - run: make test
