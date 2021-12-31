@@ -94,3 +94,21 @@ func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deploymen
 	}
 	return GetDeploymentByID(DB, deployment.ID)
 }
+
+func RemoveDeployment(DB *gorm.DB, id string) error {
+	if !strings.HasPrefix(id, "dpl-") {
+		zap.L().Error(MsgDeploymentPrefix)
+		return errutil.ErrInvalidArgument
+	}
+	var dpl datamodel.Deployment
+	err := DB.Table("deployments").Where(datamodel.Deployment{ID: id}).First(&dpl).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+	if err := DB.Delete(&dpl).Error; err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrUnknown
+	}
+	return nil
+}
