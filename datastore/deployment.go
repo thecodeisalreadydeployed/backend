@@ -68,12 +68,11 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 }
 
 func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deployment, error) {
-	if deployment.ID != "" {
-		if !strings.HasPrefix(deployment.ID, "dpl-") {
-			return nil, errutil.ErrInvalidArgument
-		}
-	} else {
+	if deployment.ID == "" {
 		deployment.ID = model.GenerateDeploymentID()
+	}
+	if deployment.ID != "" && !strings.HasPrefix(deployment.ID, "dpl-") {
+		return nil, errutil.ErrInvalidArgument
 	}
 
 	a := datamodel.NewDeploymentFromModel(deployment)
