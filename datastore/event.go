@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"errors"
 	"regexp"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
@@ -9,8 +10,6 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
-
-//TODO: test this file
 
 func GetEventsByDeploymentID(DB *gorm.DB, deploymentID string) (*[]model.Event, error) {
 	var _data []datamodel.Event
@@ -31,26 +30,53 @@ func GetEventsByDeploymentID(DB *gorm.DB, deploymentID string) (*[]model.Event, 
 	return ret, nil
 }
 
-func IsValidKSUID(str string) bool {
-	re := regexp.MustCompile("^[a-zA-Z0-9]{27}$")
-	return re.MatchString(str)
+func GetEventByID(DB *gorm.DB, eventID string) (*model.Event, error) {
+	if !IsValidKSUID(eventID) {
+		zap.L().Error(MsgEventPrefix)
+		return nil, errutil.ErrInvalidArgument
+	}
+
+	var _data datamodel.Event
+	err := DB.First(&_data, "id = ?", eventID).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrNotFound
+	}
+
+	ret := _data.ToModel()
+	return &ret, nil
 }
 
-func SaveEvent(DB *gorm.DB, event *model.Event) error {
-	if event.ID != "" {
-		if !IsValidKSUID(event.ID) {
-			return errutil.ErrInvalidArgument
-		}
-	} else {
+func SaveEvent(DB *gorm.DB, event *model.Event) (*model.Event, error) {
+	if event.ID == "" {
 		event.ID = model.GenerateEventID(event.ExportedAt)
+	}
+	if event.ID != "" && !IsValidKSUID(event.ID) {
+		zap.L().Error(MsgEventPrefix)
+		return nil, errutil.ErrInvalidArgument
 	}
 	e := datamodel.NewEventFromModel(event)
 	err := DB.Save(e).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
-		return errutil.ErrUnknown
+
+		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
+			return nil, errutil.ErrInvalidArgument
+		}
+
+		if errors.Is(err, gorm.ErrMissingWhereClause) {
+			return nil, errutil.ErrFailedPrecondition
+		}
+
+		return nil, errutil.ErrUnknown
 	}
 
-	return nil
+	return GetEventByID(DB, event.ID)
+}
+
+func IsValidKSUID(str string) bool {
+	re := regexp.MustCompile("^[a-zA-Z0-9]{27}$")
+	return re.MatchString(str)
 }
