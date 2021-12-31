@@ -2,8 +2,9 @@ package preset
 
 import (
 	"bytes"
-	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"text/template"
+
+	"github.com/thecodeisalreadydeployed/model"
 )
 
 type Framework string
@@ -14,7 +15,7 @@ const (
 	FrameworkFlask  Framework = "FrameworkFlask"
 )
 
-func Preset(opts kanikogateway.BuildOptions, framework Framework) (string, error) {
+func Preset(opts model.BuildConfiguration, framework Framework) (string, error) {
 
 	text := Text(framework)
 
