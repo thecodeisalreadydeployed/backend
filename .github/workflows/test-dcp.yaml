@@ -25,8 +25,7 @@ jobs:
       - run: wait-for-it localhost:5432 --timeout=60 --strict
       - run: go mod download
       - run: docker compose -f docker-compose.ci.yaml up -d
-      - run: sleep 30s
       - run: docker ps -a
-      - run: docker logs backend
+      - run: sh hack/ci/wait-for-healthy-container.sh backend 120
       - run: wait-for-it localhost:3000 --timeout=120 --strict
       - run: make test
