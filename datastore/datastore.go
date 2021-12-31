@@ -49,6 +49,11 @@ func Init() {
 		panic(err)
 	}
 
+	err = DB.AutoMigrate(&datamodel.Preset{})
+	if err != nil {
+		panic(err)
+	}
+
 	if util.IsDevEnvironment() {
 		seed()
 	}

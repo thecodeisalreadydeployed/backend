@@ -55,20 +55,3 @@ func NewDeploymentFromModel(dpl *model.Deployment) *Deployment {
 		UpdatedAt:          dpl.UpdatedAt,
 	}
 }
-
-func DeploymentStructString() []string {
-	return []string{
-		"ID",
-		"AppID",
-		"Creator",
-		"Meta",
-		"GitSource",
-		"BuiltAt",
-		"CommittedAt",
-		"DeployedAt",
-		"BuildConfiguration",
-		"CreatedAt",
-		"UpdatedAt",
-		"State",
-	}
-}

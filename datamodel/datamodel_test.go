@@ -9,46 +9,21 @@ import (
 
 func TestProject_ToModel(t *testing.T) {
 	prj := Project{
-		ID:        "prj_test",
+		ID:        "prj-test",
 		Name:      "Best Project",
 		CreatedAt: time.Unix(1, 0),
 		UpdatedAt: time.Unix(2, 0),
 	}
 
-	expected := model.Project{
-		ID:        "prj_test",
-		Name:      "Best Project",
-		CreatedAt: time.Unix(1, 0),
-		UpdatedAt: time.Unix(2, 0),
-	}
-
-	actual := prj.ToModel()
-	assert.Equal(t, expected, actual)
-}
-
-func TestNewProjectFromModel(t *testing.T) {
-	prj := model.Project{
-		ID:        "prj_test",
-		Name:      "Best Project",
-		CreatedAt: time.Unix(1, 0),
-		UpdatedAt: time.Unix(2, 0),
-	}
-
-	expected := &Project{
-		ID:        "prj_test",
-		Name:      "Best Project",
-		CreatedAt: time.Unix(1, 0),
-		UpdatedAt: time.Unix(2, 0),
-	}
-
-	actual := NewProjectFromModel(&prj)
-	assert.Equal(t, expected, actual)
+	parsed := prj.ToModel()
+	actual := *NewProjectFromModel(&parsed)
+	assert.Equal(t, prj, actual)
 }
 
 func TestApp_ToModel(t *testing.T) {
 	app := App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
+		ID:                 "app-test",
+		ProjectID:          "prj-test",
 		Project:            Project{},
 		Name:               "Best App",
 		GitSource:          model.GetGitSourceString(model.GitSource{}),
@@ -58,53 +33,15 @@ func TestApp_ToModel(t *testing.T) {
 		Observable:         false,
 	}
 
-	expected := model.App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
-		Name:               "Best App",
-		GitSource:          model.GitSource{},
-		CreatedAt:          time.Unix(1, 0),
-		UpdatedAt:          time.Unix(2, 0),
-		BuildConfiguration: model.BuildConfiguration{},
-		Observable:         false,
-	}
-
-	actual := app.ToModel()
-	assert.Equal(t, expected, actual)
-}
-
-func TestNewAppFromModel(t *testing.T) {
-	app := model.App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
-		Name:               "Best App",
-		GitSource:          model.GitSource{},
-		CreatedAt:          time.Unix(1, 0),
-		UpdatedAt:          time.Unix(2, 0),
-		BuildConfiguration: model.BuildConfiguration{},
-		Observable:         false,
-	}
-
-	expected := &App{
-		ID:                 "app_test",
-		ProjectID:          "prj_test",
-		Project:            Project{},
-		Name:               "Best App",
-		GitSource:          model.GetGitSourceString(model.GitSource{}),
-		CreatedAt:          time.Unix(1, 0),
-		UpdatedAt:          time.Unix(2, 0),
-		BuildConfiguration: model.GetBuildConfigurationString(model.BuildConfiguration{}),
-		Observable:         false,
-	}
-
-	actual := NewAppFromModel(&app)
-	assert.Equal(t, expected, actual)
+	parsed := app.ToModel()
+	actual := *NewAppFromModel(&parsed)
+	assert.Equal(t, app, actual)
 }
 
 func TestDeployment_ToModel(t *testing.T) {
 	dpl := Deployment{
-		ID:                 "dpl_test",
-		AppID:              "app_test",
+		ID:                 "dpl-test",
+		AppID:              "app-test",
 		App:                App{},
 		Creator:            model.GetCreatorString(model.Actor{}),
 		Meta:               "dummy_meta",
@@ -118,57 +55,35 @@ func TestDeployment_ToModel(t *testing.T) {
 		State:              model.DeploymentStateReady,
 	}
 
-	expected := model.Deployment{
-		ID:                 "dpl_test",
-		AppID:              "app_test",
-		Creator:            model.Actor{},
-		Meta:               "dummy_meta",
-		GitSource:          model.GitSource{},
-		BuiltAt:            time.Unix(0, 0),
-		CommittedAt:        time.Unix(0, 0),
-		DeployedAt:         time.Unix(0, 0),
-		BuildConfiguration: model.BuildConfiguration{},
-		CreatedAt:          time.Unix(0, 0),
-		UpdatedAt:          time.Unix(0, 0),
-		State:              model.DeploymentStateReady,
-	}
-
-	actual := dpl.ToModel()
-	assert.Equal(t, expected, actual)
+	parsed := dpl.ToModel()
+	actual := *NewDeploymentFromModel(&parsed)
+	assert.Equal(t, dpl, actual)
 }
 
-func TestNewDeploymentFromModel(t *testing.T) {
-	dpl := model.Deployment{
-		ID:                 "dpl_test",
-		AppID:              "app_test",
-		Creator:            model.Actor{},
-		Meta:               "dummy_meta",
-		GitSource:          model.GitSource{},
-		BuiltAt:            time.Unix(0, 0),
-		CommittedAt:        time.Unix(0, 0),
-		DeployedAt:         time.Unix(0, 0),
-		BuildConfiguration: model.BuildConfiguration{},
-		CreatedAt:          time.Unix(0, 0),
-		UpdatedAt:          time.Unix(0, 0),
-		State:              model.DeploymentStateReady,
+func TestEvent_ToModel(t *testing.T) {
+	event := Event{
+		ID:           "abcdefghijklmnopqrstuvwxyz0",
+		DeploymentID: "dpl-test",
+		Text:         "Downloading dependencies (1/20)",
+		Type:         model.INFO,
+		ExportedAt:   time.Unix(0, 0),
+		CreatedAt:    time.Unix(0, 0),
 	}
 
-	expected := &Deployment{
-		ID:                 "dpl_test",
-		AppID:              "app_test",
-		App:                App{},
-		Creator:            model.GetCreatorString(model.Actor{}),
-		Meta:               "dummy_meta",
-		GitSource:          model.GetGitSourceString(model.GitSource{}),
-		BuiltAt:            time.Unix(0, 0),
-		CommittedAt:        time.Unix(0, 0),
-		DeployedAt:         time.Unix(0, 0),
-		BuildConfiguration: model.GetBuildConfigurationString(model.BuildConfiguration{}),
-		CreatedAt:          time.Unix(0, 0),
-		UpdatedAt:          time.Unix(0, 0),
-		State:              model.DeploymentStateReady,
+	parsed := event.ToModel()
+	actual := *NewEventFromModel(&parsed)
+	assert.Equal(t, event, actual)
+}
+
+func TestPreset_ToModel(t *testing.T) {
+	preset := Preset{
+		ID:       "pst-test",
+		Name:     "My Preset",
+		Template: "UlVOIGVjaG8gaGVsbG8=",
 	}
 
-	actual := NewDeploymentFromModel(&dpl)
-	assert.Equal(t, expected, actual)
+	parsed := preset.ToModel()
+	assert.Equal(t, "RUN echo hello", parsed.Template)
+	actual := *NewPresetFromModel(&parsed)
+	assert.Equal(t, preset, actual)
 }

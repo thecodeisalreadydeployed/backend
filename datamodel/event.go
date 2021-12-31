@@ -9,6 +9,7 @@ import (
 type Event struct {
 	ID           string `gorm:"primaryKey"`
 	DeploymentID string
+	Deployment   Deployment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Text         string
 	Type         model.EventType
 	ExportedAt   time.Time

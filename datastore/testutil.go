@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -23,8 +22,53 @@ func OpenGormDB(db *sql.DB) (*gorm.DB, error) {
 	}), &gorm.Config{})
 }
 
+func DeploymentStructString() []string {
+	return []string{
+		"ID",
+		"AppID",
+		"Creator",
+		"Meta",
+		"GitSource",
+		"BuiltAt",
+		"CommittedAt",
+		"DeployedAt",
+		"BuildConfiguration",
+		"CreatedAt",
+		"UpdatedAt",
+		"State",
+	}
+}
+
+func AppStructString() []string {
+	return []string{
+		"ID",
+		"ProjectID",
+		"Name",
+		"GitSource",
+		"CreatedAt",
+		"UpdatedAt",
+		"BuildConfiguration",
+		"Observable",
+	}
+}
+
+func ProjectStructString() []string {
+	return []string{"ID", "Name", "CreatedAt", "UpdatedAt"}
+}
+
+func EventStructString() []string {
+	return []string{
+		"ID",
+		"DeploymentID",
+		"Text",
+		"Type",
+		"ExportedAt",
+		"CreatedAt",
+	}
+}
+
 func GetDeploymentRows() *sqlmock.Rows {
-	return sqlmock.NewRows(datamodel.DeploymentStructString()).
+	return sqlmock.NewRows(DeploymentStructString()).
 		AddRow(
 			"dpl-test",
 			"app-test",
@@ -42,7 +86,7 @@ func GetDeploymentRows() *sqlmock.Rows {
 }
 
 func GetAppRows() *sqlmock.Rows {
-	return sqlmock.NewRows(datamodel.AppStructString()).
+	return sqlmock.NewRows(AppStructString()).
 		AddRow(
 			"app-test",
 			"prj-test",
@@ -56,8 +100,19 @@ func GetAppRows() *sqlmock.Rows {
 }
 
 func GetProjectRows() *sqlmock.Rows {
-	return sqlmock.NewRows(datamodel.ProjectStructString()).
+	return sqlmock.NewRows(ProjectStructString()).
 		AddRow("prj-test", "Best Project", time.Unix(0, 0), time.Unix(0, 0))
+}
+
+func GetEventRows() *sqlmock.Rows {
+	return sqlmock.NewRows(EventStructString()).
+		AddRow(
+			"abcdefghijklmnopqrstuvwxyz0",
+			"dpl-test",
+			"Downloading dependencies (1/20)",
+			model.INFO,
+			time.Unix(0, 0),
+			time.Unix(0, 0))
 }
 
 func GetExpectedDeployment() *model.Deployment {
@@ -96,5 +151,16 @@ func GetExpectedProject() *model.Project {
 		Name:      "Best Project",
 		CreatedAt: time.Unix(0, 0),
 		UpdatedAt: time.Unix(0, 0),
+	}
+}
+
+func GetExpectedEvent() *model.Event {
+	return &model.Event{
+		ID:           "abcdefghijklmnopqrstuvwxyz0",
+		DeploymentID: "dpl-test",
+		Text:         "Downloading dependencies (1/20)",
+		Type:         model.INFO,
+		CreatedAt:    time.Unix(0, 0),
+		ExportedAt:   time.Unix(0, 0),
 	}
 }
