@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/thecodeisalreadydeployed/config"
-	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
@@ -64,17 +63,11 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errutil.ErrFailedPrecondition
 	}
 
-	registry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
-	containerImage, err := registry.RegistryFormat(appID, "")
-	if err != nil {
-		return errutil.ErrFailedPrecondition
-	}
-
 	deploymentYAML, generateErr := manifestgenerator.GenerateDeploymentYAML(&manifestgenerator.GenerateDeploymentOptions{
 		Name:           appID,
 		Namespace:      projectID,
 		Labels:         map[string]string{},
-		ContainerImage: containerImage,
+		ContainerImage: "codedeploy://" + appID,
 	})
 
 	if generateErr != nil {
