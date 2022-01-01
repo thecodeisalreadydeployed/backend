@@ -18,6 +18,7 @@ type GitOpsController interface {
 
 type gitOpsController struct {
 	user gitgateway.GitGateway
+	path string
 }
 
 var once sync.Once
@@ -38,7 +39,7 @@ func NewGitOpsController(path string) GitOpsController {
 		panic(err)
 	}
 
-	return &gitOpsController{user: userspace}
+	return &gitOpsController{user: userspace, path: path}
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
