@@ -71,7 +71,7 @@ func (g *gitGateway) Checkout(branch string) error {
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
 		fmt.Printf("worktreeErr: %v\n", worktreeErr)
-		return errutil.ErrFailedPrecondition
+		return errors.New("git: cannot get worktree")
 	}
 
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
@@ -82,7 +82,7 @@ func (g *gitGateway) Checkout(branch string) error {
 	if checkoutErr != nil {
 		if !errors.Is(checkoutErr, plumbing.ErrReferenceNotFound) {
 			fmt.Printf("checkoutErr: %v\n", checkoutErr)
-			return errutil.ErrFailedPrecondition
+			return errors.New("git: cannot checkout")
 		} else {
 			err := w.Checkout(&git.CheckoutOptions{
 				Branch: plumbing.NewBranchReferenceName(branch),
@@ -92,7 +92,7 @@ func (g *gitGateway) Checkout(branch string) error {
 
 			if err != nil {
 				fmt.Printf("err: %v\n", err)
-				return errutil.ErrFailedPrecondition
+				return errors.New("git: cannot checkout")
 			}
 		}
 	}
