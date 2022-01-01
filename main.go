@@ -29,6 +29,10 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	datastore.Init()
-	go repositoryobserver.ObserveGitSources(datastore.GetDB())
+	go repositoryobserver.ObserveGitSources(
+		datastore.GetDB(),
+		datastore.GetObservables(),
+		datastore.GetAppChannel(),
+	)
 	apiserver.APIServer(3000)
 }
