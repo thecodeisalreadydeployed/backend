@@ -1,7 +1,7 @@
 // Copyright 2019 The Kubernetes Authors.
 // SPDX-License-Identifier: Apache-2.0
 
-package set
+package kustomize
 
 import (
 	"errors"
@@ -12,7 +12,6 @@ import (
 	"sigs.k8s.io/kustomize/api/types"
 
 	"github.com/spf13/cobra"
-	"sigs.k8s.io/kustomize/kustomize/v4/commands/internal/kustfile"
 	"sigs.k8s.io/kustomize/kyaml/filesys"
 )
 
@@ -117,7 +116,7 @@ func (o *setImageOptions) Validate(args []string) error {
 
 // RunSetImage runs setImage command.
 func (o *setImageOptions) RunSetImage(fSys filesys.FileSystem) error {
-	mf, err := kustfile.NewKustomizationFile(fSys)
+	mf, err := NewKustomizationFile(fSys)
 	if err != nil {
 		return err
 	}
