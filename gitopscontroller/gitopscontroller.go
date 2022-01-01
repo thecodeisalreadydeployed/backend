@@ -1,6 +1,7 @@
 package gitopscontroller
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -60,7 +61,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 
 	writeErr := g.user.WriteFile(kustomizationFile, "")
 	if writeErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot write kustomization.yml")
 	}
 
 	deploymentYAML, generateErr := manifestgenerator.GenerateDeploymentYAML(&manifestgenerator.GenerateDeploymentOptions{
@@ -75,7 +76,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	})
 
 	if generateErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot generate deployment.yml")
 	}
 
 	serviceYAML, generateErr := manifestgenerator.GenerateServiceYAML(&manifestgenerator.GenerateServiceOptions{
@@ -89,17 +90,17 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	})
 
 	if generateErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot generate service.yml")
 	}
 
 	writeErr = g.user.WriteFile(deploymentFile, deploymentYAML)
 	if writeErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot write deployment.yml")
 	}
 
 	writeErr = g.user.WriteFile(serviceFile, serviceYAML)
 	if writeErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot write service.yml")
 	}
 
 	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
