@@ -182,6 +182,7 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string, commit
 /* To integrate with workload controller, replace this function with a functional one.
 /  If error occurs, return error, otherwise return nil
 /  The commit parameter is reference to HEAD obtained in checkChanges()
+/
 */
 func deployNewRevision(commit *string) error {
 	zap.L().Info(*commit + " Deploying new revision...")
