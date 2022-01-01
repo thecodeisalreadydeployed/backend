@@ -2,6 +2,7 @@ package gitopscontroller_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/go-git/go-billy/v5/osfs"
@@ -31,6 +32,16 @@ func TestGitOpsController(t *testing.T) {
 		controller := gitopscontroller.NewGitOpsController(dir)
 		err := controller.SetupApp("prj-test", "app-test")
 		assert.NoError(t, err)
+
+		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
+		assert.NoError(t, err)
+
+		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
+		assert.NoError(t, err)
+
+		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
+		assert.NoError(t, err)
+
 		clean()
 	}
 }
