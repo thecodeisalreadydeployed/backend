@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
@@ -24,9 +23,8 @@ type gitOpsController struct {
 var once sync.Once
 var mutex sync.Mutex
 
-func setupUserspace() {
+func SetupUserspace(path string) {
 	once.Do(func() {
-		path := config.DefaultUserspaceRepository
 		gateway, err := gitgateway.NewGitRepository(path)
 		if err != nil {
 			panic(err)
@@ -37,10 +35,8 @@ func setupUserspace() {
 	})
 }
 
-func NewGitOpsController() GitOpsController {
-	setupUserspace()
-
-	userspace, err := gitgateway.NewGitGatewayLocal(config.DefaultUserspaceRepository)
+func NewGitOpsController(path string) GitOpsController {
+	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
 		panic(err)
 	}
