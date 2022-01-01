@@ -68,9 +68,9 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		Name:      appID,
 		Namespace: projectID,
 		Labels: map[string]string{
-			"project.api.deploys.dev/id":  projectID,
-			"app.api.deploys.dev/id":      appID,
-			"app.api.deploys.dev/part-of": "gitopscontroller",
+			"project.api.deploys.dev/id": projectID,
+			"app.api.deploys.dev/id":     appID,
+			"api.deploys.dev/part-of":    "gitopscontroller",
 		},
 		ContainerImage: "codedeploy://" + appID,
 	})
@@ -83,9 +83,9 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		Name:      appID,
 		Namespace: projectID,
 		Labels: map[string]string{
-			"project.api.deploys.dev/id":  projectID,
-			"app.api.deploys.dev/id":      appID,
-			"app.api.deploys.dev/part-of": "gitopscontroller",
+			"project.api.deploys.dev/id": projectID,
+			"app.api.deploys.dev/id":     appID,
+			"api.deploys.dev/part-of":    "gitopscontroller",
 		},
 	})
 
