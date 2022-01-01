@@ -14,10 +14,7 @@ import (
 const MaximumDuration = 3 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
-func ObserveGitSources(DB *gorm.DB) {
-	observables := datastore.GetObservables()
-	appChan := datastore.GetAppChannel()
-
+func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.App) {
 	for {
 		apps, err := datastore.GetObservableApps(DB)
 		if err != nil {
@@ -25,7 +22,10 @@ func ObserveGitSources(DB *gorm.DB) {
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
-				appChan <- &app
+				if _, ok := observables.Load(app.ID); !ok {
+					observables.Store(app.ID, nil)
+					go checkGitSourceWrapper(DB, &app, observables)
+				}
 			}
 			break
 		}
@@ -35,12 +35,12 @@ func ObserveGitSources(DB *gorm.DB) {
 		app := <-appChan
 		if _, ok := observables.Load(app.ID); !ok {
 			observables.Store(app.ID, nil)
-			go checkGitSourceWrapper(DB, *app, observables)
+			go checkGitSourceWrapper(DB, app, observables)
 		}
 	}
 }
 
-func checkGitSourceWrapper(DB *gorm.DB, app model.App, observables *sync.Map) {
+func checkGitSourceWrapper(DB *gorm.DB, app *model.App, observables *sync.Map) {
 	contChan := make(chan bool)
 
 	for {
@@ -52,11 +52,11 @@ func checkGitSourceWrapper(DB *gorm.DB, app model.App, observables *sync.Map) {
 	}
 }
 
-func checkGitSource(DB *gorm.DB, app model.App, contChan chan bool, observables *sync.Map) {
+func checkGitSource(DB *gorm.DB, app *model.App, contChan chan bool, observables *sync.Map) {
 	retryChan := make(chan bool)
 	exitChan := make(chan bool)
 	for {
-		go checkObservable(DB, &app, exitChan, retryChan, observables)
+		go checkObservable(DB, app, exitChan, retryChan, observables)
 		retry := <-retryChan
 		if !retry {
 			break
@@ -101,8 +101,9 @@ func checkGitSource(DB *gorm.DB, app model.App, contChan chan bool, observables 
 		return
 	}
 
-	errorChan := make(chan bool)
 	for {
+		var errorChan = make(chan bool)
+
 		go deployNewRevision(errorChan, commit)
 		hasErr := <-errorChan
 		if hasErr {
@@ -184,11 +185,13 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string, commit
 
 // TODO: Integrate with workload controller
 
-/* Direct to workload controller (can move this function to workload controller module)
+/* To integrate with workload controller, replace this function with a functional one.
 /  If error occurs, send true to errorChan so that the deployment can be retried.
 /  If deployment is successful, return false to errorChan.
 /  The commit parameter is reference to HEAD obtained in checkChanges()
+/
 */
 func deployNewRevision(errorChan chan bool, commit *string) {
-	zap.L().Info("Deploying new revision...")
+	zap.L().Info(*commit + " Deploying new revision...")
+	errorChan <- false
 }
