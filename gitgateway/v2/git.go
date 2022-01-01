@@ -168,13 +168,13 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 func (g *gitGateway) Commit(files []string, message string) (string, error) {
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
-		return "", errutil.ErrFailedPrecondition
+		return "", errors.New("git: cannot get worktree")
 	}
 
 	for _, f := range files {
 		_, addErr := w.Add(f)
 		if addErr != nil {
-			return "", errutil.ErrFailedPrecondition
+			return "", errors.New("git: cannot add")
 		}
 	}
 
@@ -183,7 +183,7 @@ func (g *gitGateway) Commit(files []string, message string) (string, error) {
 	})
 
 	if commitErr != nil {
-		return "", errutil.ErrFailedPrecondition
+		return "", errors.New("git: cannot commit")
 	}
 
 	commitHash := commit.String()
