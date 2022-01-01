@@ -64,9 +64,13 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	}
 
 	deploymentYAML, generateErr := manifestgenerator.GenerateDeploymentYAML(&manifestgenerator.GenerateDeploymentOptions{
-		Name:           appID,
-		Namespace:      projectID,
-		Labels:         map[string]string{},
+		Name:      appID,
+		Namespace: projectID,
+		Labels: map[string]string{
+			"project.api.deploys.dev/id":  projectID,
+			"app.api.deploys.dev/id":      appID,
+			"app.api.deploys.dev/part-of": "gitopscontroller",
+		},
 		ContainerImage: "codedeploy://" + appID,
 	})
 
@@ -77,7 +81,11 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	serviceYAML, generateErr := manifestgenerator.GenerateServiceYAML(&manifestgenerator.GenerateServiceOptions{
 		Name:      appID,
 		Namespace: projectID,
-		Labels:    map[string]string{},
+		Labels: map[string]string{
+			"project.api.deploys.dev/id":  projectID,
+			"app.api.deploys.dev/id":      appID,
+			"app.api.deploys.dev/part-of": "gitopscontroller",
+		},
 	})
 
 	if generateErr != nil {
