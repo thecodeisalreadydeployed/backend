@@ -2,8 +2,10 @@ package datastore
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
@@ -14,6 +16,16 @@ import (
 )
 
 var DB *gorm.DB
+var appChan = make(chan *model.App)
+var observables sync.Map
+
+func GetAppChannel() chan *model.App {
+	return appChan
+}
+
+func GetObservables() *sync.Map {
+	return &observables
+}
 
 func Init() {
 	// dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
