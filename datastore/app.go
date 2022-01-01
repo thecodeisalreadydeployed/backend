@@ -48,6 +48,30 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 	return ret, nil
 }
 
+func SetObservable(DB *gorm.DB, appID string, observable bool) error {
+	var app datamodel.App
+
+	err := DB.Table("apps").Where(datamodel.App{ID: appID}).Scan(&app).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+
+	app.Observable = observable
+	err = DB.Save(&app).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+
+	if observable {
+		app_ := app.ToModel()
+		appChan <- &app_
+	}
+
+	return nil
+}
+
 func IsObservableApp(DB *gorm.DB, appID string) (bool, error) {
 	var observable bool
 	err := DB.Table("apps").
@@ -129,6 +153,11 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 
 		return nil, errutil.ErrUnknown
 	}
+	if a.Observable {
+		app_ := a.ToModel()
+		appChan <- &app_
+	}
+
 	return GetAppByID(DB, app.ID)
 }
 
@@ -146,6 +175,10 @@ func RemoveApp(DB *gorm.DB, id string) error {
 	if err := DB.Delete(&a).Error; err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrUnknown
+	}
+
+	if a.Observable {
+		observables.Delete(a.ID)
 	}
 	return nil
 }
