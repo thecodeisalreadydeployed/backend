@@ -111,8 +111,9 @@ type kustomizationFile struct {
 }
 
 // NewKustomizationFile returns a new instance.
-func NewKustomizationFile(fSys filesys.FileSystem) (*kustomizationFile, error) { // nolint
-	mf := &kustomizationFile{fSys: fSys}
+func NewKustomizationFile(path string) (*kustomizationFile, error) { // nolint
+	fSys := filesys.MakeFsOnDisk()
+	mf := &kustomizationFile{fSys: fSys, path: path}
 	return mf, nil
 }
 
