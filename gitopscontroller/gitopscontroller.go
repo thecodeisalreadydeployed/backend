@@ -27,8 +27,11 @@ var mutex sync.Mutex
 func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository
-		_, err := gitgateway.NewGitRepository(path)
+		gateway, err := gitgateway.NewGitRepository(path)
 		if err != nil {
+			panic(err)
+		}
+		if err = gateway.Checkout("main"); err != nil {
 			panic(err)
 		}
 	})
@@ -105,7 +108,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 
 	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
 	if commitErr != nil {
-		return errutil.ErrFailedPrecondition
+		return commitErr
 	}
 
 	fmt.Printf("commit: %v\n", commit)
