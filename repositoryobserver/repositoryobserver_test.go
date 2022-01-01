@@ -19,40 +19,60 @@ import (
 )
 
 func TestCheckChanges(t *testing.T) {
-	changeString, duration := checkChanges(
+	commitChan := make(chan *string)
+	durationChan := make(chan time.Duration)
+
+	var ref *string
+	var duration time.Duration
+
+	go checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"37e8e4d20d889924780f2373453a246591b6b11a",
+		commitChan,
+		durationChan,
 	)
 
-	assert.Equal(t, "5da29979c5ef986dc8ec6aa603e0862310abc96e", *changeString)
+	ref = <-commitChan
+	duration = <-durationChan
+	assert.Equal(t, "5da29979c5ef986dc8ec6aa603e0862310abc96e", *ref)
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
 	changeString, duration = checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"5da29979c5ef986dc8ec6aa603e0862310abc96e",
+		commitChan,
+		durationChan,
 	)
 
 	assert.Nil(t, changeString)
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
-	changeString, duration = checkChanges(
+	go checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
 		"main",
 		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
+		commitChan,
+		durationChan,
 	)
 
-	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
+	ref = <-commitChan
+	duration = <-durationChan
+	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *ref)
 	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 
-	changeString, duration = checkChanges(
+	go checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
 		"dev",
 		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
+		commitChan,
+		durationChan,
 	)
 
-	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
+	ref = <-commitChan
+	duration = <-durationChan
+	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *ref)
 	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 }
 
