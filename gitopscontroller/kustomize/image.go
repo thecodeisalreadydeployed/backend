@@ -1,12 +1,20 @@
 package kustomize
 
 import (
+	"errors"
+	"regexp"
 	"strings"
 
 	"sigs.k8s.io/kustomize/api/types"
 )
 
 const separator = "="
+
+var pattern = regexp.MustCompile(`^(.*):([a-zA-Z0-9._-]*|\*)$`)
+var (
+	errImageNoArgs      = errors.New("no image specified")
+	errImageInvalidArgs = errors.New("invalid format of image")
+)
 
 type overwrite struct {
 	name   string
