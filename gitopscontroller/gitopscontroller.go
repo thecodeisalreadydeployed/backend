@@ -25,11 +25,8 @@ var mutex sync.Mutex
 
 func SetupUserspace(path string) {
 	once.Do(func() {
-		gateway, err := gitgateway.NewGitRepository(path)
+		_, err := gitgateway.NewGitRepository(path)
 		if err != nil {
-			panic(err)
-		}
-		if err = gateway.Checkout("main"); err != nil {
 			panic(err)
 		}
 	})
