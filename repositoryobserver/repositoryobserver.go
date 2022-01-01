@@ -37,6 +37,20 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 			observables.Store(app.ID, nil)
 			go checkGitSourceWrapper(DB, app, observables)
 		}
+		if commit == nil {
+			if duration == -1 {
+				zap.L().Info(app.ID + " An error occurred while fetching the repository, waiting for the next retry.")
+				time.Sleep(WaitAfterErrorInterval)
+			} else {
+				zap.L().Info(app.ID + " There are no changes in the application, waiting for the next repository check.")
+				time.Sleep(duration)
+				restart = true
+				break
+			}
+		} else {
+			restart = false
+			break
+		}
 	}
 }
 
@@ -120,30 +134,40 @@ func checkObservable(DB *gorm.DB, app *model.App, observables *sync.Map) (bool, 
 	}
 }
 
-func checkChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
+func checkChanges(repoURL string, branch string, currentCommitSHA string, commitChan chan *string, durationChan chan time.Duration) {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
-		return nil, -1
+		commitChan <- nil
+		durationChan <- -1
+		return
 	}
 
 	duration, err := git.CommitDuration()
 	if err != nil {
-		return nil, -1
+		commitChan <- nil
+		durationChan <- -1
+		return
 	}
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
-		return nil, -1
+		commitChan <- nil
+		durationChan <- -1
+		return
 	}
 
 	ref, err := git.Head()
 	if err != nil {
-		return nil, -1
+		commitChan <- nil
+		durationChan <- -1
+		return
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
-		return nil, -1
+		commitChan <- nil
+		durationChan <- -1
+		return
 	}
 
 	if len(diff) > 0 {
