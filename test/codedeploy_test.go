@@ -3,7 +3,9 @@ package test
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/stretchr/testify/assert"
@@ -106,11 +108,31 @@ CMD node main
 	expect.GET(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).JSON().Null()
 
-	expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
+	deployment := expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).
-		JSON().Object().
+		JSON()
+
+	deployment.Object().
 		ContainsKey("state").
 		ValueEqual("state", model.DeploymentStateQueueing)
+
+	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
+		time.Sleep(30 * time.Second)
+
+		deploymentID := deployment.Object().Value("id").String().Raw()
+
+		expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
+			Expect().Status(http.StatusOK).JSON().
+			Object().
+			ContainsKey("state").ValueEqual("state", model.DeploymentStateBuilding)
+
+		events := expect.GET("/deployments/" + deploymentID + "/events").
+			Expect().
+			Status(http.StatusOK).
+			JSON()
+
+		events.Array().Length().Gt(0)
+	}
 
 	expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
 		Expect().Status(http.StatusOK)

@@ -1,11 +1,10 @@
 package gitopscontroller
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
-	"github.com/thecodeisalreadydeployed/config"
-	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
@@ -24,9 +23,8 @@ type gitOpsController struct {
 var once sync.Once
 var mutex sync.Mutex
 
-func setupUserspace() {
+func SetupUserspace(path string) {
 	once.Do(func() {
-		path := config.DefaultUserspaceRepository
 		_, err := gitgateway.NewGitRepository(path)
 		if err != nil {
 			panic(err)
@@ -34,10 +32,8 @@ func setupUserspace() {
 	})
 }
 
-func NewGitOpsController() GitOpsController {
-	setupUserspace()
-
-	userspace, err := gitgateway.NewGitGatewayLocal(config.DefaultUserspaceRepository)
+func NewGitOpsController(path string) GitOpsController {
+	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
 		panic(err)
 	}
@@ -61,49 +57,51 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 
 	writeErr := g.user.WriteFile(kustomizationFile, "")
 	if writeErr != nil {
-		return errutil.ErrFailedPrecondition
-	}
-
-	registry := gcr.NewGCRGateway("asia.gcr.io", "hu-tao-mains", "")
-	containerImage, err := registry.RegistryFormat(appID, "")
-	if err != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot write kustomization.yml")
 	}
 
 	deploymentYAML, generateErr := manifestgenerator.GenerateDeploymentYAML(&manifestgenerator.GenerateDeploymentOptions{
-		Name:           appID,
-		Namespace:      projectID,
-		Labels:         map[string]string{},
-		ContainerImage: containerImage,
+		Name:      appID,
+		Namespace: projectID,
+		Labels: map[string]string{
+			"project.api.deploys.dev/id": projectID,
+			"app.api.deploys.dev/id":     appID,
+			"api.deploys.dev/part-of":    "gitopscontroller",
+		},
+		ContainerImage: "codedeploy://" + appID,
 	})
 
 	if generateErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot generate deployment.yml")
 	}
 
 	serviceYAML, generateErr := manifestgenerator.GenerateServiceYAML(&manifestgenerator.GenerateServiceOptions{
 		Name:      appID,
 		Namespace: projectID,
-		Labels:    map[string]string{},
+		Labels: map[string]string{
+			"project.api.deploys.dev/id": projectID,
+			"app.api.deploys.dev/id":     appID,
+			"api.deploys.dev/part-of":    "gitopscontroller",
+		},
 	})
 
 	if generateErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot generate service.yml")
 	}
 
 	writeErr = g.user.WriteFile(deploymentFile, deploymentYAML)
 	if writeErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot write deployment.yml")
 	}
 
 	writeErr = g.user.WriteFile(serviceFile, serviceYAML)
 	if writeErr != nil {
-		return errutil.ErrFailedPrecondition
+		return errors.New("cannot write service.yml")
 	}
 
 	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
 	if commitErr != nil {
-		return errutil.ErrFailedPrecondition
+		return commitErr
 	}
 
 	fmt.Printf("commit: %v\n", commit)

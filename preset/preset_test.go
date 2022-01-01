@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thecodeisalreadydeployed/kanikogateway"
+	"github.com/thecodeisalreadydeployed/model"
 )
 
 func TestNestJSPreset(t *testing.T) {
-	actualText, err := Preset(kanikogateway.BuildOptions{
+	actualText, err := Preset(model.BuildConfiguration{
 		InstallCommand:   "yarn install",
 		BuildCommand:     "yarn build a",
 		WorkingDirectory: "nx/",
@@ -39,7 +39,7 @@ CMD node dist/apps/a/main
 }
 
 func TestFlaskPreset(t *testing.T) {
-	actualText, err := Preset(kanikogateway.BuildOptions{
+	actualText, err := Preset(model.BuildConfiguration{
 		InstallCommand:   "echo",
 		BuildCommand:     "echo",
 		WorkingDirectory: "",
@@ -65,7 +65,7 @@ CMD export FLASK_APP=app && flask run
 }
 
 func TestSpringPreset(t *testing.T) {
-	actualText, err := Preset(kanikogateway.BuildOptions{
+	actualText, err := Preset(model.BuildConfiguration{
 		InstallCommand:   "",
 		BuildCommand:     "mvn clean install",
 		WorkingDirectory: "src/main/java/com/example/demo/",

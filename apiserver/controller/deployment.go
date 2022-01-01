@@ -8,6 +8,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/model"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 	"go.uber.org/zap"
 )
@@ -72,8 +73,25 @@ func createDeploymentEvents(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 
+	deployment, err := datastore.GetDeploymentByID(datastore.GetDB(), deploymentID)
+	if err != nil {
+		return err
+	}
+
+	events, err := datastore.GetEventsByDeploymentID(datastore.GetDB(), deployment.ID)
+	if err != nil {
+		return err
+	}
+
+	if len(*events) == 0 && deployment.State == model.DeploymentStateQueueing {
+		err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuilding)
+		if err != nil {
+			return err
+		}
+	}
+
 	inputModel := input.ToModel()
-	inputModel.DeploymentID = deploymentID
+	inputModel.DeploymentID = deployment.ID
 
 	zap.L().Sugar().Debug(inputModel.Text)
 

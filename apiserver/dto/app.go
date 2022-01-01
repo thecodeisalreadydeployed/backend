@@ -21,12 +21,11 @@ func (req *CreateAppRequest) ToModel() model.App {
 		ProjectID: req.ProjectID,
 		Name:      req.Name,
 		BuildConfiguration: model.BuildConfiguration{
-			BuildScript:      req.BuildScript,
-			ParseBuildScript: true,
-			InstallCommand:   req.InstallCommand,
-			BuildCommand:     req.BuildCommand,
-			OutputDirectory:  req.OutputDirectory,
-			StartCommand:     req.StartCommand,
+			BuildScript:     req.BuildScript,
+			InstallCommand:  req.InstallCommand,
+			BuildCommand:    req.BuildCommand,
+			OutputDirectory: req.OutputDirectory,
+			StartCommand:    req.StartCommand,
 		},
 		GitSource: model.GitSource{
 			RepositoryURL: req.RepositoryURL,
