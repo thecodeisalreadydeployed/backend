@@ -8,7 +8,6 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/bxcodec/faker/v3 v3.6.0
-	github.com/davecgh/go-spew v1.1.1
 	github.com/fasthttp/websocket v1.4.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gavv/httpexpect/v2 v2.3.1
@@ -26,11 +25,9 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/buildkit v0.9.1
 	github.com/nginxinc/kubernetes-ingress v1.12.0
-	github.com/robfig/cron v1.2.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cast v1.4.1
-	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
 	github.com/subosito/gotenv v1.2.0
 	github.com/valyala/fasthttp v1.28.0 // indirect
@@ -55,5 +52,7 @@ require (
 	k8s.io/apimachinery v0.21.2
 	k8s.io/client-go v0.21.2
 	sigs.k8s.io/kustomize/api v0.10.0
+	sigs.k8s.io/kustomize/kyaml v0.12.0
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
+	sigs.k8s.io/yaml v1.2.0
 )
