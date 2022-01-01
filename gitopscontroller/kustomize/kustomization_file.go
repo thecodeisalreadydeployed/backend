@@ -6,14 +6,12 @@ package kustomize
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"reflect"
 	"regexp"
 	"strings"
 
-	"sigs.k8s.io/kustomize/api/konfig"
 	"sigs.k8s.io/kustomize/api/types"
 	"sigs.k8s.io/kustomize/kyaml/filesys"
 	"sigs.k8s.io/yaml"
@@ -115,10 +113,6 @@ type kustomizationFile struct {
 // NewKustomizationFile returns a new instance.
 func NewKustomizationFile(fSys filesys.FileSystem) (*kustomizationFile, error) { // nolint
 	mf := &kustomizationFile{fSys: fSys}
-	err := mf.validate()
-	if err != nil {
-		return nil, err
-	}
 	return mf, nil
 }
 
@@ -127,33 +121,6 @@ func (mf *kustomizationFile) GetPath() string {
 		return ""
 	}
 	return mf.path
-}
-
-func (mf *kustomizationFile) validate() error {
-	match := 0
-	var path []string
-	for _, kfilename := range konfig.RecognizedKustomizationFileNames() {
-		if mf.fSys.Exists(kfilename) {
-			match += 1
-			path = append(path, kfilename)
-		}
-	}
-
-	switch match {
-	case 0:
-		return fmt.Errorf(
-			"Missing kustomization file '%s'.\n",
-			konfig.DefaultKustomizationFileName())
-	case 1:
-		mf.path = path[0]
-	default:
-		return fmt.Errorf("Found multiple kustomization file: %v\n", path)
-	}
-
-	if mf.fSys.IsDir(mf.path) {
-		return fmt.Errorf("%s should be a file", mf.path)
-	}
-	return nil
 }
 
 func (mf *kustomizationFile) Read() (*types.Kustomization, error) {
