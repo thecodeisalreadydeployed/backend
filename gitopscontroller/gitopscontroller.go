@@ -3,10 +3,12 @@ package gitopscontroller
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"sync"
 
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
 )
 
@@ -98,6 +100,11 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	writeErr = g.user.WriteFile(serviceFile, serviceYAML)
 	if writeErr != nil {
 		return errors.New("cannot write service.yml")
+	}
+
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, kustomizationFile), []string{"deployment.yml", "service.yml"})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
 	}
 
 	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
