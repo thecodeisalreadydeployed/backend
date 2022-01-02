@@ -30,9 +30,19 @@ var mutex sync.Mutex
 func SetupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
-		_, err := gitgateway.NewGitRepository(path)
+		gateway, err := gitgateway.NewGitRepository(path)
 		if err != nil {
 			panic(err)
+		}
+
+		writeErr := gateway.WriteFile("kustomization.yml", "")
+		if writeErr != nil {
+			panic("cannot write kustomization.yml")
+		}
+
+		_, commitErr := gateway.Commit([]string{"kustomization.yml"}, "initial commit")
+		if commitErr != nil {
+			panic(commitErr)
 		}
 	})
 }
