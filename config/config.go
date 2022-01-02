@@ -23,3 +23,7 @@ const (
 func DefaultUserspaceRepository() string {
 	return viper.GetString(constant.UserspaceRepository)
 }
+
+func SetDefault() {
+	viper.SetDefault(constant.UserspaceRepository, "/__w/userspace")
+}
