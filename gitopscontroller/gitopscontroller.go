@@ -118,6 +118,9 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 }
 
 func (g *gitOpsController) SetContainerImage(projectID string, appID string, newImage string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	prefix := fmt.Sprintf("%s/%s", projectID, appID)
 	kustomizationFile := filepath.Join(prefix, "kustomization.yml")
 	err := kustomize.SetImage(filepath.Join(g.path, kustomizationFile), "codedeploy://"+appID, newImage)
