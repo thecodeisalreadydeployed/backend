@@ -2,7 +2,9 @@ package kustomize
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 
 	"sigs.k8s.io/kustomize/api/types"
@@ -11,6 +13,7 @@ import (
 const separator = "="
 
 var pattern = regexp.MustCompile(`^(.*):([a-zA-Z0-9._-]*|\*)$`)
+var preserveSeparator = "*"
 var (
 	errImageNoArgs      = errors.New("no image specified")
 	errImageInvalidArgs = errors.New("invalid format of image")
@@ -33,8 +36,51 @@ func SetImage(kustomizationFilePath string, image string, newImage string) error
 		return err
 	}
 
-	_ = m
-	return nil
+	img, err := parse(fmt.Sprintf("%s=%s", image, newImage))
+	if err != nil {
+		return err
+	}
+
+	imageMap := map[string]types.Image{}
+
+	for _, im := range m.Images {
+		if im.Name == img.Name {
+			if img.NewName == preserveSeparator {
+				img = replaceNewName(img, im.NewName)
+			}
+			if img.NewTag == preserveSeparator {
+				img = replaceNewTag(img, im.NewTag)
+			}
+			if img.Digest == preserveSeparator {
+				img = replaceDigest(img, im.Digest)
+			}
+			imageMap[im.Name] = img
+			continue
+		}
+		imageMap[im.Name] = im
+	}
+
+	var images []types.Image
+	for _, im := range imageMap {
+		if im.NewName == preserveSeparator {
+			im = replaceNewName(im, "")
+		}
+		if im.NewTag == preserveSeparator {
+			im = replaceNewTag(im, "")
+		}
+		if im.Digest == preserveSeparator {
+			im = replaceDigest(im, "")
+		}
+		images = append(images, im)
+	}
+
+	sort.Slice(images, func(i, j int) bool {
+		return images[i].Name < images[j].Name
+	})
+
+	m.Images = images
+
+	return mf.Write(m)
 }
 
 func replaceNewName(image types.Image, newName string) types.Image {
