@@ -7,7 +7,9 @@ import (
 
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-billy/v5/util"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/thecodeisalreadydeployed/constant"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
 )
 
@@ -28,8 +30,9 @@ func temporalDir() (path string, clean func()) {
 func TestGitOpsController(t *testing.T) {
 	if os.Getenv("CI") == "true" && os.Getenv("GITHUB_WORKFLOW") == "test: unit" {
 		dir, clean := temporalDir()
-		gitopscontroller.SetupUserspace(dir)
-		controller := gitopscontroller.NewGitOpsController(dir)
+		viper.Set(constant.UserspaceRepository, dir)
+		gitopscontroller.SetupUserspace()
+		controller := gitopscontroller.NewGitOpsController()
 		err := controller.SetupApp("prj-test", "app-test")
 		assert.NoError(t, err)
 
