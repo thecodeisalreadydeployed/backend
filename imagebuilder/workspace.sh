@@ -13,4 +13,4 @@ rm -rf ./workspace/* && mkdir -p /workspace/$CODEDEPLOY_DEPLOYMENT_ID && cd /wor
   git init && \
   git remote add origin $CODEDEPLOY_GIT_REPOSITORY && \
   git fetch --depth 1 origin $CODEDEPLOY_GIT_REFERENCE && \
-  git checkout FETCH_HEAD
+  git checkout FETCH_HEAD 2>&1 | /deploys-dev/logexporter
