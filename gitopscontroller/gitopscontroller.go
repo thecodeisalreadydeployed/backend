@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
@@ -26,8 +27,9 @@ type gitOpsController struct {
 var once sync.Once
 var mutex sync.Mutex
 
-func SetupUserspace(path string) {
+func SetupUserspace() {
 	once.Do(func() {
+		path := config.DefaultUserspaceRepository()
 		_, err := gitgateway.NewGitRepository(path)
 		if err != nil {
 			panic(err)
@@ -35,7 +37,8 @@ func SetupUserspace(path string) {
 	})
 }
 
-func NewGitOpsController(path string) GitOpsController {
+func NewGitOpsController() GitOpsController {
+	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
 		panic(err)
