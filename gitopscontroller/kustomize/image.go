@@ -22,6 +22,21 @@ type overwrite struct {
 	tag    string
 }
 
+func SetImage(kustomizationFilePath string, image string, newImage string) error {
+	mf, err := NewKustomizationFile(kustomizationFilePath)
+	if err != nil {
+		return err
+	}
+
+	m, err := mf.Read()
+	if err != nil {
+		return err
+	}
+
+	_ = m
+	return nil
+}
+
 func replaceNewName(image types.Image, newName string) types.Image {
 	return types.Image{
 		Name:    image.Name,
