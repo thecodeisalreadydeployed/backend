@@ -33,7 +33,11 @@ func TestGitOpsController(t *testing.T) {
 		viper.Set(constant.UserspaceRepository, dir)
 		gitopscontroller.SetupUserspace()
 		controller := gitopscontroller.NewGitOpsController()
-		err := controller.SetupApp("prj-test", "app-test")
+
+		err := controller.SetupProject("prj-test")
+		assert.NoError(t, err)
+
+		err = controller.SetupApp("prj-test", "app-test")
 		assert.NoError(t, err)
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
