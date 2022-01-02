@@ -42,6 +42,9 @@ func TestGitOpsController(t *testing.T) {
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
 
+		err = controller.SetContainerImage("prj-test", "app-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
+		assert.NoError(t, err)
+
 		clean()
 	}
 }
