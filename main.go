@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/subosito/gotenv"
 	"github.com/thecodeisalreadydeployed/apiserver"
+	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/util"
@@ -18,9 +19,9 @@ func main() {
 		}
 	}
 
-	config := zap.NewDevelopmentConfig()
-	config.OutputPaths = []string{"stdout"}
-	logger, err := config.Build()
+	loggerConfig := zap.NewDevelopmentConfig()
+	loggerConfig.OutputPaths = []string{"stdout"}
+	logger, err := loggerConfig.Build()
 
 	if err != nil {
 		panic(err)
@@ -28,6 +29,7 @@ func main() {
 
 	zap.ReplaceGlobals(logger)
 
+	config.SetDefault()
 	datastore.Init()
 	go repositoryobserver.ObserveGitSources(datastore.GetDB())
 	apiserver.APIServer(3000)

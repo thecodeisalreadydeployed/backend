@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewDeployment(appID string) (*model.Deployment, error) {
+func NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error) {
 	logger := zap.L().Sugar().With("appID", appID)
 	_ = logger
 
@@ -17,19 +17,25 @@ func NewDeployment(appID string) (*model.Deployment, error) {
 		return nil, err
 	}
 
-	git, err := gitgateway.NewGitGatewayRemote(app.GitSource.RepositoryURL)
-	if err != nil {
-		return nil, err
-	}
+	var commitHash string
 
-	err = git.Checkout(app.GitSource.Branch)
-	if err != nil {
-		return nil, err
-	}
+	if expectedCommitHash == nil {
+		git, err := gitgateway.NewGitGatewayRemote(app.GitSource.RepositoryURL)
+		if err != nil {
+			return nil, err
+		}
 
-	commitHash, err := git.Head()
-	if err != nil {
-		return nil, err
+		err = git.Checkout(app.GitSource.Branch)
+		if err != nil {
+			return nil, err
+		}
+
+		commitHash, err = git.Head()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		commitHash = *expectedCommitHash
 	}
 
 	gitSource := model.GitSource{

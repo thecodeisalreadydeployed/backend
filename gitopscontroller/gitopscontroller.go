@@ -3,46 +3,80 @@ package gitopscontroller
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"sync"
 
-	"github.com/thecodeisalreadydeployed/errutil"
+	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
 )
 
 type GitOpsController interface {
 	SetupProject(projectID string) error
 	SetupApp(projectID string, appID string) error
-	UpdateContainerImage(projectID string, appID string, newImage string) error
+	SetContainerImage(projectID string, appID string, newImage string) error
 }
 
 type gitOpsController struct {
 	user gitgateway.GitGateway
+	path string
 }
 
 var once sync.Once
 var mutex sync.Mutex
 
-func SetupUserspace(path string) {
+func SetupUserspace() {
 	once.Do(func() {
-		_, err := gitgateway.NewGitRepository(path)
+		path := config.DefaultUserspaceRepository()
+		gateway, err := gitgateway.NewGitRepository(path)
 		if err != nil {
 			panic(err)
+		}
+
+		writeErr := gateway.WriteFile("kustomization.yml", "")
+		if writeErr != nil {
+			panic("cannot write kustomization.yml")
+		}
+
+		_, commitErr := gateway.Commit([]string{"kustomization.yml"}, "initial commit")
+		if commitErr != nil {
+			panic(commitErr)
 		}
 	})
 }
 
-func NewGitOpsController(path string) GitOpsController {
+func NewGitOpsController() GitOpsController {
+	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
 		panic(err)
 	}
 
-	return &gitOpsController{user: userspace}
+	return &gitOpsController{user: userspace, path: path}
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
-	return errutil.ErrNotImplemented
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	kustomizationFile := fmt.Sprintf("%s/kustomization.yml", projectID)
+	writeErr := g.user.WriteFile(kustomizationFile, "")
+	if writeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, "kustomization.yml"), []string{kustomizationFile})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	_, commitErr := g.user.Commit([]string{"kustomization.yml", kustomizationFile}, projectID)
+	if commitErr != nil {
+		return commitErr
+	}
+
+	return nil
 }
 
 func (g *gitOpsController) SetupApp(projectID string, appID string) error {
@@ -99,7 +133,17 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errors.New("cannot write service.yml")
 	}
 
-	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, kustomizationFile), []string{"deployment.yml", "service.yml"})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	kustomizeErr = kustomize.AddResources(filepath.Join(g.path, projectID, "kustomization.yml"), []string{filepath.Join(appID, "kustomization.yml")})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile, filepath.Join(projectID, "kustomization.yml")}, prefix)
 	if commitErr != nil {
 		return commitErr
 	}
@@ -109,6 +153,17 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	return nil
 }
 
-func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, newImage string) error {
-	return errutil.ErrNotImplemented
+func (g *gitOpsController) SetContainerImage(projectID string, appID string, newImage string) error {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	prefix := fmt.Sprintf("%s/%s", projectID, appID)
+	kustomizationFile := filepath.Join(prefix, "kustomization.yml")
+	err := kustomize.SetImage(filepath.Join(g.path, kustomizationFile), "codedeploy://"+appID, newImage)
+	if err != nil {
+		return err
+	}
+
+	_, commitErr := g.user.Commit([]string{kustomizationFile}, fmt.Sprintf("%s: %s", prefix, newImage))
+	return commitErr
 }

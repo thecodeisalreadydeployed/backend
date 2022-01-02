@@ -8,7 +8,6 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/bxcodec/faker/v3 v3.6.0
-	github.com/davecgh/go-spew v1.1.1
 	github.com/fasthttp/websocket v1.4.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gavv/httpexpect/v2 v2.3.1
@@ -26,11 +25,10 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/buildkit v0.9.1
 	github.com/nginxinc/kubernetes-ingress v1.12.0
-	github.com/robfig/cron v1.2.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cast v1.4.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.10.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/subosito/gotenv v1.2.0
 	github.com/valyala/fasthttp v1.28.0 // indirect
@@ -43,7 +41,6 @@ require (
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -55,5 +52,7 @@ require (
 	k8s.io/apimachinery v0.21.2
 	k8s.io/client-go v0.21.2
 	sigs.k8s.io/kustomize/api v0.10.0
+	sigs.k8s.io/kustomize/kyaml v0.12.0
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
+	sigs.k8s.io/yaml v1.2.0
 )
