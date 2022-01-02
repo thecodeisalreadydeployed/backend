@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/spf13/viper"
+	"github.com/thecodeisalreadydeployed/constant"
 )
 
 func DefaultGitSignature() *object.Signature {
@@ -16,5 +18,8 @@ func DefaultGitSignature() *object.Signature {
 
 const (
 	DefaultKanikoWorkingDirectory string = "/__w/kaniko/"
-	DefaultUserspaceRepository    string = "/__w/userspace.git"
 )
+
+func DefaultUserspaceRepository() string {
+	return viper.GetString(constant.UserspaceRepository)
+}
