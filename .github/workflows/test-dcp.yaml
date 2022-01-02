@@ -5,7 +5,7 @@ jobs:
   integration-tests:
     runs-on: ubuntu-20.04
     concurrency:
-      group: test/docker-compose:${{ github.ref }}
+      group: test/docker-compose:${{ github.head_ref }}
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v2
