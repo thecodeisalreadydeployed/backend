@@ -25,7 +25,7 @@ func NewDeploymentController(api fiber.Router) {
 
 func createDeployment(ctx *fiber.Ctx) error {
 	appID := ctx.Params("appID")
-	deployment, err := workloadcontroller.NewDeployment(appID)
+	deployment, err := workloadcontroller.NewDeployment(appID, nil)
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError)
 	}
