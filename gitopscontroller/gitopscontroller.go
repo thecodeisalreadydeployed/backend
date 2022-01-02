@@ -15,7 +15,7 @@ import (
 type GitOpsController interface {
 	SetupProject(projectID string) error
 	SetupApp(projectID string, appID string) error
-	UpdateContainerImage(projectID string, appID string, newImage string) error
+	SetContainerImage(projectID string, appID string, newImage string) error
 }
 
 type gitOpsController struct {
@@ -117,6 +117,6 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	return nil
 }
 
-func (g *gitOpsController) UpdateContainerImage(projectID string, appID string, newImage string) error {
-	return errutil.ErrNotImplemented
+func (g *gitOpsController) SetContainerImage(projectID string, appID string, newImage string) error {
+	return kustomize.SetImage(filepath.Join(g.path, projectID, appID, "kustomization.yml"), "codedeploy://"+appID, newImage)
 }
