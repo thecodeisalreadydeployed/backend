@@ -118,5 +118,13 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 }
 
 func (g *gitOpsController) SetContainerImage(projectID string, appID string, newImage string) error {
-	return kustomize.SetImage(filepath.Join(g.path, projectID, appID, "kustomization.yml"), "codedeploy://"+appID, newImage)
+	prefix := fmt.Sprintf("%s/%s", projectID, appID)
+	kustomizationFile := filepath.Join(prefix, "kustomization.yml")
+	err := kustomize.SetImage(filepath.Join(g.path, kustomizationFile), "codedeploy://"+appID, newImage)
+	if err != nil {
+		return err
+	}
+
+	_, commitErr := g.user.Commit([]string{kustomizationFile}, fmt.Sprintf("%s: %s", prefix, newImage))
+	return commitErr
 }
