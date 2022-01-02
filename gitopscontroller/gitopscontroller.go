@@ -138,7 +138,12 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errors.New("cannot write kustomization.yml")
 	}
 
-	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile}, prefix)
+	kustomizeErr = kustomize.AddResources(filepath.Join(g.path, projectID, "kustomization.yml"), []string{filepath.Join(appID, "kustomization.yml")})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile, filepath.Join(projectID, "kustomization.yml")}, prefix)
 	if commitErr != nil {
 		return commitErr
 	}
