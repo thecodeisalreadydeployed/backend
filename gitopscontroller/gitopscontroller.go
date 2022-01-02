@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/thecodeisalreadydeployed/config"
-	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
@@ -58,7 +57,26 @@ func NewGitOpsController() GitOpsController {
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
-	return errutil.ErrNotImplemented
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	kustomizationFile := fmt.Sprintf("%s/kustomization.yml", projectID)
+	writeErr := g.user.WriteFile(kustomizationFile, "")
+	if writeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, "kustomization.yml"), []string{kustomizationFile})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	_, commitErr := g.user.Commit([]string{"kustomization.yml", kustomizationFile}, projectID)
+	if commitErr != nil {
+		return commitErr
+	}
+
+	return nil
 }
 
 func (g *gitOpsController) SetupApp(projectID string, appID string) error {
