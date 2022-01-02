@@ -15,8 +15,7 @@ const separator = "="
 var pattern = regexp.MustCompile(`^(.*):([a-zA-Z0-9._-]*|\*)$`)
 var preserveSeparator = "*"
 var (
-	errImageNoArgs      = errors.New("no image specified")
-	errImageInvalidArgs = errors.New("invalid format of image")
+	errImageNoArgs = errors.New("no image specified")
 )
 
 type overwrite struct {
