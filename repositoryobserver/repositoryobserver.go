@@ -18,7 +18,7 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 	for {
 		apps, err := datastore.GetObservableApps(DB)
 		if err != nil {
-			zap.L().Error("An error occurred while accessing the database for observable apps, waiting for the next retry.")
+			zap.L().Error("An error occurred while accessing the database for observable apps, waiting for the next retry.\n" + err.Error())
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
@@ -91,12 +91,9 @@ func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
 	}
 
 	for {
-		var errorChan = make(chan bool)
-
-		go deployNewRevision(errorChan, commit)
-		hasErr := <-errorChan
-		if hasErr {
-			zap.L().Error(app.ID + " An error occurred while deploying new revision of %s, waiting for the next retry.")
+		err := deployNewRevision(commit)
+		if err != nil {
+			zap.L().Error(app.ID + " An error occurred while deploying new revision of %s, waiting for the next retry.\n" + err.Error())
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			break
@@ -111,7 +108,7 @@ func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
 func checkObservable(DB *gorm.DB, app *model.App, observables *sync.Map) (bool, bool) {
 	observableNow, err := datastore.IsObservableApp(DB, app.ID)
 	if err != nil {
-		zap.L().Error(app.ID + " An error occurred while accessing the database, waiting for the next retry.")
+		zap.L().Error(app.ID + " An error occurred while accessing the database, waiting for the next retry.\n" + err.Error())
 		time.Sleep(WaitAfterErrorInterval)
 		return true, false
 	}
@@ -159,12 +156,10 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 // TODO: Integrate with workload controller
 
 /* To integrate with workload controller, replace this function with a functional one.
-/  If error occurs, send true to errorChan so that the deployment can be retried.
-/  If deployment is successful, return false to errorChan.
+/  If error occurs, return error, otherwise return nil
 /  The commit parameter is reference to HEAD obtained in checkChanges()
-/
 */
-func deployNewRevision(errorChan chan bool, commit *string) {
+func deployNewRevision(commit *string) error {
 	zap.L().Info(*commit + " Deploying new revision...")
-	errorChan <- false
+	return nil
 }
