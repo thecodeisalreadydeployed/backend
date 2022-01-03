@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"net/http"
 	"time"
+
+	"github.com/thecodeisalreadydeployed/config"
 )
 
 var transport = &http.Transport{
@@ -16,7 +18,7 @@ var httpClient = &http.Client{
 }
 
 func Refresh() error {
-	apiURL := "http://argocd-server.argocd.svc.cluster.local/api/v1/application?name=" + "codedeploy" + "&refresh=true"
+	apiURL := config.ArgoCDServerHost() + "/api/v1/application?name=" + "codedeploy" + "&refresh=true"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
