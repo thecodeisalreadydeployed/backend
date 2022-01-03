@@ -94,7 +94,7 @@ CMD node main
 
 	assert.NotEmpty(t, appID)
 
-	expect.PUT(fmt.Sprintf("/apps/%s/false", appID)).Expect().Status(http.StatusOK)
+	expect.PUT(fmt.Sprintf("/apps/%s/observable/disable", appID)).Expect().Status(http.StatusOK)
 
 	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
 		Expect().Status(http.StatusOK).JSON().
