@@ -2,9 +2,9 @@ package datastore
 
 import (
 	"errors"
-	"strings"
-
 	"go.uber.org/zap"
+	"strings"
+	"sync"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
@@ -46,6 +46,29 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 
 	ret := &_ret
 	return ret, nil
+}
+
+func SetObservable(DB *gorm.DB, appID string, observable bool) error {
+	var app datamodel.App
+	err := DB.First(&app, "id = ?", appID).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+
+	app.Observable = observable
+	err = DB.Save(&app).Error
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+
+	if observable {
+		app_ := app.ToModel()
+		appChan <- &app_
+	}
+
+	return nil
 }
 
 func IsObservableApp(DB *gorm.DB, appID string) (bool, error) {
@@ -129,6 +152,18 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 
 		return nil, errutil.ErrUnknown
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		if a.Observable {
+			a_ := a.ToModel()
+			GetAppChannel() <- &a_
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+
 	return GetAppByID(DB, app.ID)
 }
 
@@ -146,6 +181,10 @@ func RemoveApp(DB *gorm.DB, id string) error {
 	if err := DB.Delete(&a).Error; err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrUnknown
+	}
+
+	if a.Observable {
+		observables.Delete(a.ID)
 	}
 	return nil
 }

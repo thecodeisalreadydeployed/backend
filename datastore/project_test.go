@@ -116,12 +116,17 @@ func TestRemoveProject(t *testing.T) {
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
 
-	query := "SELECT * FROM `projects` WHERE `projects`.`id` = ? ORDER BY `projects`.`id` LIMIT 1"
-	exec := "DELETE FROM `projects` WHERE `projects`.`id` = ?"
-
+	query := "SELECT * FROM `apps` WHERE `apps`.`project_id` = ?"
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("prj-test").
+		WillReturnRows(GetAppRows())
+
+	newQuery := "SELECT * FROM `projects` WHERE `projects`.`id` = ? ORDER BY `projects`.`id` LIMIT 1"
+	mock.ExpectQuery(regexp.QuoteMeta(newQuery)).
+		WithArgs("prj-test").
 		WillReturnRows(GetProjectRows())
+
+	exec := "DELETE FROM `projects` WHERE `projects`.`id` = ?"
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
 		WithArgs("prj-test").

@@ -84,7 +84,20 @@ func RemoveProject(DB *gorm.DB, id string) error {
 		return errutil.ErrInvalidArgument
 	}
 	var p datamodel.Project
-	err := DB.Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
+
+	apps, err := GetAppsByProjectID(DB, id)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return errutil.ErrNotFound
+	}
+
+	for _, app := range *apps {
+		if _, ok := observables.Load(app.ID); ok {
+			observables.Delete(app.ID)
+		}
+	}
+
+	err = DB.Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrNotFound

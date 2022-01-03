@@ -11,121 +11,112 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-const FetchObservableAppsInterval = 3 * time.Minute
 const MaximumDuration = 3 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
-func ObserveGitSources(DB *gorm.DB) {
-	aChan := make(chan *model.App)
-	var observables sync.Map
-
-	go fetchWrapper(DB, aChan, &observables)
-
+func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.App) {
 	for {
-		app := <-aChan
-		go checkWrapper(DB, *app, &observables)
-	}
-}
-
-func fetchWrapper(DB *gorm.DB, aChan chan *model.App, observables *sync.Map) {
-	var wgFetch sync.WaitGroup
-
-	for {
-		wgFetch.Add(1)
-		go fetchObservableApps(DB, aChan, &wgFetch, observables)
-		wgFetch.Wait()
-	}
-}
-
-func fetchObservableApps(DB *gorm.DB, aChan chan *model.App, wgFetch *sync.WaitGroup, observables *sync.Map) {
-	apps, err := datastore.GetObservableApps(DB)
-
-	if err != nil {
-		zap.L().Error(err.Error())
-		zap.L().Info("Unable to fetch observable apps, waiting for the next fetch of observables.")
-		time.Sleep(WaitAfterErrorInterval)
-		wgFetch.Done()
-		return
-	}
-
-	if len(*apps) == 0 {
-		zap.L().Info("All apps are set to not be observed, waiting for the next fetch of observables.")
-		time.Sleep(FetchObservableAppsInterval)
-		wgFetch.Done()
-		return
-	}
-
-	for _, app := range *apps {
-		_, ok := observables.Load(app.ID)
-		if !ok {
-			observables.Store(app.ID, nil)
-			aChan <- &app
-		}
-	}
-
-	time.Sleep(FetchObservableAppsInterval)
-	wgFetch.Done()
-}
-
-func checkWrapper(DB *gorm.DB, app model.App, observables *sync.Map) {
-	cChan := make(chan bool)
-
-	for {
-		go checkGitSource(DB, app, cChan, observables)
-		cont := <-cChan
-		if !cont {
-			return
-		}
-	}
-}
-
-func checkGitSource(DB *gorm.DB, app model.App, cChan chan bool, observables *sync.Map) {
-	commit, duration := checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
-	if duration > MaximumDuration {
-		duration = MaximumDuration
-	}
-	if commit == nil {
-		if duration == -1 {
-			zap.L().Info("An error occurred while fetching the repository, waiting for next repository check.")
+		apps, err := datastore.GetObservableApps(DB)
+		if err != nil {
+			zap.L().Error("An error occurred while accessing the database for observable apps, waiting for the next retry.\n" + err.Error())
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
-			zap.L().Info("There are no changes in the application, waiting for next repository check.")
-			time.Sleep(duration)
+			for _, app := range *apps {
+				if _, ok := observables.Load(app.ID); !ok {
+					observables.Store(app.ID, nil)
+					go checkGitSourceWrapper(DB, &app, observables)
+				}
+			}
+			break
 		}
-		cChan <- true
-		return
 	}
 
-	deployNewRevision()
-
-	time.Sleep(duration)
-
-	retryChan := make(chan bool)
 	for {
-		go checkObservable(DB, &app, cChan, retryChan, observables)
-		cont := <-retryChan
+		app := <-appChan
+		if _, ok := observables.Load(app.ID); !ok {
+			observables.Store(app.ID, nil)
+			go checkGitSourceWrapper(DB, app, observables)
+		}
+	}
+}
+
+func checkGitSourceWrapper(DB *gorm.DB, app *model.App, observables *sync.Map) {
+	for {
+		cont := checkGitSource(DB, app, observables)
 		if !cont {
 			return
 		}
 	}
 }
 
-func checkObservable(DB *gorm.DB, app *model.App, cChan chan bool, retryChan chan bool, observables *sync.Map) {
+func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
+	var retry bool
+	var exit bool
+	for {
+		retry, exit = checkObservable(DB, app, observables)
+		if !retry {
+			break
+		}
+	}
+	if exit {
+		return false
+	}
+
+	var commit *string
+	var duration time.Duration
+	var restart bool
+	for {
+		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
+
+		if duration > MaximumDuration {
+			duration = MaximumDuration
+		}
+		if commit == nil {
+			if duration == -1 {
+				zap.L().Error(app.ID + " An error occurred while fetching the repository, waiting for the next retry.")
+				time.Sleep(WaitAfterErrorInterval)
+			} else {
+				zap.L().Info(app.ID + " There are no changes in the application, waiting for the next repository check.")
+				time.Sleep(duration)
+				restart = true
+				break
+			}
+		} else {
+			restart = false
+			break
+		}
+	}
+	if restart {
+		return true
+	}
+
+	for {
+		err := deployNewRevision(commit)
+		if err != nil {
+			zap.L().Error(app.ID + " An error occurred while deploying new revision of %s, waiting for the next retry.\n" + err.Error())
+			time.Sleep(WaitAfterErrorInterval)
+		} else {
+			break
+		}
+	}
+
+	zap.L().Info(app.ID + " Deployment of new revision completed, waiting for new changes.")
+	time.Sleep(duration)
+	return true
+}
+
+func checkObservable(DB *gorm.DB, app *model.App, observables *sync.Map) (bool, bool) {
 	observableNow, err := datastore.IsObservableApp(DB, app.ID)
 	if err != nil {
+		zap.L().Error(app.ID + " An error occurred while accessing the database, waiting for the next retry.\n" + err.Error())
 		time.Sleep(WaitAfterErrorInterval)
-		retryChan <- true
-		return
+		return true, false
 	}
 	if observableNow {
-		retryChan <- false
-		cChan <- true
-		return
+		return false, false
 	} else {
 		observables.Delete(app.ID)
-		retryChan <- false
-		cChan <- false
-		return
+		return false, true
 	}
 }
 
@@ -157,14 +148,18 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 
 	if len(diff) > 0 {
 		return &ref, duration
+	} else {
+		return nil, duration
 	}
-
-	return nil, duration
 }
 
 // TODO: Integrate with workload controller
 
-func deployNewRevision() {
-	zap.L().Info("Deploying new revision...")
-	// direct to workload controller
+/* To integrate with workload controller, replace this function with a functional one.
+/  If error occurs, return error, otherwise return nil
+/  The commit parameter is reference to HEAD obtained in checkChanges()
+*/
+func deployNewRevision(commit *string) error {
+	zap.L().Info(*commit + " Deploying new revision...")
+	return nil
 }

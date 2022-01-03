@@ -2,9 +2,11 @@ package repositoryobserver
 
 import (
 	"bou.ke/monkey"
+	"errors"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/config"
+	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
@@ -26,13 +28,14 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, "5da29979c5ef986dc8ec6aa603e0862310abc96e", *changeString)
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
-	changeString, _ = checkChanges(
+	changeString, duration = checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"5da29979c5ef986dc8ec6aa603e0862310abc96e",
 	)
 
 	assert.Nil(t, changeString)
+	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
 	changeString, duration = checkChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
@@ -53,11 +56,13 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 }
 
-func TestFetchObservableApps(t *testing.T) {
+func TestObserveGitSources(t *testing.T) {
 	monkey.Patch(time.Sleep, func(d time.Duration) {
 		fmt.Println("Sleep skipped.")
 	})
 	defer monkey.UnpatchAll()
+
+	now := time.Now()
 
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
@@ -65,50 +70,50 @@ func TestFetchObservableApps(t *testing.T) {
 
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
+
+	appChan := make(chan *model.App)
+	var observables sync.Map
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
-		WillReturnRows(datastore.GetAppRows())
-	mock.ExpectClose()
+		WillReturnError(errors.New("simulated failure"))
 
-	aChan := make(chan *model.App)
-	var wgFetch sync.WaitGroup
-	wgFetch.Add(1)
-	var observables sync.Map
-
-	go fetchObservableApps(gdb, aChan, &wgFetch, &observables)
-
-	app := *<-aChan
-
-	assert.Equal(t, datastore.GetExpectedApp(), &app)
-
-	err = db.Close()
-	assert.Nil(t, err)
-
-	err = mock.ExpectationsWereMet()
-	assert.Nil(t, err)
-}
-
-func TestCheckGitSource(t *testing.T) {
-	monkey.Patch(time.Sleep, func(d time.Duration) {
-		fmt.Println("Sleep skipped.")
-	})
-	defer monkey.UnpatchAll()
-
-	db, mock, err := sqlmock.New()
-	assert.Nil(t, err)
-	datastore.ExpectVersionQuery(mock)
-
-	gdb, err := datastore.OpenGormDB(db)
-	assert.Nil(t, err)
-
-	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(false)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
+		WithArgs(true).
+		WillReturnRows(getObservableAppRows(t, false))
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
-		WithArgs("app_test").
+		WithArgs("app-test").
+		WillReturnError(errors.New("simulated failure"))
+
+	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
+		WithArgs("app-test").
 		WillReturnRows(rows)
+
+	rows = sqlmock.NewRows([]string{"Observable"}).AddRow(false)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
+		WithArgs("app-test").
+		WillReturnRows(rows)
+
 	mock.ExpectClose()
 
+	go ObserveGitSources(gdb, &observables, appChan)
+
+	for {
+		if time.Now().After(now.Add(5 * time.Second)) {
+			err = db.Close()
+			assert.Nil(t, err)
+
+			err = mock.ExpectationsWereMet()
+			assert.Nil(t, err)
+
+			return
+		}
+	}
+}
+
+func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
 	path, clean := gitgateway.InitRepository()
 	defer clean()
 
@@ -118,16 +123,24 @@ func TestCheckGitSource(t *testing.T) {
 	err = git.WriteFile(".thecodeisalreadydeployed", "data")
 	assert.Nil(t, err)
 
-	hash, err := git.Commit([]string{".thecodeisalreadydeployed"}, "This is a commit.")
+	msg := "This is a commit."
+	hash, err := git.Commit([]string{".thecodeisalreadydeployed"}, msg)
+	assert.Nil(t, err)
+
+	err = git.WriteFile(".thecodeisalreadydeployed", "new data")
+	assert.Nil(t, err)
+
+	revisedMsg := "This is another commit."
+	revisedHash, err := git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
 	assert.Nil(t, err)
 
 	app := model.App{
-		ID:        "app_test",
-		ProjectID: "prj_test",
+		ID:        "app-test",
+		ProjectID: "prj-test",
 		Name:      "BestApp",
 		GitSource: model.GitSource{
 			CommitSHA:        hash,
-			CommitMessage:    "This is a commit.",
+			CommitMessage:    msg,
 			CommitAuthorName: config.DefaultGitSignature().Name,
 			RepositoryURL:    path,
 			Branch:           "main",
@@ -138,17 +151,20 @@ func TestCheckGitSource(t *testing.T) {
 		Observable:         true,
 	}
 
-	err = git.WriteFile(".thecodeisalreadydeployed", "new data")
-	assert.Nil(t, err)
+	if revised {
+		app.GitSource.CommitSHA = revisedHash
+		app.GitSource.CommitMessage = revisedMsg
+	}
 
-	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, "This is another commit.")
-	assert.Nil(t, err)
-
-	cChan := make(chan bool)
-	var observables sync.Map
-
-	go checkGitSource(gdb, app, cChan, &observables)
-
-	cont := <-cChan
-	assert.False(t, cont)
+	a := datamodel.NewAppFromModel(&app)
+	return sqlmock.NewRows(datastore.AppStructString()).AddRow(
+		a.ID,
+		a.ProjectID,
+		a.Name,
+		a.GitSource,
+		a.CreatedAt,
+		a.UpdatedAt,
+		a.BuildConfiguration,
+		a.Observable,
+	)
 }
