@@ -17,6 +17,7 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gofiber/fiber/v2 v2.16.0
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
+	github.com/jarcoal/httpmock v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/compress v1.13.3 // indirect
