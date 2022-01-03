@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
@@ -18,7 +16,8 @@ func NewAppController(api fiber.Router) {
 	api.Get("/:appID/deployments", listAppDeployments)
 	api.Post("/", createApp)
 	api.Delete("/:appID", deleteApp)
-	api.Put("/:appID/:observable", setObservable)
+	api.Put("/:appID/observable/enable", enableObservable)
+	api.Put("/:appID/observable/disable", disableObservable)
 }
 
 func listApps(ctx *fiber.Ctx) error {
@@ -67,13 +66,18 @@ func deleteApp(ctx *fiber.Ctx) error {
 	return ctx.SendStatus(fiber.StatusOK)
 }
 
-func setObservable(ctx *fiber.Ctx) error {
+func enableObservable(ctx *fiber.Ctx) error {
 	appID := ctx.Params("appID")
-	observable, err := strconv.ParseBool(ctx.Params("observable"))
+	err := datastore.SetObservable(datastore.GetDB(), appID, true)
 	if err != nil {
-		return ctx.SendStatus(fiber.StatusBadRequest)
+		return fiber.NewError(errutil.MapStatusCode(err))
 	}
-	err = datastore.SetObservable(datastore.GetDB(), appID, observable)
+	return ctx.SendStatus(fiber.StatusOK)
+}
+
+func disableObservable(ctx *fiber.Ctx) error {
+	appID := ctx.Params("appID")
+	err := datastore.SetObservable(datastore.GetDB(), appID, false)
 	if err != nil {
 		return fiber.NewError(errutil.MapStatusCode(err))
 	}
