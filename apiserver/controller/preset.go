@@ -11,6 +11,7 @@ import (
 func NewPresetController(api fiber.Router) {
 	api.Get("/list", listPresets)
 	api.Get("/:presetID", getPreset)
+	api.Get("/name/:presetName", searchPreset)
 	api.Post("/", createPreset)
 	api.Delete("/:presetID", deletePreset)
 }
@@ -23,6 +24,12 @@ func listPresets(ctx *fiber.Ctx) error {
 func getPreset(ctx *fiber.Ctx) error {
 	presetID := ctx.Params("presetID")
 	result, err := datastore.GetPresetByID(datastore.GetDB(), presetID)
+	return writeResponse(ctx, result, err)
+}
+
+func searchPreset(ctx *fiber.Ctx) error {
+	presetName := ctx.Params("presetName")
+	result, err := datastore.GetPresetsByName(datastore.GetDB(), presetName)
 	return writeResponse(ctx, result, err)
 }
 
