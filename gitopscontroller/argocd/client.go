@@ -8,22 +8,34 @@ import (
 	"github.com/thecodeisalreadydeployed/config"
 )
 
-var transport = &http.Transport{
-	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+type ArgoCDClient interface {
+	Refresh() error
 }
 
-var httpClient = &http.Client{
-	Timeout:   2 * time.Second,
-	Transport: transport,
+type argoCDClient struct {
+	httpClient *http.Client
 }
 
-func Refresh() error {
+func NewArgoCDClient() ArgoCDClient {
+	var transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	var httpClient = &http.Client{
+		Timeout:   2 * time.Second,
+		Transport: transport,
+	}
+
+	return &argoCDClient{httpClient: httpClient}
+}
+
+func (client *argoCDClient) Refresh() error {
 	apiURL := config.ArgoCDServerHost() + "/api/v1/application?name=" + "codedeploy" + "&refresh=true"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
 	}
-	resp, err := httpClient.Do(req)
+	resp, err := client.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
