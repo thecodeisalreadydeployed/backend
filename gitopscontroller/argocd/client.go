@@ -25,6 +25,6 @@ func NewArgoCDClient() error {
 	if err != nil {
 		return err
 	}
-	_ = resp
+	defer resp.Body.Close()
 	return nil
 }
