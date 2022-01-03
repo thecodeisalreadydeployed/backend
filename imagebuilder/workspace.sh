@@ -7,3 +7,4 @@ git init 2>&1 | /deploys-dev/logexporter
 git remote add origin $CODEDEPLOY_GIT_REPOSITORY 2>&1 | /deploys-dev/logexporter
 git fetch --depth 1 --no-tags --prune --progress origin $CODEDEPLOY_GIT_REFERENCE 2>&1 | /deploys-dev/logexporter
 git checkout FETCH_HEAD 2>&1 | /deploys-dev/logexporter
+git log -1 --format='%H' 2>&1 | /deploys-dev/logexporter
