@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-billy/v5/util"
+	"github.com/jarcoal/httpmock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/constant"
@@ -29,6 +30,15 @@ func temporalDir() (path string, clean func()) {
 
 func TestGitOpsController(t *testing.T) {
 	if os.Getenv("CI") == "true" && os.Getenv("GITHUB_WORKFLOW") == "test: unit" {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		httpmock.RegisterResponder(
+			"GET",
+			"http://argocd-server.argocd.svc.cluster.local/api/v1/application?name=codedeploy&refresh=true",
+			httpmock.NewStringResponder(200, ""),
+		)
+
 		dir, clean := temporalDir()
 		viper.Set(constant.UserspaceRepository, dir)
 		gitopscontroller.SetupUserspace()
