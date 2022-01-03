@@ -37,20 +37,6 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 			observables.Store(app.ID, nil)
 			go checkGitSourceWrapper(DB, app, observables)
 		}
-		if commit == nil {
-			if duration == -1 {
-				zap.L().Info(app.ID + " An error occurred while fetching the repository, waiting for the next retry.")
-				time.Sleep(WaitAfterErrorInterval)
-			} else {
-				zap.L().Info(app.ID + " There are no changes in the application, waiting for the next repository check.")
-				time.Sleep(duration)
-				restart = true
-				break
-			}
-		} else {
-			restart = false
-			break
-		}
 	}
 }
 
