@@ -121,17 +121,16 @@ CMD node main
 
 	assert.Equal(t, appID, actualApp.Value("id").String().Raw())
 	assert.Equal(t, appName, actualApp.Value("name").String().Raw())
+	deployment := expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
+		Expect().Status(http.StatusOK).
+		JSON()
+
+	deployment.Object().
+		ContainsKey("state").
+		ValueEqual("state", model.DeploymentStateQueueing)
 
 	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
 		time.Sleep(30 * time.Second)
-
-		deployment := expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
-			Expect().Status(http.StatusOK).
-			JSON()
-
-		deployment.Object().
-			ContainsKey("state").
-			ValueEqual("state", model.DeploymentStateQueueing)
 
 		deploymentID := deployment.Object().Value("id").String().Raw()
 
