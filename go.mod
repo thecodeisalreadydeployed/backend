@@ -7,6 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/argoproj/argo-cd/v2 v2.2.2
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/fasthttp/websocket v1.4.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
@@ -19,7 +20,6 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
-	github.com/klauspost/compress v1.13.3 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -48,14 +48,13 @@ require (
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.13
-	k8s.io/api v0.21.2
-	k8s.io/apimachinery v0.21.2
-	k8s.io/client-go v0.21.2
+	k8s.io/api v0.22.2
+	k8s.io/apimachinery v0.22.2
+	k8s.io/client-go v0.22.2
 	sigs.k8s.io/kustomize/api v0.10.0
 	sigs.k8s.io/kustomize/kyaml v0.12.0
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.2.0
-  github.com/argoproj/argo-cd/v2 v2.2.2
 )
 
 replace (
