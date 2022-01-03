@@ -176,9 +176,9 @@ func TestPresetIntegration(t *testing.T) {
 		Status(http.StatusOK).
 		JSON()
 
-	presets.Array().Length().Equal(1)
+	presets.Array().Length().Equal(5)
 
-	presetID := presets.Array().Element(0).Object().Value("id").String().Raw()
+	presetID := presets.Array().Element(4).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, presetID)
 
 	expect.GET(fmt.Sprintf("/presets/%s", presetID)).
