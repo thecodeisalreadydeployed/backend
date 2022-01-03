@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"regexp"
+	"sync"
 	"testing"
 	"time"
 
@@ -151,7 +152,16 @@ func TestSaveApp(t *testing.T) {
 
 	expected := GetExpectedApp()
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		a := <-GetAppChannel()
+		assert.Equal(t, expected, a)
+		wg.Done()
+	}()
 	actual, err := SaveApp(gdb, expected)
+	wg.Wait()
+
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 
