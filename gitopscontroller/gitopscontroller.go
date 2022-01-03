@@ -8,6 +8,7 @@ import (
 
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
 )
@@ -74,6 +75,11 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 	_, commitErr := g.user.Commit([]string{"kustomization.yml", kustomizationFile}, projectID)
 	if commitErr != nil {
 		return commitErr
+	}
+
+	err := argocd.Refresh()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -150,6 +156,11 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 
 	fmt.Printf("commit: %v\n", commit)
 
+	err := argocd.Refresh()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -165,5 +176,8 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, new
 	}
 
 	_, commitErr := g.user.Commit([]string{kustomizationFile}, fmt.Sprintf("%s: %s", prefix, newImage))
-	return commitErr
+	if commitErr != nil {
+		return commitErr
+	}
+	return argocd.Refresh()
 }
