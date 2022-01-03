@@ -67,7 +67,6 @@ CMD node main
 	projects.Array().Length().Equal(1)
 
 	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
-
 	assert.NotEmpty(t, projectID)
 
 	expect.POST("/apps").
@@ -91,7 +90,6 @@ CMD node main
 	apps.Array().Length().Equal(1)
 
 	appID := apps.Array().Element(0).Object().Value("id").String().Raw()
-
 	assert.NotEmpty(t, appID)
 
 	expect.PUT(fmt.Sprintf("/apps/%s/observable/disable", appID)).Expect().Status(http.StatusOK)
@@ -110,16 +108,30 @@ CMD node main
 	expect.GET(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).JSON().Null()
 
-	deployment := expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
-		Expect().Status(http.StatusOK).
-		JSON()
+	actualProject := expect.GET(fmt.Sprintf("/projects/name/%s", projectName)).
+		Expect().Status(http.StatusOK).JSON().
+		Array().Element(0).Object()
 
-	deployment.Object().
-		ContainsKey("state").
-		ValueEqual("state", model.DeploymentStateQueueing)
+	assert.Equal(t, projectID, actualProject.Value("id").String().Raw())
+	assert.Equal(t, projectName, actualProject.Value("name").String().Raw())
+
+	actualApp := expect.GET(fmt.Sprintf("/apps/name/%s", appName)).
+		Expect().Status(http.StatusOK).JSON().
+		Array().Element(0).Object()
+
+	assert.Equal(t, appID, actualApp.Value("id").String().Raw())
+	assert.Equal(t, appName, actualApp.Value("name").String().Raw())
 
 	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
 		time.Sleep(30 * time.Second)
+
+		deployment := expect.POST(fmt.Sprintf("/apps/%s/deployments", appID)).
+			Expect().Status(http.StatusOK).
+			JSON()
+
+		deployment.Object().
+			ContainsKey("state").
+			ValueEqual("state", model.DeploymentStateQueueing)
 
 		deploymentID := deployment.Object().Value("id").String().Raw()
 
@@ -146,5 +158,49 @@ CMD node main
 		Expect().Status(http.StatusNotFound)
 
 	expect.GET(fmt.Sprintf("/apps/%s", appID)).
+		Expect().Status(http.StatusNotFound)
+}
+
+func TestPresetIntegration(t *testing.T) {
+	presetName := "best-preset"
+
+	expect := Setup(t)
+
+	expect.POST("/presets").
+		WithForm(dto.CreatePresetRequest{Name: presetName, Template: "RUN echo hello"}).
+		Expect().
+		Status(http.StatusOK)
+
+	presets := expect.GET("/presets/list").
+		Expect().
+		Status(http.StatusOK).
+		JSON()
+
+	presets.Array().Length().Equal(1)
+
+	presetID := presets.Array().Element(0).Object().Value("id").String().Raw()
+	assert.NotEmpty(t, presetID)
+
+	expect.GET(fmt.Sprintf("/presets/%s", presetID)).
+		Expect().Status(http.StatusOK).
+		JSON().
+		Object().
+		ContainsKey("name").
+		ValueEqual("name", presetName)
+
+	actualPreset := expect.GET(fmt.Sprintf("/presets/name/%s", presetName)).
+		Expect().
+		Status(http.StatusOK).
+		JSON().
+		Array().
+		Element(0)
+
+	assert.Equal(t, presetID, actualPreset.Object().Value("id").String().Raw())
+	assert.Equal(t, presetName, actualPreset.Object().Value("name").String().Raw())
+
+	expect.DELETE(fmt.Sprintf("/presets/%s", presetID)).
+		Expect().Status(http.StatusOK)
+
+	expect.GET(fmt.Sprintf("/presets/%s", presetID)).
 		Expect().Status(http.StatusNotFound)
 }
