@@ -10,14 +10,13 @@ func ParseBody(ctx *fiber.Ctx, body interface{}) *fiber.Error {
 	return nil
 }
 
-func ParseBodyAndValidate(ctx *fiber.Ctx, body interface{}) *fiber.Error {
+func ParseBodyAndValidate(ctx *fiber.Ctx, body interface{}) error {
 	if err := ParseBody(ctx, body); err != nil {
 		return err
 	}
 
 	if validationErrors := CheckStruct(body); len(validationErrors) > 0 {
-		ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
-		return fiber.ErrBadRequest
+		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
 	}
 
 	return nil
