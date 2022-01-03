@@ -1,12 +1,13 @@
 package controller
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
-	"strconv"
 )
 
 func NewAppController(api fiber.Router) {
@@ -47,12 +48,8 @@ func listAppDeployments(ctx *fiber.Ctx) error {
 func createApp(ctx *fiber.Ctx) error {
 	input := dto.CreateAppRequest{}
 
-	if err := ctx.BodyParser(&input); err != nil {
-		return fiber.NewError(errutil.MapStatusCode(err))
-	}
-
-	if validationErrors := validator.CheckStruct(input); len(validationErrors) > 0 {
-		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
+	if err := validator.ParseBodyAndValidate(ctx, &input); err != nil {
+		return err
 	}
 
 	inputModel := input.ToModel()

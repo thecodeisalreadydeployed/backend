@@ -2,9 +2,9 @@
 [[ -z $CODEDEPLOY_GIT_REPOSITORY ]] && exit 1
 [[ -z $CODEDEPLOY_GIT_REFERENCE ]] && exit 1
 
-ls -a /workspace && rm -rf /workspace/* && git clone $CODEDEPLOY_GIT_REPOSITORY \
-  --branch $CODEDEPLOY_GIT_REFERENCE \
-  --single-branch \
-  --depth 1 \
-  --no-tags \
-  /workspace/$CODEDEPLOY_DEPLOYMENT_ID
+rm -rf ./workspace/* && mkdir -p /workspace/$CODEDEPLOY_DEPLOYMENT_ID && cd /workspace/$CODEDEPLOY_DEPLOYMENT_ID
+git init 2>&1 | /deploys-dev/logexporter
+git remote add origin $CODEDEPLOY_GIT_REPOSITORY 2>&1 | /deploys-dev/logexporter
+git fetch --depth 1 --no-tags --prune --progress origin $CODEDEPLOY_GIT_REFERENCE 2>&1 | /deploys-dev/logexporter
+git checkout FETCH_HEAD 2>&1 | /deploys-dev/logexporter
+git log -1 --format='%H' 2>&1 | /deploys-dev/logexporter
