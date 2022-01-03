@@ -67,6 +67,10 @@ func EventStructString() []string {
 	}
 }
 
+func PresetStructString() []string {
+	return []string{"ID", "Name", "Template"}
+}
+
 func GetDeploymentRows() *sqlmock.Rows {
 	return sqlmock.NewRows(DeploymentStructString()).
 		AddRow(
@@ -113,6 +117,10 @@ func GetEventRows() *sqlmock.Rows {
 			model.INFO,
 			time.Unix(0, 0),
 			time.Unix(0, 0))
+}
+
+func GetPresetRows() *sqlmock.Rows {
+	return sqlmock.NewRows(PresetStructString()).AddRow("pst-test", "My Preset", "UlVOIGVjaG8gaGVsbG8=")
 }
 
 func GetExpectedDeployment() *model.Deployment {
@@ -162,5 +170,13 @@ func GetExpectedEvent() *model.Event {
 		Type:         model.INFO,
 		CreatedAt:    time.Unix(0, 0),
 		ExportedAt:   time.Unix(0, 0),
+	}
+}
+
+func GetExpectedPreset() *model.Preset {
+	return &model.Preset{
+		ID:       "pst-test",
+		Name:     "My Preset",
+		Template: "RUN echo hello",
 	}
 }
