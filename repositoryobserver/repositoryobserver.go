@@ -134,40 +134,30 @@ func checkObservable(DB *gorm.DB, app *model.App, observables *sync.Map) (bool, 
 	}
 }
 
-func checkChanges(repoURL string, branch string, currentCommitSHA string, commitChan chan *string, durationChan chan time.Duration) {
+func checkChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	duration, err := git.CommitDuration()
 	if err != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	ref, err := git.Head()
 	if err != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	if len(diff) > 0 {
