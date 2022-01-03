@@ -2,9 +2,9 @@ package datastore
 
 import (
 	"errors"
-	"strings"
-
 	"go.uber.org/zap"
+	"strings"
+	"sync"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
@@ -153,10 +153,17 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 
 		return nil, errutil.ErrUnknown
 	}
-	if a.Observable {
-		app_ := a.ToModel()
-		appChan <- &app_
-	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		if a.Observable {
+			a_ := a.ToModel()
+			GetAppChannel() <- &a_
+		}
+		wg.Done()
+	}()
+	wg.Wait()
 
 	return GetAppByID(DB, app.ID)
 }
