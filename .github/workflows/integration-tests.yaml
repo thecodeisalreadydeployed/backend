@@ -39,7 +39,8 @@ jobs:
         timeout-minutes: 5
       - run: brew install argocd
       - run: |
-          argocd -n argocd login --core
+          kubectl config set-context --current --namespace=argocd
+          argocd login --core
           argocd version
       - run: argocd app sync codedeploy
       - run: argocd app wait codedeploy --timeout 300
