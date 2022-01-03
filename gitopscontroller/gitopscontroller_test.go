@@ -30,12 +30,13 @@ func temporalDir() (path string, clean func()) {
 
 func TestGitOpsController(t *testing.T) {
 	if os.Getenv("CI") == "true" && os.Getenv("GITHUB_WORKFLOW") == "test: unit" {
+		viper.Set(constant.ArgoCDServerHostEnv, "http://localhost")
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		httpmock.RegisterResponder(
 			"GET",
-			"http://argocd-server.argocd.svc.cluster.local/api/v1/application?name=codedeploy&refresh=true",
+			"http://localhost/api/v1/application?name=codedeploy&refresh=true",
 			httpmock.NewStringResponder(200, ""),
 		)
 
