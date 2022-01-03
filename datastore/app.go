@@ -50,8 +50,7 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 
 func SetObservable(DB *gorm.DB, appID string, observable bool) error {
 	var app datamodel.App
-
-	err := DB.Table("apps").Where(datamodel.App{ID: appID}).Scan(&app).Error
+	err := DB.First(&app, "id = ?", appID).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrNotFound
