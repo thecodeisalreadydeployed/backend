@@ -5,6 +5,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/util"
 	_ "go.uber.org/automaxprocs"
@@ -28,6 +29,11 @@ func main() {
 	}
 
 	zap.ReplaceGlobals(logger)
+
+	err = argocd.NewArgoCDClient()
+	if err != nil {
+		panic(err)
+	}
 
 	config.SetDefault()
 	datastore.Init()
