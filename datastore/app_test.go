@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"regexp"
+	"sync"
 	"testing"
 	"time"
 
@@ -151,7 +152,16 @@ func TestSaveApp(t *testing.T) {
 
 	expected := GetExpectedApp()
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		a := <-GetAppChannel()
+		assert.Equal(t, expected, a)
+		wg.Done()
+	}()
 	actual, err := SaveApp(gdb, expected)
+	wg.Wait()
+
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 
@@ -246,6 +256,50 @@ func TestIsObservableApp(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, true, actual)
+
+	err = db.Close()
+	assert.Nil(t, err)
+
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
+}
+
+func TestSetObservable(t *testing.T) {
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Unix(0, 0)
+	})
+	defer monkey.UnpatchAll()
+
+	db, mock, err := sqlmock.New()
+	assert.Nil(t, err)
+	ExpectVersionQuery(mock)
+
+	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs("app-test").
+		WillReturnRows(GetAppRows())
+
+	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(exec)).
+		WithArgs(
+			"prj-test",
+			"Best App",
+			model.GetGitSourceString(model.GitSource{}),
+			time.Unix(0, 0),
+			time.Unix(0, 0),
+			model.GetBuildConfigurationString(model.BuildConfiguration{}),
+			false,
+			"app-test").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+	mock.ExpectClose()
+
+	gdb, err := OpenGormDB(db)
+	assert.Nil(t, err)
+
+	err = SetObservable(gdb, "app-test", false)
+	assert.Nil(t, err)
 
 	err = db.Close()
 	assert.Nil(t, err)
