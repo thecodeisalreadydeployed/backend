@@ -1,3 +1,5 @@
+//go:generate mockgen -destination mock/client.go . ArgoCDClient
+
 package argocd
 
 import (
