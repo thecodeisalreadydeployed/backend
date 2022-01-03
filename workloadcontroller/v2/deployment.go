@@ -3,7 +3,6 @@ package workloadcontroller
 import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
-	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/kanikogateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
@@ -73,11 +72,6 @@ func NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment,
 		}
 
 		_ = podName
-	}
-
-	err = argocd.NewArgoCDClient()
-	if err != nil {
-		return nil, err
 	}
 
 	return deployment, nil
