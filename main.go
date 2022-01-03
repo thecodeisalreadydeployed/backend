@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/subosito/gotenv"
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/config"
@@ -32,7 +34,7 @@ func main() {
 
 	err = argocd.NewArgoCDClient()
 	if err != nil {
-		panic(err)
+		fmt.Print(err)
 	}
 
 	config.SetDefault()
