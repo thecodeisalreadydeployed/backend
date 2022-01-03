@@ -81,6 +81,7 @@ func Init() {
 		panic(err)
 	}
 
+	seedPreset()
 	if util.IsDevEnvironment() {
 		seed()
 	}

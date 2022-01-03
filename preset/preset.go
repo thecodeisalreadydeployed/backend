@@ -13,6 +13,7 @@ const (
 	FrameworkNestJS Framework = "FrameworkNestJS"
 	FrameworkSpring Framework = "FrameworkSpring"
 	FrameworkFlask  Framework = "FrameworkFlask"
+	NoFramework     Framework = "NoFramework"
 )
 
 func Preset(opts model.BuildConfiguration, framework Framework) (string, error) {
@@ -70,7 +71,7 @@ RUN {{.InstallCommand}}
 RUN {{.BuildCommand}}
 CMD {{.StartCommand}}
 `
-	default:
+	case NoFramework:
 		return `
 FROM alpine:latest
 ADD . /app
@@ -79,5 +80,7 @@ RUN {{.InstallCommand}}
 RUN {{.BuildCommand}}
 CMD {{.StartCommand}}	
 `
+	default:
+		return ""
 	}
 }
