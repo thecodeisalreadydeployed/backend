@@ -41,42 +41,32 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 }
 
 func checkGitSourceWrapper(DB *gorm.DB, app *model.App, observables *sync.Map) {
-	contChan := make(chan bool)
-
 	for {
-		go checkGitSource(DB, app, contChan, observables)
-		cont := <-contChan
+		cont := checkGitSource(DB, app, observables)
 		if !cont {
 			return
 		}
 	}
 }
 
-func checkGitSource(DB *gorm.DB, app *model.App, contChan chan bool, observables *sync.Map) {
-	retryChan := make(chan bool)
-	exitChan := make(chan bool)
+func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
+	var retry bool
+	var exit bool
 	for {
-		go checkObservable(DB, app, exitChan, retryChan, observables)
-		retry := <-retryChan
+		retry, exit = checkObservable(DB, app, observables)
 		if !retry {
 			break
 		}
 	}
-	exit := <-exitChan
 	if exit {
-		contChan <- false
-		return
+		return false
 	}
 
-	commitChan := make(chan *string)
-	durationChan := make(chan time.Duration)
 	var commit *string
 	var duration time.Duration
 	var restart bool
 	for {
-		go checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA, commitChan, durationChan)
-		commit = <-commitChan
-		duration = <-durationChan
+		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 
 		if duration > MaximumDuration {
 			duration = MaximumDuration
@@ -97,8 +87,7 @@ func checkGitSource(DB *gorm.DB, app *model.App, contChan chan bool, observables
 		}
 	}
 	if restart {
-		contChan <- true
-		return
+		return true
 	}
 
 	for {
@@ -116,71 +105,55 @@ func checkGitSource(DB *gorm.DB, app *model.App, contChan chan bool, observables
 
 	zap.L().Info(app.ID + " Deployment of new revision completed, waiting for new changes.")
 	time.Sleep(duration)
-	contChan <- true
+	return true
 }
 
-func checkObservable(DB *gorm.DB, app *model.App, exitChan chan bool, retryChan chan bool, observables *sync.Map) {
+func checkObservable(DB *gorm.DB, app *model.App, observables *sync.Map) (bool, bool) {
 	observableNow, err := datastore.IsObservableApp(DB, app.ID)
 	if err != nil {
 		zap.L().Error(app.ID + " An error occurred while accessing the database, waiting for the next retry.")
 		time.Sleep(WaitAfterErrorInterval)
-		retryChan <- true
-		return
+		return true, false
 	}
 	if observableNow {
-		retryChan <- false
-		exitChan <- false
-		return
+		return false, false
 	} else {
 		observables.Delete(app.ID)
-		retryChan <- false
-		exitChan <- true
-		return
+		return false, true
 	}
 }
 
-func checkChanges(repoURL string, branch string, currentCommitSHA string, commitChan chan *string, durationChan chan time.Duration) {
+func checkChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	duration, err := git.CommitDuration()
 	if err != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	ref, err := git.Head()
 	if err != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
-		commitChan <- nil
-		durationChan <- -1
-		return
+		return nil, -1
 	}
 
 	if len(diff) > 0 {
-		commitChan <- &ref
+		return &ref, duration
 	} else {
-		commitChan <- nil
+		return nil, duration
 	}
-	durationChan <- duration
 }
 
 // TODO: Integrate with workload controller
