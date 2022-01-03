@@ -16,7 +16,8 @@ func ParseBodyAndValidate(ctx *fiber.Ctx, body interface{}) *fiber.Error {
 	}
 
 	if validationErrors := CheckStruct(body); len(validationErrors) > 0 {
-		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
+		ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
+		return fiber.ErrBadRequest
 	}
 
 	return nil
