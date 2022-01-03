@@ -84,7 +84,7 @@ jobs:
           kubectl -n default wait pod/postgres-1-0 --for condition=Ready --timeout 5m
         timeout-minutes: 5
       - run: |
-          ko resolve -f hack/ci/backend.yaml | kubectl -n default apply -f -
+          ko resolve -f deploy/ci/backend.yaml | kubectl -n default apply -f -
       - run: |
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5

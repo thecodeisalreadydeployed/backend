@@ -26,7 +26,7 @@ jobs:
       - run: go mod download
       - run: docker compose -f docker-compose.ci.yaml up -d
       - run: docker ps -a
-      - run: bash hack/ci/wait-for-healthy-container.sh backend 120
+      - run: bash deploy/ci/wait-for-healthy-container.sh backend 120
       - run: docker logs backend
       - run: make test
         continue-on-error: true
