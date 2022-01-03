@@ -32,7 +32,7 @@ test:
 
 .PHONY: lint-ci
 lint-ci:
-	sh hack/lint.sh
+	sh deploy/lint.sh
 
 .PHONY: dev-image
 dev-image:
@@ -44,8 +44,8 @@ dev-image-detach:
 
 .PHONY: kind
 kind:
-	sh hack/0-kind-create-cluster.sh
-	sh hack/1-kubectl-apply-argocd.sh
+	sh deploy/0-kind-create-cluster.sh
+	sh deploy/1-kubectl-apply-argocd.sh
 
 .PHONY: port-forward
 port-forward:

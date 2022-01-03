@@ -35,43 +35,12 @@ jobs:
         env:
           KO_DOCKER_REPO: kind.local
       - run: ko publish ./
-      - run: kubectl -n argocd wait deploy/argocd-server --for condition=available --timeout 5m
+      - run: kubectl -n argocd wait deploy/argocd-repo-server --for condition=available --timeout 5m
         timeout-minutes: 5
+      - run: brew install argocd
       - run: |
-          kubectl -n argocd port-forward svc/argocd-server 8080:443 &
-          wait-for-it localhost:8080 --timeout=15 --strict
-      - run: |
-          ARGOCD_HOST=localhost:8080
-          ARGOCD_SERVER=http://$ARGOCD_HOST
-          sudo curl -k -sSL -o /usr/local/bin/argocd "$ARGOCD_SERVER/download/argocd-linux-amd64"
-          sudo chmod +x /usr/local/bin/argocd
-      - run: |
-          ARGOCD_HOST=localhost:8080
-          ARGOCD_SERVER=http://$ARGOCD_HOST
-          ARGOCD_USERNAME=admin
-          ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-
-          function retry {
-            local retries=$1
-            shift
-
-            local count=0
-            until "$@"; do
-              exit=$?
-              wait=$((2 ** $count))
-              count=$(($count + 1))
-              if [ $count -lt $retries ]; then
-                echo "Retry $count/$retries exited $exit, retrying in $wait seconds..."
-                sleep $wait
-              else
-                echo "Retry $count/$retries exited $exit, no more retries left."
-                return $exit
-              fi
-            done
-            return 0
-          }
-
-          retry 5 argocd login "$ARGOCD_HOST" --username "$ARGOCD_USERNAME" --password "$ARGOCD_PASSWORD" --insecure
+          kubectl config set-context --current --namespace=argocd
+          argocd login --core
           argocd version
       - run: argocd app sync codedeploy
       - run: argocd app wait codedeploy --timeout 300
@@ -84,7 +53,7 @@ jobs:
           kubectl -n default wait pod/postgres-1-0 --for condition=Ready --timeout 5m
         timeout-minutes: 5
       - run: |
-          ko resolve -f hack/ci/backend.yaml | kubectl -n default apply -f -
+          ko resolve -f deploy/ci/backend.yaml | kubectl -n default apply -f -
       - run: |
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
