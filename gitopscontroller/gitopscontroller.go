@@ -1,3 +1,4 @@
+//go:generate mockgen -destination mock/gitopscontroller.go . GitOpsController
 package gitopscontroller
 
 import (
