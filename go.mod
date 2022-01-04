@@ -16,6 +16,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gofiber/fiber/v2 v2.16.0
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jarcoal/httpmock v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
