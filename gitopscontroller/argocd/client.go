@@ -12,6 +12,7 @@ import (
 
 type ArgoCDClient interface {
 	Refresh() error
+	Sync() error
 }
 
 type argoCDClient struct {
