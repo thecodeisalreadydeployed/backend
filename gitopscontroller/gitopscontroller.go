@@ -1,3 +1,4 @@
+//go:generate mockgen -destination mock/gitopscontroller.go . GitOpsController
 package gitopscontroller
 
 import (
@@ -8,6 +9,7 @@ import (
 
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
 )
@@ -19,8 +21,9 @@ type GitOpsController interface {
 }
 
 type gitOpsController struct {
-	user gitgateway.GitGateway
-	path string
+	user         gitgateway.GitGateway
+	path         string
+	argoCDClient argocd.ArgoCDClient
 }
 
 var once sync.Once
@@ -46,14 +49,14 @@ func SetupUserspace() {
 	})
 }
 
-func NewGitOpsController() GitOpsController {
+func NewGitOpsController(argoCDClient argocd.ArgoCDClient) GitOpsController {
 	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
 		panic(err)
 	}
 
-	return &gitOpsController{user: userspace, path: path}
+	return &gitOpsController{user: userspace, path: path, argoCDClient: argoCDClient}
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
@@ -74,6 +77,11 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 	_, commitErr := g.user.Commit([]string{"kustomization.yml", kustomizationFile}, projectID)
 	if commitErr != nil {
 		return commitErr
+	}
+
+	err := g.argoCDClient.Refresh()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -150,6 +158,11 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 
 	fmt.Printf("commit: %v\n", commit)
 
+	err := g.argoCDClient.Refresh()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -165,5 +178,8 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, new
 	}
 
 	_, commitErr := g.user.Commit([]string{kustomizationFile}, fmt.Sprintf("%s: %s", prefix, newImage))
-	return commitErr
+	if commitErr != nil {
+		return commitErr
+	}
+	return g.argoCDClient.Refresh()
 }

@@ -24,6 +24,11 @@ func DefaultUserspaceRepository() string {
 	return viper.GetString(constant.UserspaceRepository)
 }
 
+func ArgoCDServerHost() string {
+	return viper.GetString(constant.ArgoCDServerHostEnv)
+}
+
 func SetDefault() {
 	viper.SetDefault(constant.UserspaceRepository, "/__w/userspace")
+	viper.SetDefault(constant.ArgoCDServerHostEnv, "http://argocd-server.argocd.svc.cluster.local")
 }
