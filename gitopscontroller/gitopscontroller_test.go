@@ -50,7 +50,7 @@ func TestGitOpsController(t *testing.T) {
 		defer ctrl.Finish()
 
 		argocd := mock_argocd.NewMockArgoCDClient(ctrl)
-		argocd.EXPECT().Refresh().Return(true).Times(3)
+		argocd.EXPECT().Refresh().Return(nil).Times(3)
 
 		controller := gitopscontroller.NewGitOpsController(argocd)
 
