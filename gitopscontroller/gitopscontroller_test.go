@@ -7,11 +7,13 @@ import (
 
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-billy/v5/util"
+	"github.com/golang/mock/gomock"
 	"github.com/jarcoal/httpmock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/constant"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
+	mock_argocd "github.com/thecodeisalreadydeployed/gitopscontroller/argocd/mock"
 )
 
 func temporalDir() (path string, clean func()) {
@@ -43,7 +45,14 @@ func TestGitOpsController(t *testing.T) {
 		dir, clean := temporalDir()
 		viper.Set(constant.UserspaceRepository, dir)
 		gitopscontroller.SetupUserspace()
-		controller := gitopscontroller.NewGitOpsController()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		argocd := mock_argocd.NewMockArgoCDClient(ctrl)
+		argocd.EXPECT().Refresh().Return(true).Times(3)
+
+		controller := gitopscontroller.NewGitOpsController(argocd)
 
 		err := controller.SetupProject("prj-test")
 		assert.NoError(t, err)
