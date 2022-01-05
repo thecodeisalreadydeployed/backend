@@ -10,8 +10,8 @@ import (
 
 func NewPresetController(api fiber.Router) {
 	api.Get("/list", listPresets)
+	api.Get("/search", searchPreset)
 	api.Get("/:presetID", getPreset)
-	api.Get("/name/:presetName", searchPreset)
 	api.Post("/", createPreset)
 	api.Delete("/:presetID", deletePreset)
 }
@@ -28,7 +28,7 @@ func getPreset(ctx *fiber.Ctx) error {
 }
 
 func searchPreset(ctx *fiber.Ctx) error {
-	presetName := ctx.Params("presetName")
+	presetName := ctx.Query("name")
 	result, err := datastore.GetPresetsByName(datastore.GetDB(), presetName)
 	return writeResponse(ctx, result, err)
 }

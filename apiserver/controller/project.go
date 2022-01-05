@@ -10,9 +10,9 @@ import (
 
 func NewProjectController(api fiber.Router) {
 	api.Get("/list", listProjects)
+	api.Get("/search", searchProject)
 	api.Get("/:projectID", getProject)
 	api.Get("/:projectID/apps", listProjectApps)
-	api.Get("/name/:projectName", searchProject)
 	api.Post("/", createProject)
 	api.Delete("/:projectID", deleteProject)
 }
@@ -35,7 +35,7 @@ func listProjectApps(ctx *fiber.Ctx) error {
 }
 
 func searchProject(ctx *fiber.Ctx) error {
-	projectName := ctx.Params("projectName")
+	projectName := ctx.Query("name")
 	result, err := datastore.GetProjectsByName(datastore.GetDB(), projectName)
 	return writeResponse(ctx, result, err)
 }

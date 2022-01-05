@@ -108,14 +108,14 @@ CMD node main
 	expect.GET(fmt.Sprintf("/apps/%s/deployments", appID)).
 		Expect().Status(http.StatusOK).JSON().Null()
 
-	actualProject := expect.GET(fmt.Sprintf("/projects/name/%s", projectName)).
+	actualProject := expect.GET("/projects/search").WithQuery("name", projectName).
 		Expect().Status(http.StatusOK).JSON().
 		Array().Element(0).Object()
 
 	assert.Equal(t, projectID, actualProject.Value("id").String().Raw())
 	assert.Equal(t, projectName, actualProject.Value("name").String().Raw())
 
-	actualApp := expect.GET(fmt.Sprintf("/apps/name/%s", appName)).
+	actualApp := expect.GET("/apps/search").WithQuery("name", appName).
 		Expect().Status(http.StatusOK).JSON().
 		Array().Element(0).Object()
 
@@ -187,7 +187,7 @@ func TestPresetIntegration(t *testing.T) {
 		ContainsKey("name").
 		ValueEqual("name", presetName)
 
-	actualPreset := expect.GET(fmt.Sprintf("/presets/name/%s", presetName)).
+	actualPreset := expect.GET("/presets/search").WithQuery("name", presetName).
 		Expect().
 		Status(http.StatusOK).
 		JSON().

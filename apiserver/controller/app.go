@@ -10,8 +10,8 @@ import (
 
 func NewAppController(api fiber.Router) {
 	api.Get("/list", listApps)
+	api.Get("/search", searchApp)
 	api.Get("/:appID", getApp)
-	api.Get("/name/:appName", searchApp)
 	api.Post("/:appID/deployments", createDeployment)
 	api.Get("/:appID/deployments", listAppDeployments)
 	api.Post("/", createApp)
@@ -32,7 +32,7 @@ func getApp(ctx *fiber.Ctx) error {
 }
 
 func searchApp(ctx *fiber.Ctx) error {
-	appName := ctx.Params("appName")
+	appName := ctx.Query("name")
 	result, err := datastore.GetAppsByName(datastore.GetDB(), appName)
 	return writeResponse(ctx, result, err)
 }
