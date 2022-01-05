@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
@@ -49,7 +50,7 @@ func GetPresetByID(DB *gorm.DB, presetID string) (*model.Preset, error) {
 func GetPresetsByName(DB *gorm.DB, name string) (*[]model.Preset, error) {
 	var _data []datamodel.Preset
 
-	err := DB.Table("presets").Where(datamodel.Preset{Name: name}).Scan(&_data).Error
+	err := DB.Table("presets").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())

@@ -153,8 +153,8 @@ func TestGetProjectByName(t *testing.T) {
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects` WHERE `projects`.`name` = ?")).
-		WithArgs("Best Project").
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `projects` WHERE name LIKE ?")).
+		WithArgs("%Best Project%").
 		WillReturnRows(GetProjectRows())
 	mock.ExpectClose()
 

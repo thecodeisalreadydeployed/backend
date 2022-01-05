@@ -145,8 +145,8 @@ func TestGetPresetsByName(t *testing.T) {
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `presets` WHERE `presets`.`name` = ?")).
-		WithArgs("My Preset").
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `presets` WHERE name LIKE ?")).
+		WithArgs("%My Preset%").
 		WillReturnRows(GetPresetRows())
 	mock.ExpectClose()
 
