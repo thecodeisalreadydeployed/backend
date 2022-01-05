@@ -101,7 +101,7 @@ func TestObserveGitSources(t *testing.T) {
 	go ObserveGitSources(gdb, &observables, appChan, fakeDeploy)
 
 	for {
-		if time.Now().After(now.Add(5 * time.Second)) {
+		if time.Now().After(now.Add(2 * time.Second)) {
 			err = db.Close()
 			assert.Nil(t, err)
 
