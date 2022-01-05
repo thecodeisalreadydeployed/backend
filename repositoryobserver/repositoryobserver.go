@@ -11,7 +11,6 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-const MaximumDuration = 30 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
 func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.App, deploy func(string, *string) (*model.Deployment, error)) {
@@ -68,8 +67,8 @@ func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map, deploy f
 	for {
 		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 
-		if duration > MaximumDuration {
-			duration = MaximumDuration
+		if duration > gitgateway.MaximumInterval {
+			duration = gitgateway.MaximumInterval
 		}
 		if commit == nil {
 			if duration == -1 {
@@ -126,7 +125,7 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 		return nil, -1
 	}
 
-	duration, err := git.CommitDuration()
+	duration, err := git.CommitInterval()
 	if err != nil {
 		return nil, -1
 	}

@@ -29,8 +29,8 @@ type GitGateway interface {
 	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
 
-	// Calculate average commit duration for the last 3 commit intervals
-	CommitDuration() (time.Duration, error)
+	// Calculate average commit interval for the last 10 commit intervals
+	CommitInterval() (time.Duration, error)
 }
 
 type gitGateway struct {
@@ -268,9 +268,9 @@ func (g *gitGateway) Log() error {
 
 }
 
-const DefaultCommitDuration = 3 * time.Minute
+const MaximumInterval = 30 * time.Minute
 
-func (g *gitGateway) CommitDuration() (time.Duration, error) {
+func (g *gitGateway) CommitInterval() (time.Duration, error) {
 	ref, refErr := g.repo.Head()
 	if refErr != nil {
 		return -1, errutil.ErrFailedPrecondition
@@ -284,29 +284,20 @@ func (g *gitGateway) CommitDuration() (time.Duration, error) {
 	//Latest commit
 	commit, err := cIter.Next()
 	if err != nil {
-		return DefaultCommitDuration, nil
+		return MaximumInterval, nil
 	}
 	latest := commit.Author.When
-
-	//1 commit before
-	commit, err = cIter.Next()
-	if err != nil {
-		return DefaultCommitDuration, nil
-	}
 	prev := commit.Author.When
 
-	//2 commit before
-	commit, err = cIter.Next()
-	if err != nil {
-		return latest.Sub(prev), nil
+	for i := 0; i < 10; i++ {
+		commit, err = cIter.Next()
+		if err != nil {
+			if i == 0 {
+				return MaximumInterval, nil
+			}
+			return time.Duration(int(latest.Sub(prev)) / i), nil
+		}
+		prev = commit.Author.When
 	}
-	prev = commit.Author.When
-
-	//3 commit before
-	commit, err = cIter.Next()
-	if err != nil {
-		return latest.Sub(prev) / 2, nil
-	}
-	prev = commit.Author.When
-	return latest.Sub(prev) / 3, nil
+	return latest.Sub(prev) / 10, nil
 }

@@ -59,7 +59,7 @@ func TestGitGateway(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestCommitDuration(t *testing.T) {
+func TestCommitInterval(t *testing.T) {
 	defer monkey.UnpatchAll()
 
 	path, clean := InitRepository()
@@ -72,7 +72,7 @@ func TestCommitDuration(t *testing.T) {
 	commit(time.Unix(50, 0), git, t)
 	commit(time.Unix(150, 0), git, t)
 
-	duration, err := git.CommitDuration()
+	duration, err := git.CommitInterval()
 	assert.Nil(t, err)
 	assert.Equal(t, 75*time.Second, duration)
 }
