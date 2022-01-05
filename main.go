@@ -7,6 +7,7 @@ import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/util"
+	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
@@ -35,6 +36,7 @@ func main() {
 		datastore.GetDB(),
 		datastore.GetObservables(),
 		datastore.GetAppChannel(),
+		workloadcontroller.NewDeployment,
 	)
 	apiserver.APIServer(3000)
 }
