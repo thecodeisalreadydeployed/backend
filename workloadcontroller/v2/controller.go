@@ -1,3 +1,5 @@
+//go:generate mockgen -destination mock/controller.go . WorkloadController
+
 package workloadcontroller
 
 import "github.com/thecodeisalreadydeployed/model"
