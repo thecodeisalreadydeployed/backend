@@ -11,10 +11,9 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-const MaximumDuration = 3 * time.Minute
 const WaitAfterErrorInterval = 10 * time.Second
 
-func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.App) {
+func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.App, deploy func(string, *string) (*model.Deployment, error)) {
 	for {
 		apps, err := datastore.GetObservableApps(DB)
 		if err != nil {
@@ -24,7 +23,7 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 			for _, app := range *apps {
 				if _, ok := observables.Load(app.ID); !ok {
 					observables.Store(app.ID, nil)
-					go checkGitSourceWrapper(DB, &app, observables)
+					go checkGitSourceWrapper(DB, &app, observables, deploy)
 				}
 			}
 			break
@@ -35,21 +34,21 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 		app := <-appChan
 		if _, ok := observables.Load(app.ID); !ok {
 			observables.Store(app.ID, nil)
-			go checkGitSourceWrapper(DB, app, observables)
+			go checkGitSourceWrapper(DB, app, observables, deploy)
 		}
 	}
 }
 
-func checkGitSourceWrapper(DB *gorm.DB, app *model.App, observables *sync.Map) {
+func checkGitSourceWrapper(DB *gorm.DB, app *model.App, observables *sync.Map, deploy func(string, *string) (*model.Deployment, error)) {
 	for {
-		cont := checkGitSource(DB, app, observables)
+		cont := checkGitSource(DB, app, observables, deploy)
 		if !cont {
 			return
 		}
 	}
 }
 
-func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
+func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map, deploy func(string, *string) (*model.Deployment, error)) bool {
 	var retry bool
 	var exit bool
 	for {
@@ -68,8 +67,8 @@ func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
 	for {
 		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 
-		if duration > MaximumDuration {
-			duration = MaximumDuration
+		if duration > gitgateway.MaximumInterval {
+			duration = gitgateway.MaximumInterval
 		}
 		if commit == nil {
 			if duration == -1 {
@@ -91,7 +90,7 @@ func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map) bool {
 	}
 
 	for {
-		err := deployNewRevision(commit)
+		_, err := deploy(app.ID, commit)
 		if err != nil {
 			zap.L().Error(app.ID + " An error occurred while deploying new revision of %s, waiting for the next retry.\n" + err.Error())
 			time.Sleep(WaitAfterErrorInterval)
@@ -126,7 +125,7 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 		return nil, -1
 	}
 
-	duration, err := git.CommitDuration()
+	duration, err := git.CommitInterval()
 	if err != nil {
 		return nil, -1
 	}
@@ -151,15 +150,4 @@ func checkChanges(repoURL string, branch string, currentCommitSHA string) (*stri
 	} else {
 		return nil, duration
 	}
-}
-
-// TODO: Integrate with workload controller
-
-/* To integrate with workload controller, replace this function with a functional one.
-/  If error occurs, return error, otherwise return nil
-/  The commit parameter is reference to HEAD obtained in checkChanges()
-*/
-func deployNewRevision(commit *string) error {
-	zap.L().Info(*commit + " Deploying new revision...")
-	return nil
 }

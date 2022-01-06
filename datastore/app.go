@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"go.uber.org/zap"
 	"strings"
 	"sync"
@@ -192,7 +193,7 @@ func RemoveApp(DB *gorm.DB, id string) error {
 func GetAppsByName(DB *gorm.DB, name string) (*[]model.App, error) {
 	var _data []datamodel.App
 
-	err := DB.Table("apps").Where(datamodel.App{Name: name}).Scan(&_data).Error
+	err := DB.Table("apps").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())

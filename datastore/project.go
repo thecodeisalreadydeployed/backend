@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"gorm.io/gorm"
@@ -112,7 +113,7 @@ func RemoveProject(DB *gorm.DB, id string) error {
 func GetProjectsByName(DB *gorm.DB, name string) (*[]model.Project, error) {
 	var _data []datamodel.Project
 
-	err := DB.Table("projects").Where(datamodel.Project{Name: name}).Scan(&_data).Error
+	err := DB.Table("projects").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())

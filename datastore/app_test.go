@@ -215,8 +215,8 @@ func TestGetAppByName(t *testing.T) {
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE `apps`.`name` = ?")).
-		WithArgs("Best App").
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE name LIKE ?")).
+		WithArgs("%Best App%").
 		WillReturnRows(GetAppRows())
 	mock.ExpectClose()
 

@@ -98,10 +98,10 @@ func TestObserveGitSources(t *testing.T) {
 
 	mock.ExpectClose()
 
-	go ObserveGitSources(gdb, &observables, appChan)
+	go ObserveGitSources(gdb, &observables, appChan, fakeDeploy)
 
 	for {
-		if time.Now().After(now.Add(5 * time.Second)) {
+		if time.Now().After(now.Add(2 * time.Second)) {
 			err = db.Close()
 			assert.Nil(t, err)
 
@@ -111,6 +111,10 @@ func TestObserveGitSources(t *testing.T) {
 			return
 		}
 	}
+}
+
+func fakeDeploy(id string, commit *string) (*model.Deployment, error) {
+	return nil, nil
 }
 
 func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
