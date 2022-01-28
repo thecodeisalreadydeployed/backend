@@ -15,7 +15,7 @@ import (
 
 func NewDeploymentController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
 	// Create a new deployment
-	api.Post("/", createDeployment)
+	api.Post("/", createDeployment(workloadController))
 
 	api.Get("/:deploymentID", getDeployment)
 	api.Get("/:deploymentID/events", getDeploymentEvents)
@@ -23,13 +23,15 @@ func NewDeploymentController(api fiber.Router, workloadController workloadcontro
 	api.Delete("/:deploymentID", deleteDeployment)
 }
 
-func createDeployment(ctx *fiber.Ctx) error {
-	appID := ctx.Params("appID")
-	deployment, err := workloadcontroller.NewDeployment(appID, nil)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError)
+func createDeployment(workloadController workloadcontroller.WorkloadController) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		appID := ctx.Params("appID")
+		deployment, err := workloadController.NewDeployment(appID, nil)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError)
+		}
+		return ctx.JSON(deployment)
 	}
-	return ctx.JSON(deployment)
 }
 
 func getDeployment(ctx *fiber.Ctx) error {
