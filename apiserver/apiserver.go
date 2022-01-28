@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/thecodeisalreadydeployed/apiserver/controller"
+	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -12,7 +13,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 )
 
-func APIServer(port int) {
+func APIServer(port int, workloadController workloadcontroller.WorkloadController) {
 	validator.Init()
 	app := fiber.New()
 
@@ -20,8 +21,8 @@ func APIServer(port int) {
 	app.Use(logger.New())
 
 	controller.NewProjectController(app.Group("projects"))
-	controller.NewAppController(app.Group("apps"))
-	controller.NewDeploymentController(app.Group("deployments"))
+	controller.NewAppController(app.Group("apps"), workloadController)
+	controller.NewDeploymentController(app.Group("deployments"), workloadController)
 
 	controller.NewHealthController(app.Group("health"))
 	controller.NewPresetController(app.Group("presets"))

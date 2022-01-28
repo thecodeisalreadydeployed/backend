@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error) {
+func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error) {
 	logger := zap.L().Sugar().With("appID", appID)
 	_ = logger
 

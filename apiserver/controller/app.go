@@ -6,13 +6,14 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 )
 
-func NewAppController(api fiber.Router) {
+func NewAppController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
 	api.Get("/list", listApps)
 	api.Get("/search", searchApp)
 	api.Get("/:appID", getApp)
-	api.Post("/:appID/deployments", createDeployment)
+	api.Post("/:appID/deployments", createDeployment(workloadController))
 	api.Get("/:appID/deployments", listAppDeployments)
 	api.Post("/", createApp)
 	api.Delete("/:appID", deleteApp)
