@@ -13,14 +13,12 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 )
 
-func APIServer(port int) {
+func APIServer(port int, workloadController workloadcontroller.WorkloadController) {
 	validator.Init()
 	app := fiber.New()
 
 	app.Use(cors.New())
 	app.Use(logger.New())
-
-	workloadController := workloadcontroller.NewWorkloadController()
 
 	controller.NewProjectController(app.Group("projects"))
 	controller.NewAppController(app.Group("apps"), workloadController)
