@@ -23,7 +23,7 @@ func APIServer(port int) {
 	workloadController := workloadcontroller.NewWorkloadController()
 
 	controller.NewProjectController(app.Group("projects"))
-	controller.NewAppController(app.Group("apps"))
+	controller.NewAppController(app.Group("apps"), workloadController)
 	controller.NewDeploymentController(app.Group("deployments"), workloadController)
 
 	controller.NewHealthController(app.Group("health"))
