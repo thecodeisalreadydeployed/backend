@@ -7,6 +7,7 @@
 
 /kaniko/executor \
   --no-push \
+  --force \
   --log-format=json \
   --verbosity=$CODEDEPLOY_KANIKO_LOG_VERBOSITY \
   --dockerfile=$CODEDEPLOY_KANIKO_DOCKERFILE \
