@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewDeploymentController(api fiber.Router) {
+func NewDeploymentController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
 	// Create a new deployment
 	api.Post("/", createDeployment)
 
