@@ -32,11 +32,12 @@ func main() {
 
 	config.SetDefault()
 	datastore.Init()
+	workloadController := workloadcontroller.NewWorkloadController()
 	go repositoryobserver.ObserveGitSources(
 		datastore.GetDB(),
 		datastore.GetObservables(),
 		datastore.GetAppChannel(),
-		workloadcontroller.NewDeployment,
+		workloadController.NewDeployment,
 	)
-	apiserver.APIServer(3000)
+	apiserver.APIServer(3000, workloadController)
 }
