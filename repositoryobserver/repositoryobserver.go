@@ -1,15 +1,34 @@
 package repositoryobserver
 
 import (
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 )
+
+type RepositoryObserver interface {
+	ObserveGitSources()
+}
+
+type repositoryObserver struct {
+	db                 *gorm.DB
+	workloadController *workloadcontroller.WorkloadController
+	appChan            chan *model.App
+}
+
+func NewRepositoryObserver(DB *gorm.DB, workloadController *workloadcontroller.WorkloadController) RepositoryObserver {
+	appChan := make(chan *model.App)
+	return &repositoryObserver{db: DB, workloadController: workloadController, appChan: appChan}
+}
+
+func (observer *repositoryObserver) ObserveGitSources() {}
 
 const WaitAfterErrorInterval = 10 * time.Second
 
