@@ -18,31 +18,31 @@ type RepositoryObserver interface {
 }
 
 type repositoryObserver struct {
+	logger             *zap.Logger
 	db                 *gorm.DB
-	workloadController *workloadcontroller.WorkloadController
+	workloadController workloadcontroller.WorkloadController
+	observables        *sync.Map
 	appChan            chan *model.App
 }
 
-func NewRepositoryObserver(DB *gorm.DB, workloadController *workloadcontroller.WorkloadController) RepositoryObserver {
+func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
 	appChan := make(chan *model.App)
-	return &repositoryObserver{db: DB, workloadController: workloadController, appChan: appChan}
+	return &repositoryObserver{logger: logger, db: DB, workloadController: workloadController, appChan: appChan, observables: &sync.Map{}}
 }
-
-func (observer *repositoryObserver) ObserveGitSources() {}
 
 const WaitAfterErrorInterval = 10 * time.Second
 
-func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.App, deploy func(string, *string) (*model.Deployment, error)) {
+func (observer *repositoryObserver) ObserveGitSources() {
 	for {
-		apps, err := datastore.GetObservableApps(DB)
+		apps, err := datastore.GetObservableApps(observer.db)
 		if err != nil {
-			zap.L().Error("cannot get observable apps", zap.Error(err))
+			observer.logger.Error("cannot get observable apps", zap.Error(err))
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
-				if _, ok := observables.Load(app.ID); !ok {
-					observables.Store(app.ID, nil)
-					go checkGitSourceWrapper(DB, &app, observables, deploy)
+				if _, ok := observer.observables.Load(app.ID); !ok {
+					observer.observables.Store(app.ID, nil)
+					go checkGitSourceWrapper(observer.db, &app, observer.observables, observer.workloadController.NewDeployment)
 				}
 			}
 			break
@@ -50,10 +50,10 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 	}
 
 	for {
-		app := <-appChan
-		if _, ok := observables.Load(app.ID); !ok {
-			observables.Store(app.ID, nil)
-			go checkGitSourceWrapper(DB, app, observables, deploy)
+		app := <-observer.appChan
+		if _, ok := observer.observables.Load(app.ID); !ok {
+			observer.observables.Store(app.ID, nil)
+			go checkGitSourceWrapper(observer.db, app, observer.observables, observer.workloadController.NewDeployment)
 		}
 	}
 }
