@@ -68,10 +68,11 @@ func (observer *repositoryObserver) checkGitSourceWrapper(app *model.App) {
 }
 
 func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
+	logger := observer.logger.With(zap.String("appID", app.ID))
 	var retry bool
 	var exit bool
 	for {
-		retry, exit = checkObservable(DB, app, observables)
+		retry, exit = checkObservable(observer.db, app, observer.observables)
 		if !retry {
 			break
 		}
@@ -91,10 +92,10 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		}
 		if commit == nil {
 			if duration == -1 {
-				zap.L().Error(app.ID + " An error occurred while fetching the repository, waiting for the next retry.")
+				logger.Error("failed to fetch the repository, waiting for the next retry")
 				time.Sleep(WaitAfterErrorInterval)
 			} else {
-				zap.L().Info(app.ID + " There are no changes in the application, waiting for the next repository check.")
+				logger.Info("no changes in the application, waiting for the next repository check")
 				time.Sleep(duration)
 				restart = true
 				break
@@ -109,9 +110,9 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 	}
 
 	for {
-		_, err := deploy(app.ID, commit)
+		_, err := observer.workloadController.NewDeployment(app.ID, commit)
 		if err != nil {
-			zap.L().Error(app.ID + " An error occurred while deploying new revision of %s, waiting for the next retry.\n" + err.Error())
+			logger.Error("failed to deploy new revision, waiting for the next retry", zap.Error(err))
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			break
