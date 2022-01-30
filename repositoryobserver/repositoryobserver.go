@@ -42,7 +42,7 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
-					go checkGitSourceWrapper(observer.db, &app, observer.observables, observer.workloadController.NewDeployment)
+					go observer.checkGitSourceWrapper(app)
 				}
 			}
 			break
@@ -53,21 +53,21 @@ func (observer *repositoryObserver) ObserveGitSources() {
 		app := <-observer.appChan
 		if _, ok := observer.observables.Load(app.ID); !ok {
 			observer.observables.Store(app.ID, nil)
-			go checkGitSourceWrapper(observer.db, app, observer.observables, observer.workloadController.NewDeployment)
+			go observer.checkGitSourceWrapper(app)
 		}
 	}
 }
 
-func checkGitSourceWrapper(DB *gorm.DB, app *model.App, observables *sync.Map, deploy func(string, *string) (*model.Deployment, error)) {
+func (observer *repositoryObserver) checkGitSourceWrapper(app *model.App) {
 	for {
-		cont := checkGitSource(DB, app, observables, deploy)
+		cont := observer.checkGitSource(app)
 		if !cont {
 			return
 		}
 	}
 }
 
-func checkGitSource(DB *gorm.DB, app *model.App, observables *sync.Map, deploy func(string, *string) (*model.Deployment, error)) bool {
+func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 	var retry bool
 	var exit bool
 	for {
