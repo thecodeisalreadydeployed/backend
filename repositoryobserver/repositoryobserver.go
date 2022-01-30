@@ -72,7 +72,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 	var retry bool
 	var exit bool
 	for {
-		retry, exit = checkObservable(observer.db, app, observer.observables)
+		retry, exit = observer.checkObservable(logger, app)
 		if !retry {
 			break
 		}
@@ -119,22 +119,21 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		}
 	}
 
-	zap.L().Info(app.ID + " Deployment of new revision completed, waiting for new changes.")
 	time.Sleep(duration)
 	return true
 }
 
-func checkObservable(DB *gorm.DB, app *model.App, observables *sync.Map) (bool, bool) {
-	observableNow, err := datastore.IsObservableApp(DB, app.ID)
+func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *model.App) (bool, bool) {
+	observableNow, err := datastore.IsObservableApp(observer.db, app.ID)
 	if err != nil {
-		zap.L().Error(app.ID + " An error occurred while accessing the database, waiting for the next retry.\n" + err.Error())
+		logger.Error("application status check failed", zap.Error(err))
 		time.Sleep(WaitAfterErrorInterval)
 		return true, false
 	}
 	if observableNow {
 		return false, false
 	} else {
-		observables.Delete(app.ID)
+		observer.observables.Delete(app.ID)
 		return false, true
 	}
 }
