@@ -36,7 +36,7 @@ func ObserveGitSources(DB *gorm.DB, observables *sync.Map, appChan chan *model.A
 	for {
 		apps, err := datastore.GetObservableApps(DB)
 		if err != nil {
-			zap.L().Error("An error occurred while accessing the database for observable apps, waiting for the next retry.\n" + err.Error())
+			zap.L().Error("cannot get observable apps", zap.Error(err))
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
