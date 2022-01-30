@@ -42,7 +42,7 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
-					go observer.checkGitSourceWrapper(app)
+					go observer.checkGitSourceWrapper(&app)
 				}
 			}
 			break
