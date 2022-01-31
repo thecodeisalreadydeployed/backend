@@ -1,19 +1,22 @@
 package repositoryobserver
 
 import (
-	"bou.ke/monkey"
 	"errors"
 	"fmt"
+	"regexp"
+	"testing"
+	"time"
+
+	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/golang/mock/gomock"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
-	"regexp"
-	"sync"
-	"testing"
-	"time"
+	mock_workloadcontroller "github.com/thecodeisalreadydeployed/workloadcontroller/v2/mock"
+	"go.uber.org/zap/zaptest"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -71,9 +74,6 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
-	appChan := make(chan *model.App)
-	var observables sync.Map
-
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
 		WillReturnError(errors.New("simulated failure"))
@@ -98,7 +98,14 @@ func TestObserveGitSources(t *testing.T) {
 
 	mock.ExpectClose()
 
-	go ObserveGitSources(gdb, &observables, appChan, fakeDeploy)
+	logger := zaptest.NewLogger(t)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	workloadController := mock_workloadcontroller.NewMockWorkloadController(ctrl)
+	workloadController.EXPECT().NewDeployment(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+
+	repositoryObserver := NewRepositoryObserver(logger, gdb, workloadController)
+	go repositoryObserver.ObserveGitSources()
 
 	for {
 		if time.Now().After(now.Add(2 * time.Second)) {
@@ -111,10 +118,6 @@ func TestObserveGitSources(t *testing.T) {
 			return
 		}
 	}
-}
-
-func fakeDeploy(id string, commit *string) (*model.Deployment, error) {
-	return nil, nil
 }
 
 func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
