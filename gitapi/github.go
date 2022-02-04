@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"github.com/spf13/cast"
 	"go.uber.org/zap"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
-func ListBranches(url string) []string {
+// List branches in strings given a GitHub utl string.
+func ListBranches(url string) ([]string, error) {
 	name, repo := getNameAndRepo(url)
 	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", name, repo)
 	res, err := http.Get(urlapi)
+	defer closeHTTP(res)
 	if err != nil {
 		zap.L().Error(err.Error())
-	}
-	if res == nil {
-		return nil
+		return nil, err
 	}
 
-	var body []map[string]interface{}
-	bytes, err := ioutil.ReadAll(res.Body)
-	err = json.Unmarshal(bytes, &body)
+	body, err := getJSONArray(res)
 	if err != nil {
 		zap.L().Error(err.Error())
+		return nil, err
 	}
 
 	var output []string
@@ -33,14 +33,53 @@ func ListBranches(url string) []string {
 		output = append(output, cast.ToString(branch["name"]))
 	}
 
-	if res.Body != nil {
-		err = res.Body.Close()
-		if err != nil {
-			zap.L().Error(err.Error())
+	return output, nil
+}
+
+// List file names in strings given a GitHub url string and branch name.
+func ListFiles(url string, branch string) ([]string, error) {
+	name, repo := getNameAndRepo(url)
+	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents?ref=%s", name, repo, branch)
+	res, err := http.Get(urlapi)
+	defer closeHTTP(res)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, err
+	}
+
+	body, err := getJSONArray(res)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, err
+	}
+
+	var output []string
+	for _, file := range body {
+		if cast.ToString(file["type"]) == "file" {
+			output = append(output, cast.ToString(file["path"]))
 		}
 	}
 
-	return output
+	return output, nil
+}
+
+// Get raw file given GitHub url string, branch, and file path.
+func GetRaw(url string, branch string, path string) (string, error) {
+	name, repo := getNameAndRepo(url)
+	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", name, repo, branch, path)
+	res, err := http.Get(urlapi)
+	defer closeHTTP(res)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", err
+	}
+
+	bytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", err
+	}
+	return string(bytes), nil
 }
 
 // Returns name and repository, in order.
@@ -49,4 +88,23 @@ func ListBranches(url string) []string {
 func getNameAndRepo(url string) (string, string) {
 	urlslice := strings.Split(url, "/")
 	return urlslice[len(urlslice)-2], urlslice[len(urlslice)-1]
+}
+
+// Gets JSON from HTTP response.
+func getJSONArray(res *http.Response) ([]map[string]interface{}, error) {
+	var body []map[string]interface{}
+	bytes, err := ioutil.ReadAll(res.Body)
+	err = json.Unmarshal(bytes, &body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// Close HTTP connection.
+func closeHTTP(res *http.Response) {
+	err := res.Body.Close()
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
 }
