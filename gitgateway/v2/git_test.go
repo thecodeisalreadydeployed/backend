@@ -88,3 +88,30 @@ func commit(commitTime time.Time, git GitGateway, t *testing.T) {
 	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, "This is a commit.")
 	assert.Nil(t, err)
 }
+
+func TestGetBranches(t *testing.T) {
+	git, err := NewGitGatewayRemote("https://github.com/octocat/Hello-World")
+	assert.Nil(t, err)
+
+	branches, err := git.GetBranches()
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, branches, [3]string{"master", "test", "octocat-patch-1"})
+}
+
+func TestGetFiles(t *testing.T) {
+	git, err := NewGitGatewayRemote("https://github.com/octocat/Hello-World")
+	assert.Nil(t, err)
+
+	files, err := git.GetFiles("test")
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, files, [2]string{"CONTRIBUTING.md", "README"})
+}
+
+func TestGetRaw(t *testing.T) {
+	git, err := NewGitGatewayRemote("https://github.com/octocat/Hello-World")
+	assert.Nil(t, err)
+
+	raw, err := git.GetRaw("master", "README")
+	assert.Nil(t, err)
+	assert.Equal(t, raw, "Hello World!\n")
+}
