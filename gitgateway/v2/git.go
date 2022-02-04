@@ -28,6 +28,9 @@ type GitGateway interface {
 	Log() error
 	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
+	GetBranches() ([]string, error)
+	GetFiles(branch string) ([]string, error)
+	GetRaw(branch string, path string) (string, error)
 
 	// Calculate average commit interval for the last 10 commit intervals
 	CommitInterval() (time.Duration, error)
@@ -300,4 +303,76 @@ func (g *gitGateway) CommitInterval() (time.Duration, error) {
 		prev = commit.Author.When
 	}
 	return latest.Sub(prev) / 10, nil
+}
+
+func (g *gitGateway) GetBranches() ([]string, error) {
+	var branches []string
+	bIter, err := g.repo.Branches()
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	err = bIter.ForEach(func(ref *plumbing.Reference) error {
+		branches = append(branches, ref.Name().String())
+		return nil
+	})
+	return branches, nil
+}
+
+func (g *gitGateway) GetFiles(branch string) ([]string, error) {
+	var files []string
+	err := g.Checkout(branch)
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	ref, err := g.repo.Head()
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	commit, err := g.repo.CommitObject(ref.Hash())
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	fIter, err := commit.Files()
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	err = fIter.ForEach(func(file *object.File) error {
+		files = append(files, file.Name)
+		return nil
+	})
+	return files, nil
+}
+
+func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
+	err := g.Checkout(branch)
+	if err != nil {
+		return "", errutil.ErrUnknown
+	}
+
+	ref, err := g.repo.Head()
+	if err != nil {
+		return "", errutil.ErrUnknown
+	}
+
+	commit, err := g.repo.CommitObject(ref.Hash())
+	if err != nil {
+		return "", errutil.ErrUnknown
+	}
+
+	file, err := commit.File(path)
+	if err != nil {
+		return "", errutil.ErrUnknown
+	}
+
+	raw, err := file.Contents()
+	if err != nil {
+		return "", errutil.ErrUnknown
+	}
+
+	return raw, nil
 }
