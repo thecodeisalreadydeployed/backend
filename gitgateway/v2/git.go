@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-git/go-billy/v5/memfs"
@@ -307,15 +308,24 @@ func (g *gitGateway) CommitInterval() (time.Duration, error) {
 
 func (g *gitGateway) GetBranches() ([]string, error) {
 	var branches []string
-	bIter, err := g.repo.Branches()
+	remotes, err := g.repo.Remotes()
 	if err != nil {
 		return nil, errutil.ErrUnknown
 	}
 
-	err = bIter.ForEach(func(ref *plumbing.Reference) error {
-		branches = append(branches, ref.Name().String())
-		return nil
-	})
+	refs, err := remotes[0].List(&git.ListOptions{})
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	for _, ref := range refs {
+		refName := ref.Name().String()
+		if !strings.HasPrefix(refName, "refs/heads") {
+			continue
+		}
+		name := strings.Split(refName, "/")[2]
+		branches = append(branches, name)
+	}
 	return branches, nil
 }
 
@@ -336,15 +346,22 @@ func (g *gitGateway) GetFiles(branch string) ([]string, error) {
 		return nil, errutil.ErrUnknown
 	}
 
-	fIter, err := commit.Files()
+	tree, err := commit.Tree()
 	if err != nil {
 		return nil, errutil.ErrUnknown
 	}
 
-	err = fIter.ForEach(func(file *object.File) error {
-		files = append(files, file.Name)
-		return nil
-	})
+	walker := object.NewTreeWalker(tree, true, make(map[plumbing.Hash]bool))
+	for {
+		name, entry, err := walker.Next()
+		if err != nil {
+			break
+		}
+		if entry.Mode.IsFile() {
+			files = append(files, name)
+		}
+	}
+
 	return files, nil
 }
 
