@@ -6,16 +6,19 @@ import (
 )
 
 func TestListBranches(t *testing.T) {
-	branches := ListBranches("https://github.com/octocat/Hello-World")
+	branches, err := ListBranches("https://github.com/octocat/Hello-World")
+	assert.Nil(t, err)
 	assert.ElementsMatch(t, branches, [3]string{"master", "test", "octocat-patch-1"})
 }
 
 func TestListFiles(t *testing.T) {
-	files := ListFiles("https://github.com/octocat/Hello-World", "master")
-	assert.ElementsMatch(t, files, [1]string{"README.md"})
+	files, err := ListFiles("https://github.com/octocat/Hello-World", "master")
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, files, [1]string{"README"})
 }
 
 func TestGetRaw(t *testing.T) {
-	raw := GetRaw("https://github.com/octocat/Hello-World", "master", "README.md")
-	assert.Equal(t, raw, "Hello World!")
+	raw, err := GetRaw("https://github.com/octocat/Hello-World", "master", "README")
+	assert.Nil(t, err)
+	assert.Equal(t, raw, "Hello World!\n")
 }
