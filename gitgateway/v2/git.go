@@ -331,7 +331,84 @@ func (g *gitGateway) GetBranches() ([]string, error) {
 
 func (g *gitGateway) GetFiles(branch string) ([]string, error) {
 	var files []string
-	err := g.Checkout(branch)
+
+	//worktree, err := g.repo.Worktree()
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//err = worktree.Checkout(&git.CheckoutOptions{
+	//	Branch: "refs/heads/test",
+	//})
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//branches, err := g.repo.Branches()
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//var hash plumbing.Hash
+	//err = branches.ForEach(func(ref *plumbing.Reference) error {
+	//	fmt.Println(ref.Name().String(), ref.String())
+	//	if ref.Name().String() == branch {
+	//		hash = ref.Hash()
+	//	}
+	//	return nil
+	//})
+	//
+	//worktree, err := g.repo.Worktree()
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//err = worktree.Checkout(&git.CheckoutOptions{
+	//	Hash:
+	//})
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//err := g.repo.Fetch(&git.FetchOptions{
+	//	RemoteName: "origin",
+	//	RefSpecs:   []config.RefSpec{"refs/*:refs/*"},
+	//})
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	worktree, err := g.repo.Worktree()
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	err = worktree.Pull(&git.PullOptions{
+		RemoteName:    "origin",
+		ReferenceName: "refs/heads/test",
+	})
+	if err != nil {
+		return nil, errutil.ErrUnknown
+	}
+
+	//remotes, err := g.repo.Remotes()
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//err = remotes[0].Fetch(&git.FetchOptions{})
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+	//
+	//worktree, err := g.repo.Worktree()
+	//if err != nil {
+	//	return nil, errutil.ErrUnknown
+	//}
+
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Branch: "refs/remotes/origin/test",
+	})
 	if err != nil {
 		return nil, errutil.ErrUnknown
 	}
@@ -366,6 +443,7 @@ func (g *gitGateway) GetFiles(branch string) ([]string, error) {
 }
 
 func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
+	plumbing.NewHash("b3cbd5bbd7e81436d2eee04537ea2b4c0cad4cdf")
 	err := g.Checkout(branch)
 	if err != nil {
 		return "", errutil.ErrUnknown
