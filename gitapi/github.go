@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cast"
+	"github.com/thecodeisalreadydeployed/errutil"
 	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
@@ -18,14 +19,12 @@ func ListBranches(url string) ([]string, error) {
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return nil, err
+		return nil, errutil.ErrUnknown
 	}
 
 	body, err := getJSONArray(res)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return nil, err
+		return nil, errutil.ErrUnknown
 	}
 
 	var output []string
@@ -36,21 +35,19 @@ func ListBranches(url string) ([]string, error) {
 	return output, nil
 }
 
-// List file names in strings given a GitHub url string and branch name.
+// List all file names in strings given a GitHub url string and branch name.
 func ListFiles(url string, branch string) ([]string, error) {
 	name, repo := getNameAndRepo(url)
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents?ref=%s", name, repo, branch)
+	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", name, repo, branch)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return nil, err
+		return nil, errutil.ErrUnknown
 	}
 
 	body, err := getJSONArray(res)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return nil, err
+		return nil, errutil.ErrUnknown
 	}
 
 	var output []string
@@ -70,14 +67,12 @@ func GetRaw(url string, branch string, path string) (string, error) {
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return "", err
+		return "", errutil.ErrUnknown
 	}
 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		zap.L().Error(err.Error())
-		return "", err
+		return "", errutil.ErrUnknown
 	}
 	return string(bytes), nil
 }
@@ -96,7 +91,7 @@ func getJSONArray(res *http.Response) ([]map[string]interface{}, error) {
 	bytes, err := ioutil.ReadAll(res.Body)
 	err = json.Unmarshal(bytes, &body)
 	if err != nil {
-		return nil, err
+		return nil, errutil.ErrUnknown
 	}
 	return body, nil
 }
