@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
+	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/gitapi"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
@@ -78,7 +79,10 @@ func getRaw(ctx *fiber.Ctx) error {
 		raw, err = git.GetRaw(input.Branch, input.Path)
 	}
 
-	return writeResponse(ctx, raw, err)
+	if err != nil {
+		return fiber.NewError(errutil.MapStatusCode(err))
+	}
+	return ctx.SendString(raw)
 }
 
 func isGitHubURL(url string) bool {
