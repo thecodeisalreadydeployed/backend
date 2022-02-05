@@ -7,7 +7,6 @@ import (
 	"github.com/thecodeisalreadydeployed/errutil"
 	"go.uber.org/zap"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -23,7 +22,8 @@ func GetBranches(url string) ([]string, error) {
 		return nil, errutil.ErrUnavailable
 	}
 
-	body, err := getJSONArray(res)
+	var body []Branch
+	err = getJSON(res, &body)
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, errutil.ErrUnknown
@@ -31,7 +31,7 @@ func GetBranches(url string) ([]string, error) {
 
 	var output []string
 	for _, branch := range body {
-		output = append(output, cast.ToString(branch["name"]))
+		output = append(output, branch.Name)
 	}
 
 	return output, nil
@@ -48,16 +48,17 @@ func GetFiles(url string, branch string) ([]string, error) {
 		return nil, errutil.ErrUnavailable
 	}
 
-	body, err := getJSONArray(res)
+	var body File
+	err = getJSON(res, &body)
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, errutil.ErrUnknown
 	}
 
 	var output []string
-	for _, file := range body {
-		if cast.ToString(file["type"]) == "file" {
-			output = append(output, cast.ToString(file["path"]))
+	for _, file := range body.Tree {
+		if cast.ToString(file.Type) == "blob" {
+			output = append(output, file.Path)
 		}
 	}
 
@@ -92,14 +93,8 @@ func getNameAndRepo(url string) (string, string) {
 }
 
 // Gets JSON from HTTP response.
-func getJSONArray(res *http.Response) ([]map[string]interface{}, error) {
-	var body []map[string]interface{}
-	bytes, err := ioutil.ReadAll(res.Body)
-	err = json.Unmarshal(bytes, &body)
-	if err != nil {
-		return nil, errutil.ErrUnknown
-	}
-	return body, nil
+func getJSON(res *http.Response, output interface{}) error {
+	return json.NewDecoder(res.Body).Decode(&output)
 }
 
 // Close HTTP connection.
