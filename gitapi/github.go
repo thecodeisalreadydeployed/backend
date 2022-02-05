@@ -13,17 +13,19 @@ import (
 )
 
 // List branches in strings given a GitHub utl string.
-func ListBranches(url string) ([]string, error) {
+func GetBranches(url string) ([]string, error) {
 	name, repo := getNameAndRepo(url)
 	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", name, repo)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		return nil, errutil.ErrUnknown
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnavailable
 	}
 
 	body, err := getJSONArray(res)
 	if err != nil {
+		zap.L().Error(err.Error())
 		return nil, errutil.ErrUnknown
 	}
 
@@ -36,17 +38,19 @@ func ListBranches(url string) ([]string, error) {
 }
 
 // List all file names in strings given a GitHub url string and branch name.
-func ListFiles(url string, branch string) ([]string, error) {
+func GetFiles(url string, branch string) ([]string, error) {
 	name, repo := getNameAndRepo(url)
 	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", name, repo, branch)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		return nil, errutil.ErrUnknown
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnavailable
 	}
 
 	body, err := getJSONArray(res)
 	if err != nil {
+		zap.L().Error(err.Error())
 		return nil, errutil.ErrUnknown
 	}
 
@@ -67,22 +71,24 @@ func GetRaw(url string, branch string, path string) (string, error) {
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		return "", errutil.ErrUnknown
+		zap.L().Error(err.Error())
+		return "", errutil.ErrUnavailable
 	}
 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
+		zap.L().Error(err.Error())
 		return "", errutil.ErrUnknown
 	}
 	return string(bytes), nil
 }
 
-// Returns name and repository, in order.
+// Returns name and repository, in order. Must have HTTPS prefix.
 // For example, inputting "https://github.com/octocat/Hello-World"
 // would return ("octocat", "Hello-World")
 func getNameAndRepo(url string) (string, string) {
 	urlslice := strings.Split(url, "/")
-	return urlslice[len(urlslice)-2], urlslice[len(urlslice)-1]
+	return urlslice[3], urlslice[4]
 }
 
 // Gets JSON from HTTP response.
