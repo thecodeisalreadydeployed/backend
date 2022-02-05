@@ -27,6 +27,7 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 	controller.NewHealthController(app.Group("health"))
 	controller.NewPresetController(app.Group("presets"))
 	controller.NewBuildScriptController(app.Group("build-script"))
+	controller.NewGitApiController(app.Group("gitapi"))
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }
