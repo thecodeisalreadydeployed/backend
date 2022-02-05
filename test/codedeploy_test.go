@@ -203,3 +203,63 @@ func TestPresetIntegration(t *testing.T) {
 	expect.GET(fmt.Sprintf("/presets/%s", presetID)).
 		Expect().Status(http.StatusNotFound)
 }
+
+func TestGitHubApiIntegration(t *testing.T) {
+	expect := Setup(t)
+
+	branches := expect.POST("/gitapi/branches").
+		WithForm(dto.GetBranchesRequest{Url: "https://github.com/octocat/Hello-World"}).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Array()
+
+	assert.ElementsMatch(t, (*branches).Raw(), [3]string{"master", "test", "octocat-patch-1"})
+
+	files := expect.POST("/gitapi/files").
+		WithForm(dto.GetFilesRequest{
+			Url:    "https://github.com/octocat/Hello-World",
+			Branch: "test",
+		}).Expect().Status(http.StatusOK).JSON().Array()
+
+	assert.ElementsMatch(t, (*files).Raw(), [2]string{"CONTRIBUTING.md", "README"})
+
+	raw := expect.POST("/gitapi/raw").
+		WithForm(dto.GetRawRequest{
+			Url:    "https://github.com/octocat/Hello-World",
+			Branch: "octocat-patch-1",
+			Path:   "README",
+		}).Expect().Status(http.StatusOK).Body().Raw()
+
+	assert.Equal(t, "Hello world!\n", raw)
+}
+
+func TestGitLabApiIntegration(t *testing.T) {
+	expect := Setup(t)
+
+	branches := expect.POST("/gitapi/branches").
+		WithForm(dto.GetBranchesRequest{Url: "https://gitlab.com/gitlab-examples/docker"}).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Array()
+
+	assert.ElementsMatch(t, (*branches).Raw(), [1]string{"master"})
+
+	files := expect.POST("/gitapi/files").
+		WithForm(dto.GetFilesRequest{
+			Url:    "https://gitlab.com/gitlab-examples/docker",
+			Branch: "master",
+		}).Expect().Status(http.StatusOK).JSON().Array()
+
+	assert.ElementsMatch(t, (*files).Raw(), [3]string{".gitlab-ci.yml", "Dockerfile", "README.md"})
+
+	raw := expect.POST("/gitapi/raw").
+		WithForm(dto.GetRawRequest{
+			Url:    "https://gitlab.com/gitlab-examples/docker",
+			Branch: "master",
+			Path:   "Dockerfile",
+		}).Expect().Status(http.StatusOK).Body().Raw()
+
+	expected := "FROM alpine:latest\nRUN apk add -U git\n"
+
+	assert.Equal(t, expected, raw)
+}
