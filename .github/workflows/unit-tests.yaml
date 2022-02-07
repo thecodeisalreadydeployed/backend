@@ -12,7 +12,8 @@ jobs:
           'manifestgenerator',
           'datastore',
           'datamodel',
-          'gitopscontroller'
+          'gitopscontroller',
+          'gitapi'
         ]
     steps:
       - uses: actions/checkout@v2

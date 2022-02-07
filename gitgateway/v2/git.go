@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-git/go-billy/v5/memfs"
@@ -28,6 +29,9 @@ type GitGateway interface {
 	Log() error
 	Head() (string, error)
 	Diff(oldCommit string, currentCommit string) ([]string, error)
+	GetBranches() ([]string, error)
+	GetFiles(branch string) ([]string, error)
+	GetRaw(branch string, path string) (string, error)
 
 	// Calculate average commit interval for the last 10 commit intervals
 	CommitInterval() (time.Duration, error)
@@ -300,4 +304,112 @@ func (g *gitGateway) CommitInterval() (time.Duration, error) {
 		prev = commit.Author.When
 	}
 	return latest.Sub(prev) / 10, nil
+}
+
+func (g *gitGateway) GetBranches() ([]string, error) {
+	var branches []string
+	remotes, err := g.repo.Remotes()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	refs, err := remotes[0].List(&git.ListOptions{})
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	for _, ref := range refs {
+		refName := ref.Name().String()
+		if !strings.HasPrefix(refName, "refs/heads") {
+			continue
+		}
+		name := strings.Split(refName, "/")[2]
+		branches = append(branches, name)
+	}
+	return branches, nil
+}
+
+func (g *gitGateway) GetFiles(branch string) ([]string, error) {
+	var files []string
+	worktree, err := g.repo.Worktree()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	err = worktree.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)),
+	})
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	ref, err := g.repo.Head()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	commit, err := g.repo.CommitObject(ref.Hash())
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	tree, err := commit.Tree()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	walker := object.NewTreeWalker(tree, true, make(map[plumbing.Hash]bool))
+	for {
+		name, entry, err := walker.Next()
+		if err != nil {
+			break
+		}
+		if entry.Mode.IsFile() {
+			files = append(files, name)
+		}
+	}
+
+	return files, nil
+}
+
+func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
+	plumbing.NewHash("b3cbd5bbd7e81436d2eee04537ea2b4c0cad4cdf")
+	err := g.Checkout(branch)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", errutil.ErrUnknown
+	}
+
+	ref, err := g.repo.Head()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", errutil.ErrUnknown
+	}
+
+	commit, err := g.repo.CommitObject(ref.Hash())
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", errutil.ErrUnknown
+	}
+
+	file, err := commit.File(path)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", errutil.ErrUnknown
+	}
+
+	raw, err := file.Contents()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return "", errutil.ErrUnknown
+	}
+
+	return raw, nil
 }
