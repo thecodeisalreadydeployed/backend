@@ -85,7 +85,7 @@ func (backend *gitAPIBackend) GetBranches(repoURL string) ([]string, error) {
 	}
 	switch provider {
 	case gitHub:
-		return github.NewGitHubAPI(logger).GetBranches(owner, repo)
+		return github.NewGitHubAPI(logger, owner, repo).GetBranches()
 	}
-	return github.NewGitHubAPI(logger).GetBranches(owner, repo)
+	return github.NewGitHubAPI(logger, owner, repo).GetBranches()
 }
