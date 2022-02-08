@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/thecodeisalreadydeployed/gitapi/github"
+	"github.com/thecodeisalreadydeployed/gitapi/provider"
 	"go.uber.org/zap"
 )
 
@@ -69,23 +70,25 @@ func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
 	}
 }
 
-func (backend *gitAPIBackend) GetBranches(repoURL string) ([]string, error) {
+func (backend *gitAPIBackend) getGitProviderAPI(repoURL string) (*provider.GitProvider, error) {
 	logger := backend.logger.With(zap.String("repoURL", repoURL))
 	provider := backend.getGitProvider(repoURL)
 	owner, repo := backend.getOwnerAndRepo(repoURL)
 	if provider != unknown {
 		if len(owner) == 0 {
 			logger.Error("repository owner cannot be empty")
-			return []string{}, fmt.Errorf("repository owner cannot be empty")
+			return nil, fmt.Errorf("repository owner cannot be empty")
 		}
 		if len(repo) == 0 {
 			logger.Error("repository name cannot be empty")
-			return []string{}, fmt.Errorf("repository name cannot be empty")
+			return nil, fmt.Errorf("repository name cannot be empty")
 		}
 	}
 	switch provider {
 	case gitHub:
-		return github.NewGitHubAPI(logger, owner, repo).GetBranches()
+		api := github.NewGitHubAPI(logger, owner, repo)
+		return &api, nil
 	}
-	return github.NewGitHubAPI(logger, owner, repo).GetBranches()
+	logger.Error("cannot get Git provider API")
+	return nil, fmt.Errorf("cannot get Git provider API")
 }
