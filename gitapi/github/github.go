@@ -49,9 +49,8 @@ func (gh *gitHubAPI) GetBranches() ([]string, error) {
 }
 
 // List all file names in strings given a GitHub url string and branch name.
-func (gh *gitHubAPI) GetFiles(owner string, repo string, branch string) ([]string, error) {
-	name, repo := getNameAndRepo(url)
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", name, repo, branch)
+func (gh *gitHubAPI) GetFiles(branch string) ([]string, error) {
+	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", gh.owner, gh.repo, branch)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
@@ -77,8 +76,8 @@ func (gh *gitHubAPI) GetFiles(owner string, repo string, branch string) ([]strin
 }
 
 // Get raw file given GitHub url string, branch, and file path.
-func (gh *gitHubAPI) GetRaw(owner string, repo string, branch string, path string) (string, error) {
-	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", owner, repo, branch, path)
+func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
+	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", gh.owner, gh.repo, branch, path)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
