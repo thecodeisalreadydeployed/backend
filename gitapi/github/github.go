@@ -73,9 +73,8 @@ func (gh *gitHubAPI) GetFiles(owner string, repo string, branch string) ([]strin
 }
 
 // Get raw file given GitHub url string, branch, and file path.
-func (gh *gitHubAPI) GetRaw(url string, branch string, path string) (string, error) {
-	name, repo := getNameAndRepo(url)
-	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", name, repo, branch, path)
+func (gh *gitHubAPI) GetRaw(owner string, repo string, branch string, path string) (string, error) {
+	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", owner, repo, branch, path)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
