@@ -1,7 +1,9 @@
 package gitapi
 
 import (
+	"fmt"
 	"net/url"
+	"strings"
 
 	"go.uber.org/zap"
 )
@@ -28,10 +30,31 @@ func NewGitAPIBackend() GitAPIBackend {
 	return &gitAPIBackend{}
 }
 
-func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
+func (backend *gitAPIBackend) parseRepositoryURL(repoURL string) (*url.URL, error) {
 	u, err := url.Parse(repoURL)
 	if err != nil {
 		backend.logger.Error("cannot parse repository URL", zap.Error(err))
+		return nil, fmt.Errorf("cannot parse repository URL")
+	}
+	return u, nil
+}
+
+func (backend *gitAPIBackend) getOwnerAndRepo(repoURL string) (string, string) {
+	u, err := backend.parseRepositoryURL(repoURL)
+	if err != nil {
+		return "", ""
+	}
+	parts := strings.Split(u.Path, "/")
+	if len(parts) < 2 {
+		backend.logger.Error("invalid repository URL")
+		return "", ""
+	}
+	return parts[len(parts)-2], parts[len(parts)-1]
+}
+
+func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
+	u, err := backend.parseRepositoryURL(repoURL)
+	if err != nil {
 		return unknown
 	}
 
