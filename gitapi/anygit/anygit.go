@@ -18,15 +18,23 @@ func NewAnyGitAPI(logger *zap.Logger, repoURL string) provider.GitProvider {
 func (api *anyGitAPI) GetBranches() ([]string, error) {
 	git, gitErr := gitgateway.NewGitGatewayRemote(api.repoURL)
 	if gitErr != nil {
-		return []string{}, nil
+		return []string{}, gitErr
 	}
 	return git.GetBranches()
 }
 
 func (api *anyGitAPI) GetFiles(branch string) ([]string, error) {
-	return []string{}, nil
+	git, gitErr := gitgateway.NewGitGatewayRemote(api.repoURL)
+	if gitErr != nil {
+		return []string{}, gitErr
+	}
+	return git.GetFiles(branch)
 }
 
 func (api *anyGitAPI) GetRaw(branch string, path string) (string, error) {
-	return "", nil
+	git, gitErr := gitgateway.NewGitGatewayRemote(api.repoURL)
+	if gitErr != nil {
+		return "", gitErr
+	}
+	return git.GetRaw(branch, path)
 }
