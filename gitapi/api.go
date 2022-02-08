@@ -92,3 +92,19 @@ func (backend *gitAPIBackend) getGitProviderAPI(repoURL string) (*provider.GitPr
 	logger.Error("cannot get Git provider API")
 	return nil, fmt.Errorf("cannot get Git provider API")
 }
+
+func (backend *gitAPIBackend) GetBranches(repoURL string) ([]string, error) {
+	providerAPI, err := backend.getGitProviderAPI(repoURL)
+	if err != nil {
+		return []string{}, err
+	}
+	return (*providerAPI).GetBranches()
+}
+
+func (backend *gitAPIBackend) GetFiles(repoURL string, branch string) ([]string, error) {
+	providerAPI, err := backend.getGitProviderAPI(repoURL)
+	if err != nil {
+		return []string{}, err
+	}
+	return (*providerAPI).GetFiles(branch)
+}
