@@ -70,9 +70,19 @@ func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
 }
 
 func (backend *gitAPIBackend) GetBranches(repoURL string) ([]string, error) {
+	logger := backend.logger.With(zap.String("repoURL", repoURL))
 	provider := backend.getGitProvider(repoURL)
 	owner, repo := backend.getOwnerAndRepo(repoURL)
-	logger := backend.logger.With(zap.String("repoURL", repoURL))
+	if provider != unknown {
+		if len(owner) == 0 {
+			logger.Error("repository owner cannot be empty")
+			return []string{}, fmt.Errorf("repository owner cannot be empty")
+		}
+		if len(repo) == 0 {
+			logger.Error("repository name cannot be empty")
+			return []string{}, fmt.Errorf("repository name cannot be empty")
+		}
+	}
 	switch provider {
 	case gitHub:
 		return github.NewGitHubAPI(logger).GetBranches(owner, repo)
