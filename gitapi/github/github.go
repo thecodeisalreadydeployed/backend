@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/errutil"
@@ -91,14 +90,6 @@ func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
 		return "", errutil.ErrUnknown
 	}
 	return string(bytes), nil
-}
-
-// Returns name and repository, in order. Must have HTTPS prefix.
-// For example, inputting "https://github.com/octocat/Hello-World"
-// would return ("octocat", "Hello-World")
-func getNameAndRepo(url string) (string, string) {
-	urlslice := strings.Split(url, "/")
-	return urlslice[3], urlslice[4]
 }
 
 // Gets JSON from HTTP response.
