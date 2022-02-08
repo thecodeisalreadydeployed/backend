@@ -1,4 +1,4 @@
-package gitapi
+package github
 
 import (
 	"encoding/json"

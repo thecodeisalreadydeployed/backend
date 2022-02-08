@@ -1,4 +1,4 @@
-package gitapi
+package github
 
 type Branch struct {
 	Name      string `json:"name"`
