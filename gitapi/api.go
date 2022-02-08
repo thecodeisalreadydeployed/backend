@@ -28,8 +28,8 @@ const (
 	unknown gitProvider = "deploys.dev"
 )
 
-func NewGitAPIBackend() GitAPIBackend {
-	return &gitAPIBackend{}
+func NewGitAPIBackend(logger *zap.Logger) GitAPIBackend {
+	return &gitAPIBackend{logger: logger}
 }
 
 func (backend *gitAPIBackend) parseRepositoryURL(repoURL string) (*url.URL, error) {
