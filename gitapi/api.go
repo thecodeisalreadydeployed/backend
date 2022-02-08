@@ -108,3 +108,11 @@ func (backend *gitAPIBackend) GetFiles(repoURL string, branch string) ([]string,
 	}
 	return (*providerAPI).GetFiles(branch)
 }
+
+func (backend *gitAPIBackend) GetRaw(repoURL string, branch string, path string) (string, error) {
+	providerAPI, err := backend.getGitProviderAPI(repoURL)
+	if err != nil {
+		return "", err
+	}
+	return (*providerAPI).GetRaw(branch, path)
+}
