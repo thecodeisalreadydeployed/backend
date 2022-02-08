@@ -2,6 +2,7 @@ package anygit
 
 import (
 	"github.com/thecodeisalreadydeployed/gitapi/provider"
+	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"go.uber.org/zap"
 )
 
@@ -15,7 +16,11 @@ func NewAnyGitAPI(logger *zap.Logger, repoURL string) provider.GitProvider {
 }
 
 func (api *anyGitAPI) GetBranches() ([]string, error) {
-	return []string{}, nil
+	git, gitErr := gitgateway.NewGitGatewayRemote(api.repoURL)
+	if gitErr != nil {
+		return []string{}, nil
+	}
+	return git.GetBranches()
 }
 
 func (api *anyGitAPI) GetFiles(branch string) ([]string, error) {
