@@ -12,31 +12,22 @@ import (
 )
 
 func NewGitAPIController(api fiber.Router, gitAPIBackend gitapi.GitAPIBackend) {
-	api.Post("/branches", getBranches)
+	api.Post("/branches", getBranches(gitAPIBackend))
 	api.Post("/files", getFiles)
 	api.Post("/raw", getRaw)
 }
 
-func getBranches(ctx *fiber.Ctx) error {
-	input := dto.GetBranchesRequest{}
+func getBranches(gitAPIBackend gitapi.GitAPIBackend) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		input := dto.GetBranchesRequest{}
 
-	if err := validator.ParseBodyAndValidate(ctx, &input); err != nil {
-		return err
-	}
-
-	var branches []string
-	var err error
-	if isGitHubURL(input.Url) {
-		branches, err = gitapi.GetBranches(input.Url)
-	} else {
-		git, gitErr := gitgateway.NewGitGatewayRemote(input.Url)
-		if gitErr != nil {
-			return fiber.ErrBadRequest
+		if err := validator.ParseBodyAndValidate(c, &input); err != nil {
+			return err
 		}
-		branches, err = git.GetBranches()
-	}
 
-	return writeResponse(ctx, branches, err)
+		branches, err := gitAPIBackend.GetBranches(input.URL)
+		return writeResponse(c, branches, err)
+	}
 }
 
 func getFiles(ctx *fiber.Ctx) error {
