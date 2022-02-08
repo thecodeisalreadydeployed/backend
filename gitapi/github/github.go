@@ -13,10 +13,12 @@ import (
 	"go.uber.org/zap"
 )
 
-type gitHubAPI struct{}
+type gitHubAPI struct {
+	logger *zap.Logger
+}
 
-func NewGitHubAPI() provider.GitProvider {
-	return &gitHubAPI{}
+func NewGitHubAPI(logger *zap.Logger) provider.GitProvider {
+	return &gitHubAPI{logger: logger}
 }
 
 // List branches in strings given a GitHub utl string.
@@ -25,7 +27,7 @@ func (gh *gitHubAPI) GetBranches(owner string, repo string) ([]string, error) {
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		zap.L().Error(err.Error())
+		gh.logger.Error(err.Error())
 		return nil, errutil.ErrUnavailable
 	}
 
@@ -51,14 +53,14 @@ func (gh *gitHubAPI) GetFiles(owner string, repo string, branch string) ([]strin
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		zap.L().Error(err.Error())
+		gh.logger.Error(err.Error())
 		return nil, errutil.ErrUnavailable
 	}
 
 	var body File
 	err = getJSON(res, &body)
 	if err != nil {
-		zap.L().Error(err.Error())
+		gh.logger.Error(err.Error())
 		return nil, errutil.ErrUnknown
 	}
 
@@ -78,13 +80,13 @@ func (gh *gitHubAPI) GetRaw(owner string, repo string, branch string, path strin
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
-		zap.L().Error(err.Error())
+		gh.logger.Error(err.Error())
 		return "", errutil.ErrUnavailable
 	}
 
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		zap.L().Error(err.Error())
+		gh.logger.Error(err.Error())
 		return "", errutil.ErrUnknown
 	}
 	return string(bytes), nil
