@@ -24,8 +24,8 @@ func NewGitHubAPI(logger *zap.Logger, owner string, repo string) provider.GitPro
 }
 
 // List branches in strings given a GitHub utl string.
-func (gh *gitHubAPI) GetBranches(owner string, repo string) ([]string, error) {
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", owner, repo)
+func (gh *gitHubAPI) GetBranches() ([]string, error) {
+	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", gh.owner, gh.repo)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
