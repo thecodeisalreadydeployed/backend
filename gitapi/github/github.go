@@ -3,18 +3,25 @@ package gitapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/cast"
-	"github.com/thecodeisalreadydeployed/errutil"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/spf13/cast"
+	"github.com/thecodeisalreadydeployed/errutil"
+	"github.com/thecodeisalreadydeployed/gitapi"
+	"go.uber.org/zap"
 )
 
+type gitHubAPI struct{}
+
+func NewGitHubAPI() gitapi.GitProvider {
+	return &gitHubAPI{}
+}
+
 // List branches in strings given a GitHub utl string.
-func GetBranches(url string) ([]string, error) {
-	name, repo := getNameAndRepo(url)
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", name, repo)
+func (gh *gitHubAPI) GetBranches(owner string, repo string) ([]string, error) {
+	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", owner, repo)
 	res, err := http.Get(urlapi)
 	defer closeHTTP(res)
 	if err != nil {
@@ -38,7 +45,7 @@ func GetBranches(url string) ([]string, error) {
 }
 
 // List all file names in strings given a GitHub url string and branch name.
-func GetFiles(url string, branch string) ([]string, error) {
+func (gh *gitHubAPI) GetFiles(owner string, repo string, branch string) ([]string, error) {
 	name, repo := getNameAndRepo(url)
 	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", name, repo, branch)
 	res, err := http.Get(urlapi)
@@ -66,7 +73,7 @@ func GetFiles(url string, branch string) ([]string, error) {
 }
 
 // Get raw file given GitHub url string, branch, and file path.
-func GetRaw(url string, branch string, path string) (string, error) {
+func (gh *gitHubAPI) GetRaw(url string, branch string, path string) (string, error) {
 	name, repo := getNameAndRepo(url)
 	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", name, repo, branch, path)
 	res, err := http.Get(urlapi)
