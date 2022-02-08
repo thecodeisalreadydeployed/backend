@@ -5,7 +5,9 @@ import (
 	"log"
 
 	"github.com/thecodeisalreadydeployed/apiserver/controller"
+	"github.com/thecodeisalreadydeployed/gitapi"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
+	"go.uber.org/zap"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -14,6 +16,7 @@ import (
 )
 
 func APIServer(port int, workloadController workloadcontroller.WorkloadController) {
+	gitAPIBackend := gitapi.NewGitAPIBackend(zap.L())
 	validator.Init()
 	app := fiber.New()
 
@@ -27,7 +30,7 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 	controller.NewHealthController(app.Group("health"))
 	controller.NewPresetController(app.Group("presets"))
 	controller.NewBuildScriptController(app.Group("build-script"))
-	controller.NewGitApiController(app.Group("gitapi"))
+	controller.NewGitAPIController(app.Group("gitapi"), gitAPIBackend)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }

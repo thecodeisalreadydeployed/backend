@@ -208,7 +208,7 @@ func TestGitHubApiIntegration(t *testing.T) {
 	expect := Setup(t)
 
 	branches := expect.POST("/gitapi/branches").
-		WithForm(dto.GetBranchesRequest{Url: "https://github.com/octocat/Hello-World"}).
+		WithForm(dto.GetBranchesRequest{URL: "https://github.com/octocat/Hello-World"}).
 		Expect().
 		Status(http.StatusOK).
 		JSON().Array()
@@ -217,7 +217,7 @@ func TestGitHubApiIntegration(t *testing.T) {
 
 	files := expect.POST("/gitapi/files").
 		WithForm(dto.GetFilesRequest{
-			Url:    "https://github.com/octocat/Hello-World",
+			URL:    "https://github.com/octocat/Hello-World",
 			Branch: "test",
 		}).Expect().Status(http.StatusOK).JSON().Array()
 
@@ -225,7 +225,7 @@ func TestGitHubApiIntegration(t *testing.T) {
 
 	raw := expect.POST("/gitapi/raw").
 		WithForm(dto.GetRawRequest{
-			Url:    "https://github.com/octocat/Hello-World",
+			URL:    "https://github.com/octocat/Hello-World",
 			Branch: "octocat-patch-1",
 			Path:   "README",
 		}).Expect().Status(http.StatusOK).Body().Raw()
@@ -237,7 +237,7 @@ func TestGitLabApiIntegration(t *testing.T) {
 	expect := Setup(t)
 
 	branches := expect.POST("/gitapi/branches").
-		WithForm(dto.GetBranchesRequest{Url: "https://gitlab.com/gitlab-examples/docker"}).
+		WithForm(dto.GetBranchesRequest{URL: "https://gitlab.com/gitlab-examples/docker"}).
 		Expect().
 		Status(http.StatusOK).
 		JSON().Array()
@@ -246,7 +246,7 @@ func TestGitLabApiIntegration(t *testing.T) {
 
 	files := expect.POST("/gitapi/files").
 		WithForm(dto.GetFilesRequest{
-			Url:    "https://gitlab.com/gitlab-examples/docker",
+			URL:    "https://gitlab.com/gitlab-examples/docker",
 			Branch: "master",
 		}).Expect().Status(http.StatusOK).JSON().Array()
 
@@ -254,7 +254,7 @@ func TestGitLabApiIntegration(t *testing.T) {
 
 	raw := expect.POST("/gitapi/raw").
 		WithForm(dto.GetRawRequest{
-			Url:    "https://gitlab.com/gitlab-examples/docker",
+			URL:    "https://gitlab.com/gitlab-examples/docker",
 			Branch: "master",
 			Path:   "Dockerfile",
 		}).Expect().Status(http.StatusOK).Body().Raw()

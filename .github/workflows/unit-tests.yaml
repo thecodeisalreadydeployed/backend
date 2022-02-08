@@ -13,7 +13,7 @@ jobs:
           'datastore',
           'datamodel',
           'gitopscontroller',
-          'gitapi'
+          'gitapi/github'
         ]
     steps:
       - uses: actions/checkout@v2
