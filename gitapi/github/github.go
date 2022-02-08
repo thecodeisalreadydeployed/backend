@@ -9,13 +9,13 @@ import (
 
 	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/errutil"
-	"github.com/thecodeisalreadydeployed/gitapi"
+	"github.com/thecodeisalreadydeployed/gitapi/provider"
 	"go.uber.org/zap"
 )
 
 type gitHubAPI struct{}
 
-func NewGitHubAPI() gitapi.GitProvider {
+func NewGitHubAPI() provider.GitProvider {
 	return &gitHubAPI{}
 }
 
