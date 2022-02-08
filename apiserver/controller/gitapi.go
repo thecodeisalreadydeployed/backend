@@ -1,16 +1,17 @@
 package controller
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/apiserver/dto"
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/gitapi"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
-	"strings"
 )
 
-func NewGitApiController(api fiber.Router) {
+func NewGitAPIController(api fiber.Router, gitAPIBackend gitapi.GitAPIBackend) {
 	api.Post("/branches", getBranches)
 	api.Post("/files", getFiles)
 	api.Post("/raw", getRaw)
