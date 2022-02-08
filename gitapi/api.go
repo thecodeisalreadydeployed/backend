@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/thecodeisalreadydeployed/gitapi/anygit"
 	"github.com/thecodeisalreadydeployed/gitapi/github"
 	"github.com/thecodeisalreadydeployed/gitapi/provider"
 	"go.uber.org/zap"
@@ -64,7 +65,7 @@ func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
 	case string(gitHub):
 		return gitHub
 	case string(gitLab):
-		return gitLab
+		return unknown
 	default:
 		return unknown
 	}
@@ -88,9 +89,10 @@ func (backend *gitAPIBackend) getGitProviderAPI(repoURL string) (*provider.GitPr
 	case gitHub:
 		api := github.NewGitHubAPI(logger, owner, repo)
 		return &api, nil
+	default:
+		api := anygit.NewAnyGitAPI(logger, repoURL)
+		return &api, nil
 	}
-	logger.Error("cannot get Git provider API")
-	return nil, fmt.Errorf("cannot get Git provider API")
 }
 
 func (backend *gitAPIBackend) GetBranches(repoURL string) ([]string, error) {
