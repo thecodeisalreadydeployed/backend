@@ -15,10 +15,12 @@ import (
 
 type gitHubAPI struct {
 	logger *zap.Logger
+	owner  string
+	repo   string
 }
 
-func NewGitHubAPI(logger *zap.Logger) provider.GitProvider {
-	return &gitHubAPI{logger: logger}
+func NewGitHubAPI(logger *zap.Logger, owner string, repo string) provider.GitProvider {
+	return &gitHubAPI{logger: logger, owner: owner, repo: repo}
 }
 
 // List branches in strings given a GitHub utl string.
