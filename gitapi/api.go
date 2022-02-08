@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/thecodeisalreadydeployed/gitapi/github"
 	"go.uber.org/zap"
 )
 
@@ -70,8 +71,11 @@ func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
 
 func (backend *gitAPIBackend) GetBranches(repoURL string) ([]string, error) {
 	provider := backend.getGitProvider(repoURL)
+	owner, repo := backend.getOwnerAndRepo(repoURL)
+	logger := backend.logger.With(zap.String("repoURL", repoURL))
 	switch provider {
 	case gitHub:
-		return github.NewGitHubAPI()
+		return github.NewGitHubAPI(logger).GetBranches(owner, repo)
 	}
+	return github.NewGitHubAPI(logger).GetBranches(owner, repo)
 }
