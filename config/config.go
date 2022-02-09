@@ -25,13 +25,17 @@ const (
 
 func DefaultUserspaceRepository() string {
 	if len(viper.GetString(constant.UserspaceRepository)) != 0 {
-		return viper.GetString(constant.UserspaceRepository)
+		repo := viper.GetString(constant.UserspaceRepository)
+		zap.L().Info("userspace repository: " + repo)
+		return repo
 	}
 
 	dir, err := os.MkdirTemp("", uuid.NewString()+"-")
 	if err != nil {
 		zap.L().Fatal("cannot create temporary directory", zap.Error(err))
 	}
+
+	zap.L().Info("created temporary directory: " + dir)
 
 	viper.Set(constant.UserspaceRepository, dir)
 
