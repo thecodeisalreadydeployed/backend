@@ -49,7 +49,7 @@ func ensureValidToken() func(next http.Handler) http.Handler {
 		zap.L().Error("encountered error while validating JWT", zap.Error(err))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"message": "Failed to validate JWT"}`))
+		_, _ = w.Write([]byte(`{"message": "Failed to validate JWT"}`))
 	}
 
 	middleware := jwtmiddleware.New(
