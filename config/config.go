@@ -1,11 +1,14 @@
 package config
 
 import (
+	"os"
 	"time"
 
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"github.com/thecodeisalreadydeployed/constant"
+	"go.uber.org/zap"
 )
 
 func DefaultGitSignature() *object.Signature {
@@ -21,7 +24,16 @@ const (
 )
 
 func DefaultUserspaceRepository() string {
-	return viper.GetString(constant.UserspaceRepository)
+	if len(viper.GetString(constant.UserspaceRepository)) != 0 {
+		return viper.GetString(constant.UserspaceRepository)
+	}
+
+	dir, err := os.MkdirTemp("", uuid.NewString()+"-")
+	if err != nil {
+		zap.L().Fatal("cannot create temporary directory", zap.Error(err))
+	}
+
+	return dir
 }
 
 func ArgoCDServerHost() string {
