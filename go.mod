@@ -17,6 +17,7 @@ require (
 	github.com/gofiber/adaptor/v2 v2.1.17
 	github.com/gofiber/fiber/v2 v2.26.0
 	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
