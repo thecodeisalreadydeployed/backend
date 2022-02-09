@@ -2,11 +2,12 @@ package datastore
 
 import (
 	"fmt"
-	"github.com/thecodeisalreadydeployed/model"
 	"log"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/thecodeisalreadydeployed/model"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/util"
@@ -27,7 +28,7 @@ func GetObservables() *sync.Map {
 	return &observables
 }
 
-func Init() {
+func Migrate() {
 	// dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
