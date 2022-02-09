@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/subosito/gotenv"
 	"github.com/thecodeisalreadydeployed/apiserver"
-	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
@@ -32,7 +31,6 @@ func main() {
 
 	zap.ReplaceGlobals(logger)
 
-	config.SetDefault()
 	datastore.Migrate()
 	argoCDClient := argocd.NewArgoCDClient()
 	gitOpsController := gitopscontroller.NewGitOpsController(zap.L(), argoCDClient)
