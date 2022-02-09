@@ -7,7 +7,7 @@ import (
 )
 
 func EnsureAuthenticated() func(c *fiber.Ctx) error {
-	if util.IsDevEnvironment() {
+	if util.IsDevEnvironment() || util.IsTestEnvironment() {
 		return func(c *fiber.Ctx) error {
 			return c.Next()
 		}
