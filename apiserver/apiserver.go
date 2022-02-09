@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/thecodeisalreadydeployed/apiserver/auth"
 	"github.com/thecodeisalreadydeployed/apiserver/controller"
 	"github.com/thecodeisalreadydeployed/gitapi"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
@@ -22,6 +23,7 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 
 	app.Use(cors.New())
 	app.Use(logger.New())
+	app.Use(auth.EnsureAuthenticated())
 
 	controller.NewProjectController(app.Group("projects"))
 	controller.NewAppController(app.Group("apps"), workloadController)
