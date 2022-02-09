@@ -33,6 +33,8 @@ func DefaultUserspaceRepository() string {
 		zap.L().Fatal("cannot create temporary directory", zap.Error(err))
 	}
 
+	viper.Set(constant.UserspaceRepository, dir)
+
 	return dir
 }
 
