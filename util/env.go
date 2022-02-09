@@ -7,5 +7,5 @@ func IsDevEnvironment() bool {
 }
 
 func IsTestEnvironment() bool {
-	return os.Getenv("APP_ENV") == "TEST"
+	return os.Getenv("APP_ENV") == "TEST" || os.Getenv("CI") == "true"
 }
