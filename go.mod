@@ -7,6 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/auth0/go-jwt-middleware/v2 v2.0.0 // indirect
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/fasthttp/websocket v1.4.3 // indirect
 	github.com/gavv/httpexpect/v2 v2.3.1
@@ -36,7 +37,7 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.19.0
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
+	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.13
