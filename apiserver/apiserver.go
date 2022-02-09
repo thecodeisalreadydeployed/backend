@@ -23,16 +23,14 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 
 	app.Use(cors.New())
 	app.Use(logger.New())
-	app.Use(auth.EnsureAuthenticated())
 
-	controller.NewProjectController(app.Group("projects"))
-	controller.NewAppController(app.Group("apps"), workloadController)
-	controller.NewDeploymentController(app.Group("deployments"), workloadController)
+	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated()))
+	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated()), workloadController)
+	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated()), workloadController)
+	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated()))
+	controller.NewGitAPIController(app.Group("gitapi", auth.EnsureAuthenticated()), gitAPIBackend)
 
 	controller.NewHealthController(app.Group("health"))
-	controller.NewPresetController(app.Group("presets"))
-	controller.NewBuildScriptController(app.Group("build-script"))
-	controller.NewGitAPIController(app.Group("gitapi"), gitAPIBackend)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }
