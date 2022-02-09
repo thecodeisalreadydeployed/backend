@@ -2,14 +2,21 @@
 
 package workloadcontroller
 
-import "github.com/thecodeisalreadydeployed/model"
+import (
+	"github.com/thecodeisalreadydeployed/gitopscontroller"
+	"github.com/thecodeisalreadydeployed/model"
+	"go.uber.org/zap"
+)
 
 type WorkloadController interface {
 	NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error)
 }
 
-type workloadController struct{}
+type workloadController struct {
+	logger           *zap.Logger
+	gitOpsController gitopscontroller.GitOpsController
+}
 
-func NewWorkloadController() WorkloadController {
-	return &workloadController{}
+func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController) WorkloadController {
+	return &workloadController{logger: logger, gitOpsController: gitOpsController}
 }
