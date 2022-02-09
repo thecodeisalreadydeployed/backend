@@ -1,15 +1,17 @@
 package auth
 
 import (
+	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/thecodeisalreadydeployed/util"
 )
 
 func EnsureAuthenticated() func(c *fiber.Ctx) error {
-	return func(c *fiber.Ctx) error {
-		if util.IsDevEnvironment() {
+	if util.IsDevEnvironment() {
+		return func(c *fiber.Ctx) error {
 			return c.Next()
 		}
-		return c.Next()
 	}
+
+	return adaptor.HTTPMiddleware(ensureValidToken())
 }
