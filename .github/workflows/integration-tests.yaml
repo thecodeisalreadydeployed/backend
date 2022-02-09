@@ -60,5 +60,5 @@ jobs:
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
       - id: integration-tests
         run: make test
-      - if: failure() && steps.integration-tests.outcome == 'failure'
+      - if: always()
         run: kubectl -n default logs deploy/codedeploy
