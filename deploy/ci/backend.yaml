@@ -85,4 +85,6 @@ spec:
               value: password
             - name: DATABASE_NAME
               value: codedeploy
+            - name: APP_ENV
+              value: TEST
 status: {}
