@@ -31,7 +31,7 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	config.SetDefault()
-	datastore.Init()
+	datastore.Migrate()
 	workloadController := workloadcontroller.NewWorkloadController()
 	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), datastore.GetDB(), workloadController)
 	go repositoryObserver.ObserveGitSources()
