@@ -36,7 +36,7 @@ func main() {
 	datastore.Migrate()
 	argoCDClient := argocd.NewArgoCDClient()
 	gitOpsController := gitopscontroller.NewGitOpsController(zap.L(), argoCDClient)
-	workloadController := workloadcontroller.NewWorkloadController()
+	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController)
 	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), datastore.GetDB(), workloadController)
 	go repositoryObserver.ObserveGitSources()
 	apiserver.APIServer(3000, workloadController)
