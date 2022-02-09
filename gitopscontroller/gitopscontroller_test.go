@@ -14,6 +14,7 @@ import (
 	"github.com/thecodeisalreadydeployed/constant"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
 	mock_argocd "github.com/thecodeisalreadydeployed/gitopscontroller/argocd/mock"
+	"go.uber.org/zap/zaptest"
 )
 
 func temporalDir() (path string, clean func()) {
@@ -44,7 +45,6 @@ func TestGitOpsController(t *testing.T) {
 
 		dir, clean := temporalDir()
 		viper.Set(constant.UserspaceRepository, dir)
-		gitopscontroller.SetupUserspace()
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -52,7 +52,8 @@ func TestGitOpsController(t *testing.T) {
 		argocd := mock_argocd.NewMockArgoCDClient(ctrl)
 		argocd.EXPECT().Refresh().Return(nil).Times(3)
 
-		controller := gitopscontroller.NewGitOpsController(argocd)
+		logger := zaptest.NewLogger(t)
+		controller := gitopscontroller.NewGitOpsController(logger, argocd)
 
 		err := controller.SetupProject("prj-test")
 		assert.NoError(t, err)
