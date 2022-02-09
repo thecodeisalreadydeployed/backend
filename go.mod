@@ -14,7 +14,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-playground/validator/v10 v10.9.0
-	github.com/gofiber/adaptor/v2 v2.1.17 // indirect
+	github.com/gofiber/adaptor/v2 v2.1.17
 	github.com/gofiber/fiber/v2 v2.26.0
 	github.com/golang/mock v1.6.0
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
