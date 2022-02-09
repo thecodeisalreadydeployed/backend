@@ -7,7 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
-	github.com/auth0/go-jwt-middleware/v2 v2.0.0 // indirect
+	github.com/auth0/go-jwt-middleware/v2 v2.0.0
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/fasthttp/websocket v1.4.3 // indirect
 	github.com/gavv/httpexpect/v2 v2.3.1
