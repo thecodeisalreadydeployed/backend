@@ -12,6 +12,7 @@ import (
 	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
+	"go.uber.org/zap"
 )
 
 type GitOpsController interface {
@@ -21,6 +22,7 @@ type GitOpsController interface {
 }
 
 type gitOpsController struct {
+	logger       *zap.Logger
 	user         gitgateway.GitGateway
 	path         string
 	argoCDClient argocd.ArgoCDClient
@@ -29,7 +31,7 @@ type gitOpsController struct {
 var once sync.Once
 var mutex sync.Mutex
 
-func SetupUserspace() {
+func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
 		gateway, err := gitgateway.NewGitRepository(path)
@@ -49,14 +51,15 @@ func SetupUserspace() {
 	})
 }
 
-func NewGitOpsController(argoCDClient argocd.ArgoCDClient) GitOpsController {
+func NewGitOpsController(logger *zap.Logger, argoCDClient argocd.ArgoCDClient) GitOpsController {
+	setupUserspace()
 	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
 		panic(err)
 	}
 
-	return &gitOpsController{user: userspace, path: path, argoCDClient: argoCDClient}
+	return &gitOpsController{logger: logger, user: userspace, path: path, argoCDClient: argoCDClient}
 }
 
 func (g *gitOpsController) SetupProject(projectID string) error {
