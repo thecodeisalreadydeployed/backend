@@ -1,39 +1,20 @@
-name: 'build: imagebuilder'
+name: 'senior-project'
 on:
   push:
-    paths:
-      - "go.mod"
-      - "go.sum"
-      - "imagebuilder/**"
-      - "logexporter/**"
-      - ".github/workflows/build-imagebuilder.yaml"
     branches:
       - main
-      - v2/kanikogateway
-      - dev/imagebuilder
-      - dev/imagebuilder-docker
+      - ci/senior-project
 jobs:
   test:
     runs-on: ubuntu-20.04
     concurrency:
-      group: build/imagebuilder:${{ github.head_ref }}
+      group: senior-project:${{ github.head_ref }}
       cancel-in-progress: true
-    strategy:
-      matrix:
-        pkg: [
-          'imagebuilder',
-          'imagebuilder-workspace'
-        ]
-    env:
-      SHA7: ${GITHUB_SHA::7}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
           go-version: '1.16'
-      - run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o logexporter-linux-amd64 -ldflags '-w -s' ./logexporter
-      - run: ls
-      - run: ls ./logexporter
       - uses: docker/setup-buildx-action@v1
       - uses: docker/login-action@v1
         with:
@@ -44,14 +25,14 @@ jobs:
         id: metadata-action
         with:
           images: |
-            ghcr.io/thecodeisalreadydeployed/${{ matrix.pkg }}
+            ghcr.io/thecodeisalreadydeployed/senior-project-backend
           tags: |
             type=sha
             type=raw,value=latest
       - uses: docker/build-push-action@v2
         with:
           context: .
-          file: imagebuilder/${{ matrix.pkg }}.Dockerfile
+          file: senior-project.Dockerfile
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
