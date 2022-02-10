@@ -56,5 +56,15 @@ func Auth0Audience() string {
 }
 
 func SetDefault() {
+	viper.BindEnv(constant.ARGOCD_SERVER_HOST)
+	viper.BindEnv(constant.AUTH0_AUDIENCE)
+	viper.BindEnv(constant.AUTH0_DOMAIN)
+	viper.BindEnv(constant.DATABASE_HOST)
+	viper.BindEnv(constant.DATABASE_NAME)
+	viper.BindEnv(constant.DATABASE_PASSWORD)
+	viper.BindEnv(constant.DATABASE_PORT)
+	viper.BindEnv(constant.DATABASE_USERNAME)
+	viper.BindEnv(constant.USERSPACE_REPOSITORY)
+
 	viper.SetDefault(constant.USERSPACE_REPOSITORY, "/__w/userspace")
 }
