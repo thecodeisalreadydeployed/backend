@@ -44,7 +44,7 @@ spec:
         volumeMounts:
           - mountPath: /git
             name: codedeploy-pv
-    volumes:
+      volumes:
       - name: codedeploy-pv
         persistentVolumeClaim:
           claimName: codedeploy-pvc
