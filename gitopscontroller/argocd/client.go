@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/thecodeisalreadydeployed/config"
+	"go.uber.org/zap"
 )
 
 type ArgoCDClient interface {
@@ -17,9 +18,13 @@ type ArgoCDClient interface {
 
 type argoCDClient struct {
 	httpClient *http.Client
+
+	logger   *zap.Logger
+	appName  string
+	repoPath string
 }
 
-func NewArgoCDClient() ArgoCDClient {
+func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCDClient {
 	var transport = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -29,11 +34,11 @@ func NewArgoCDClient() ArgoCDClient {
 		Transport: transport,
 	}
 
-	return &argoCDClient{httpClient: httpClient}
+	return &argoCDClient{httpClient: httpClient, logger: logger, appName: appName, repoPath: repoPath}
 }
 
 func (client *argoCDClient) Refresh() error {
-	apiURL := config.ArgoCDServerHost() + "/api/v1/applications?name=" + "codedeploy" + "&refresh=true"
+	apiURL := config.ArgoCDServerHost() + "/api/v1/applications?name=" + client.appName + "&refresh=true"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
@@ -47,7 +52,7 @@ func (client *argoCDClient) Refresh() error {
 }
 
 func (client *argoCDClient) Sync() error {
-	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/" + "codedeploy" + "/sync"
+	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/" + client.appName + "/sync"
 	req, err := http.NewRequest("POST", apiURL, nil)
 	if err != nil {
 		return err
