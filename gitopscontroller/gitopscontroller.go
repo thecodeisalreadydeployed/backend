@@ -62,7 +62,7 @@ func NewGitOpsController(logger *zap.Logger) GitOpsController {
 
 	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), "userspace", path)
 	if err = argoCDClient.CreateApp(); err != nil {
-		if !util.IsDevEnvironment() {
+		if util.IsProductionEnvironment() || util.IsKubernetesTestEnvironment() {
 			logger.Fatal("cannot create Argo CD application", zap.Error(err))
 		} else {
 			logger.Warn("cannot create Argo CD application", zap.Error(err))
