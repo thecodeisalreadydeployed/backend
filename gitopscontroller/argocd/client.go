@@ -7,7 +7,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/thecodeisalreadydeployed/config"
 	"go.uber.org/zap"
@@ -33,11 +32,10 @@ var HTTPTransport http.RoundTripper = &http.Transport{
 
 func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCDClient {
 	var httpClient = &http.Client{
-		Timeout:   2 * time.Second,
 		Transport: HTTPTransport,
 	}
 
-	return &argoCDClient{httpClient: httpClient, logger: logger, appName: appName, repoPath: repoPath}
+	return &argoCDClient{httpClient: httpClient, logger: logger.With(zap.String("appName", appName), zap.String("repoPath", repoPath)), appName: appName, repoPath: repoPath}
 }
 
 func (client *argoCDClient) CreateApp() error {
@@ -76,6 +74,8 @@ func (client *argoCDClient) CreateApp() error {
 			},
 		},
 	})
+
+	client.logger.Info("creating Argo CD application", zap.String("requestBody", string(requestBody)))
 
 	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(requestBody))
 	if err != nil {
