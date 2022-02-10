@@ -24,8 +24,8 @@ const (
 )
 
 func DefaultUserspaceRepository() string {
-	if len(viper.GetString(constant.UserspaceRepository)) != 0 {
-		repo := viper.GetString(constant.UserspaceRepository)
+	if len(viper.GetString(constant.USERSPACE_REPOSITORY)) != 0 {
+		repo := viper.GetString(constant.USERSPACE_REPOSITORY)
 		zap.L().Info("userspace repository: " + repo)
 		return repo
 	}
@@ -37,24 +37,24 @@ func DefaultUserspaceRepository() string {
 
 	zap.L().Info("created temporary directory: " + dir)
 
-	viper.Set(constant.UserspaceRepository, dir)
+	viper.Set(constant.USERSPACE_REPOSITORY, dir)
 
 	return dir
 }
 
 func ArgoCDServerHost() string {
-	viper.SetDefault(constant.ArgoCDServerHostEnv, "http://argocd-server.argocd.svc.cluster.local")
-	return viper.GetString(constant.ArgoCDServerHostEnv)
+	viper.SetDefault(constant.ARGOCD_SERVER_HOST, "http://argocd-server.argocd.svc.cluster.local")
+	return viper.GetString(constant.ARGOCD_SERVER_HOST)
 }
 
 func Auth0Domain() string {
-	return viper.GetString("AUTH0_DOMAIN")
+	return viper.GetString(constant.AUTH0_DOMAIN)
 }
 
 func Auth0Audience() string {
-	return viper.GetString("AUTH0_AUDIENCE")
+	return viper.GetString(constant.AUTH0_AUDIENCE)
 }
 
 func SetDefault() {
-	viper.SetDefault(constant.UserspaceRepository, "/__w/userspace")
+	viper.SetDefault(constant.USERSPACE_REPOSITORY, "/__w/userspace")
 }
