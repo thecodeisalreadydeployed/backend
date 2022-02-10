@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/thecodeisalreadydeployed/config"
 	"go.uber.org/zap"
@@ -40,6 +41,9 @@ func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCD
 
 func (client *argoCDClient) CreateApp() error {
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications"
+	u, _ := url.Parse(config.GitServerHost())
+	u.Path = client.appName
+	repoURL := u.String()
 	requestBody, _ := json.Marshal(map[string]interface{}{
 		"metadata": map[string]interface{}{
 			"name":       client.appName,
@@ -50,7 +54,7 @@ func (client *argoCDClient) CreateApp() error {
 			"project": "default",
 			"source": map[string]string{
 				"path":           ".",
-				"repoURL":        client.repoPath,
+				"repoURL":        repoURL,
 				"targetRevision": "master",
 			},
 			"destination": map[string]string{
