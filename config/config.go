@@ -64,5 +64,6 @@ func BindEnv() {
 	_ = viper.BindEnv(constant.DATABASE_PASSWORD)
 	_ = viper.BindEnv(constant.DATABASE_PORT)
 	_ = viper.BindEnv(constant.DATABASE_USERNAME)
+	_ = viper.BindEnv(constant.GITSERVER_HOST)
 	_ = viper.BindEnv(constant.USERSPACE_REPOSITORY)
 }
