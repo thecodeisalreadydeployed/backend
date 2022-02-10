@@ -92,7 +92,7 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 		return commitErr
 	}
 
-	err := g.argoCDClient.Refresh()
+	err := g.argoCDClient.Sync()
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 
 	fmt.Printf("commit: %v\n", commit)
 
-	err := g.argoCDClient.Refresh()
+	err := g.argoCDClient.Sync()
 	if err != nil {
 		return err
 	}
@@ -194,5 +194,5 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, new
 	if commitErr != nil {
 		return commitErr
 	}
-	return g.argoCDClient.Refresh()
+	return g.argoCDClient.Sync()
 }
