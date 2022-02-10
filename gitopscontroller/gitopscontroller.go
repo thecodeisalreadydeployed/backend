@@ -51,7 +51,7 @@ func setupUserspace() {
 	})
 }
 
-func NewGitOpsController(logger *zap.Logger, argoCDClient argocd.ArgoCDClient) GitOpsController {
+func NewGitOpsController(logger *zap.Logger) GitOpsController {
 	setupUserspace()
 	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
@@ -59,6 +59,7 @@ func NewGitOpsController(logger *zap.Logger, argoCDClient argocd.ArgoCDClient) G
 		panic(err)
 	}
 
+	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), path, path)
 	return &gitOpsController{logger: logger, user: userspace, path: path, argoCDClient: argoCDClient}
 }
 
