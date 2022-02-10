@@ -42,6 +42,12 @@ func TestGitOpsController(t *testing.T) {
 			httpmock.NewStringResponder(200, ""),
 		)
 
+		httpmock.RegisterResponder(
+			"POST",
+			"http://localhost/api/v1/application",
+			httpmock.NewStringResponder(200, ""),
+		)
+
 		dir, clean := temporalDir()
 		viper.Set(constant.UserspaceRepository, dir)
 
