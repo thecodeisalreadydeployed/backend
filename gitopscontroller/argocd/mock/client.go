@@ -33,6 +33,20 @@ func (m *MockArgoCDClient) EXPECT() *MockArgoCDClientMockRecorder {
 	return m.recorder
 }
 
+// CreateApp mocks base method.
+func (m *MockArgoCDClient) CreateApp() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateApp")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateApp indicates an expected call of CreateApp.
+func (mr *MockArgoCDClientMockRecorder) CreateApp() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApp", reflect.TypeOf((*MockArgoCDClient)(nil).CreateApp))
+}
+
 // Refresh mocks base method.
 func (m *MockArgoCDClient) Refresh() error {
 	m.ctrl.T.Helper()
