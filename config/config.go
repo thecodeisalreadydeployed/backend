@@ -47,6 +47,10 @@ func ArgoCDServerHost() string {
 	return viper.GetString(constant.ARGOCD_SERVER_HOST)
 }
 
+func GitServerHost() string {
+	return viper.GetString(constant.GITSERVER_HOST)
+}
+
 func Auth0Domain() string {
 	return viper.GetString(constant.AUTH0_DOMAIN)
 }
