@@ -28,6 +28,8 @@ type argoCDClient struct {
 	logger   *zap.Logger
 	appName  string
 	repoPath string
+
+	isInitialized bool
 }
 
 var HTTPTransport http.RoundTripper = &http.Transport{
@@ -39,11 +41,21 @@ func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCD
 		Transport: HTTPTransport,
 	}
 
-	return &argoCDClient{httpClient: httpClient, logger: logger.With(zap.String("appName", appName), zap.String("repoPath", repoPath)), appName: appName, repoPath: repoPath}
+	isInitialized := true
+
+	if util.IsDevEnvironment() {
+		isInitialized = false
+	}
+
+	if util.IsDockerTestEnvironment() {
+		isInitialized = false
+	}
+
+	return &argoCDClient{httpClient: httpClient, logger: logger.With(zap.String("appName", appName), zap.String("repoPath", repoPath)), appName: appName, repoPath: repoPath, isInitialized: isInitialized}
 }
 
 func (client *argoCDClient) CreateApp() error {
-	if util.IsDevEnvironment() {
+	if !client.isInitialized {
 		return nil
 	}
 
@@ -113,7 +125,7 @@ func (client *argoCDClient) CreateApp() error {
 }
 
 func (client *argoCDClient) Refresh() error {
-	if util.IsDevEnvironment() {
+	if client.isInitialized {
 		return nil
 	}
 
@@ -131,7 +143,7 @@ func (client *argoCDClient) Refresh() error {
 }
 
 func (client *argoCDClient) Sync() error {
-	if util.IsDevEnvironment() {
+	if client.isInitialized {
 		return nil
 	}
 
