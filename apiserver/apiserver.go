@@ -24,7 +24,7 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 	app.Use(cors.New())
 	app.Use(logger.New())
 
-	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated()))
+	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated()), workloadController)
 	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated()), workloadController)
 	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated()), workloadController)
 	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated()))
