@@ -49,7 +49,7 @@ func TestGitOpsController(t *testing.T) {
 
 		httpmock.RegisterResponder(
 			"POST",
-			"http://localhost/api/v1/application",
+			"http://localhost/api/v1/applications",
 			httpmock.NewStringResponder(200, ""),
 		)
 
