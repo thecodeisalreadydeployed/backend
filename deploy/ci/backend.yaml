@@ -86,7 +86,7 @@ spec:
             - name: DATABASE_NAME
               value: codedeploy
             - name: APP_ENV
-              value: TEST
+              value: TEST_KUBERNETES
             - name: GITSERVER_HOST
               value: git://gitserver.default.svc.cluster.local
             - name: USERSPACE_REPOSITORY
