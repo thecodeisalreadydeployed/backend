@@ -1,13 +1,16 @@
 package util
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 func IsDevEnvironment() bool {
 	return os.Getenv("APP_ENV") == "DEV"
 }
 
 func IsTestEnvironment() bool {
-	return os.Getenv("APP_ENV") == "TEST" || os.Getenv("CI") == "true"
+	return strings.HasPrefix(os.Getenv("APP_ENV"), "TEST")
 }
 
 func IsKubernetesTestEnvironment() bool {
