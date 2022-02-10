@@ -65,4 +65,4 @@ jobs:
       - if: always()
         run: |
           argocd app list
-          argocd app sync userspace
+          argocd app get userspace
