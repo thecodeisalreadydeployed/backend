@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/subosito/gotenv"
 	"github.com/thecodeisalreadydeployed/apiserver"
+	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
@@ -30,6 +31,7 @@ func main() {
 
 	zap.ReplaceGlobals(logger)
 
+	config.BindEnv()
 	datastore.Migrate()
 	gitOpsController := gitopscontroller.NewGitOpsController(zap.L())
 	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController)
