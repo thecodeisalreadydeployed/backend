@@ -87,4 +87,6 @@ spec:
               value: codedeploy
             - name: APP_ENV
               value: TEST
+            - name: GITSERVER_HOST
+              value: http://gitserver.default.svc.cluster.local
 status: {}
