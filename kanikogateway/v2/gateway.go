@@ -1,6 +1,7 @@
 package kanikogateway
 
 import (
+	"github.com/google/uuid"
 	"github.com/thecodeisalreadydeployed/containerregistry"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
@@ -65,8 +66,9 @@ func (it kanikoGateway) Deploy() (string, error) {
 	}
 
 	objectLabel := map[string]string{
-		"deployment.api.deploys.dev/id":        it.deploymentID,
-		"deployment.api.deploys.dev/component": "imagebuilder",
+		"beta.deploys.dev/uid":           uuid.NewString(),
+		"beta.deploys.dev/deployment-id": it.deploymentID,
+		"beta.deploys.dev/component":     "imagebuilder",
 	}
 
 	it.logger.Info(objectLabel)
