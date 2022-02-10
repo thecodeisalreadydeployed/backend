@@ -41,3 +41,10 @@ spec:
           containerPort: 443
         - name: git
           containerPort: 9418
+        volumeMounts:
+          - mountPath: /git
+            name: codedeploy-pv
+    volumes:
+      - name: codedeploy-pv
+        persistentVolumeClaim:
+          claimName: codedeploy-pvc
