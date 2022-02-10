@@ -147,15 +147,27 @@ func (client *argoCDClient) Sync() error {
 		return nil
 	}
 
+	requestID := uuid.NewString()
+	client.logger.Info("syncing Argo CD application")
+
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/" + client.appName + "/sync"
 	req, err := http.NewRequest("POST", apiURL, nil)
 	if err != nil {
+		client.logger.Error(err.Error(), zap.String("requestID", requestID))
 		return err
 	}
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
+		client.logger.Error(err.Error(), zap.String("requestID", requestID))
 		return err
 	}
 	defer resp.Body.Close()
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		client.logger.Error(err.Error(), zap.String("requestID", requestID))
+		return err
+	}
+
+	client.logger.Info(string(responseBody), zap.String("requestID", requestID))
 	return nil
 }
