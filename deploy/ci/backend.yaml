@@ -89,4 +89,13 @@ spec:
               value: TEST
             - name: GITSERVER_HOST
               value: http://gitserver.default.svc.cluster.local
+            - name: USERSPACE_REPOSITORY
+              value: /etc/gitserver/userspace
+          volumeMounts:
+            - mountPath: /etc/gitserver
+              name: codedeploy-pv
+      volumes:
+        - name: codedeploy-pv
+          persistentVolumeClaim:
+            claimName: codedeploy-pvc
 status: {}
