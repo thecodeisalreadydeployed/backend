@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/constant"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
-	mock_argocd "github.com/thecodeisalreadydeployed/gitopscontroller/argocd/mock"
 	"go.uber.org/zap/zaptest"
 )
 
@@ -49,11 +48,8 @@ func TestGitOpsController(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		argocd := mock_argocd.NewMockArgoCDClient(ctrl)
-		argocd.EXPECT().Refresh().Return(nil).Times(3)
-
 		logger := zaptest.NewLogger(t)
-		controller := gitopscontroller.NewGitOpsController(logger, argocd)
+		controller := gitopscontroller.NewGitOpsController(logger)
 
 		err := controller.SetupProject("prj-test")
 		assert.NoError(t, err)
