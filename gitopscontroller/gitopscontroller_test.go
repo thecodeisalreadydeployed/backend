@@ -53,6 +53,12 @@ func TestGitOpsController(t *testing.T) {
 			httpmock.NewStringResponder(200, ""),
 		)
 
+		httpmock.RegisterResponder(
+			"POST",
+			"http://localhost/api/v1/applications/userspace/sync",
+			httpmock.NewStringResponder(200, ""),
+		)
+
 		dir, clean := temporalDir()
 		viper.Set(constant.USERSPACE_REPOSITORY, dir)
 
