@@ -6,9 +6,11 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	"github.com/google/uuid"
 	"github.com/thecodeisalreadydeployed/config"
 	"go.uber.org/zap"
 )
@@ -79,17 +81,29 @@ func (client *argoCDClient) CreateApp() error {
 		},
 	})
 
+	requestID := uuid.NewString()
 	client.logger.Info("creating Argo CD application", zap.String("requestBody", string(requestBody)))
 
 	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(requestBody))
 	if err != nil {
+		client.logger.Error(err.Error(), zap.String("requestID", requestID))
 		return err
 	}
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
+		client.logger.Error(err.Error(), zap.String("requestID", requestID))
 		return err
 	}
 	defer resp.Body.Close()
+
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		client.logger.Error(err.Error(), zap.String("requestID", requestID))
+		return err
+	}
+
+	client.logger.Info(string(responseBody), zap.String("requestID", requestID))
+
 	return nil
 }
 
