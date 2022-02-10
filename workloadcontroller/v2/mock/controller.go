@@ -48,3 +48,18 @@ func (mr *MockWorkloadControllerMockRecorder) NewDeployment(arg0, arg1 interface
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewDeployment", reflect.TypeOf((*MockWorkloadController)(nil).NewDeployment), arg0, arg1)
 }
+
+// NewProject mocks base method.
+func (m *MockWorkloadController) NewProject(arg0 *model.Project) (*model.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewProject", arg0)
+	ret0, _ := ret[0].(*model.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewProject indicates an expected call of NewProject.
+func (mr *MockWorkloadControllerMockRecorder) NewProject(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewProject", reflect.TypeOf((*MockWorkloadController)(nil).NewProject), arg0)
+}
