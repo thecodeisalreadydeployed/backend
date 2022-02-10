@@ -59,7 +59,7 @@ func NewGitOpsController(logger *zap.Logger) GitOpsController {
 		panic(err)
 	}
 
-	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), path, path)
+	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), "userspace", path)
 	if err = argoCDClient.CreateApp(); err != nil {
 		logger.Fatal("cannot create Argo CD application", zap.Error(err))
 	}
