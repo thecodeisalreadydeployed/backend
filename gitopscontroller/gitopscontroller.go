@@ -61,7 +61,7 @@ func NewGitOpsController(logger *zap.Logger) GitOpsController {
 
 	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), path, path)
 	if err = argoCDClient.CreateApp(); err != nil {
-		logger.Fatal("cannot create Argo CD client", zap.Error(err))
+		logger.Fatal("cannot create Argo CD application", zap.Error(err))
 	}
 
 	return &gitOpsController{logger: logger, user: userspace, path: path, argoCDClient: argoCDClient}
