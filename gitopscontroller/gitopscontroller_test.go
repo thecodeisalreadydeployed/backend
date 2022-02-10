@@ -33,7 +33,7 @@ func temporalDir() (path string, clean func()) {
 
 func TestGitOpsController(t *testing.T) {
 	if os.Getenv("CI") == "true" && os.Getenv("GITHUB_WORKFLOW") == "test: unit" {
-		viper.Set(constant.ArgoCDServerHostEnv, "http://localhost")
+		viper.Set(constant.ARGOCD_SERVER_HOST, "http://localhost")
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
@@ -54,7 +54,7 @@ func TestGitOpsController(t *testing.T) {
 		)
 
 		dir, clean := temporalDir()
-		viper.Set(constant.UserspaceRepository, dir)
+		viper.Set(constant.USERSPACE_REPOSITORY, dir)
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
