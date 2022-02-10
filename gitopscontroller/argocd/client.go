@@ -12,6 +12,7 @@ import (
 )
 
 type ArgoCDClient interface {
+	CreateApp() error
 	Refresh() error
 	Sync() error
 }
@@ -35,6 +36,20 @@ func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCD
 	}
 
 	return &argoCDClient{httpClient: httpClient, logger: logger, appName: appName, repoPath: repoPath}
+}
+
+func (client *argoCDClient) CreateApp() error {
+	apiURL := config.ArgoCDServerHost() + "/api/v1/applications"
+	req, err := http.NewRequest("POST", apiURL, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
 }
 
 func (client *argoCDClient) Refresh() error {
