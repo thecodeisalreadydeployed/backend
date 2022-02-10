@@ -5,7 +5,6 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
-	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/util"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
@@ -32,8 +31,7 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	datastore.Migrate()
-	argoCDClient := argocd.NewArgoCDClient()
-	gitOpsController := gitopscontroller.NewGitOpsController(zap.L(), argoCDClient)
+	gitOpsController := gitopscontroller.NewGitOpsController(zap.L())
 	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController)
 	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), datastore.GetDB(), workloadController)
 	go repositoryObserver.ObserveGitSources()
