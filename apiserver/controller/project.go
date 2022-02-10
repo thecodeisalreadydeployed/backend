@@ -6,14 +6,15 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 )
 
-func NewProjectController(api fiber.Router) {
+func NewProjectController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
 	api.Get("/list", listProjects)
 	api.Get("/search", searchProject)
 	api.Get("/:projectID", getProject)
 	api.Get("/:projectID/apps", listProjectApps)
-	api.Post("/", createProject)
+	api.Post("/", createProject(workloadController))
 	api.Delete("/:projectID", deleteProject)
 }
 
@@ -40,21 +41,17 @@ func searchProject(ctx *fiber.Ctx) error {
 	return writeResponse(ctx, result, err)
 }
 
-func createProject(ctx *fiber.Ctx) error {
-	input := dto.CreateProjectRequest{}
-
-	if err := ctx.BodyParser(&input); err != nil {
-		return fiber.NewError(errutil.MapStatusCode(err))
+func createProject(workloadController workloadcontroller.WorkloadController) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		input := dto.CreateProjectRequest{}
+		if err := validator.ParseBodyAndValidate(c, &input); err != nil {
+			return err
+		}
+		prj := input.ToModel()
+		project, createErr := workloadController.NewProject(&prj)
+		return writeResponse(c, project, createErr)
 	}
 
-	if validationErrors := validator.CheckStruct(input); len(validationErrors) > 0 {
-		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
-	}
-
-	prj := input.ToModel()
-	project, createErr := datastore.SaveProject(datastore.GetDB(), &prj)
-
-	return writeResponse(ctx, project, createErr)
 }
 
 func deleteProject(ctx *fiber.Ctx) error {
