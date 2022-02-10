@@ -25,14 +25,14 @@ type argoCDClient struct {
 	repoPath string
 }
 
-func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCDClient {
-	var transport = &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
+var HTTPTransport http.RoundTripper = &http.Transport{
+	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+}
 
+func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCDClient {
 	var httpClient = &http.Client{
 		Timeout:   2 * time.Second,
-		Transport: transport,
+		Transport: HTTPTransport,
 	}
 
 	return &argoCDClient{httpClient: httpClient, logger: logger, appName: appName, repoPath: repoPath}
