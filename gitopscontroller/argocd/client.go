@@ -125,7 +125,7 @@ func (client *argoCDClient) CreateApp() error {
 }
 
 func (client *argoCDClient) Refresh() error {
-	if client.isInitialized {
+	if !client.isInitialized {
 		return nil
 	}
 
@@ -143,7 +143,7 @@ func (client *argoCDClient) Refresh() error {
 }
 
 func (client *argoCDClient) Sync() error {
-	if client.isInitialized {
+	if !client.isInitialized {
 		return nil
 	}
 
