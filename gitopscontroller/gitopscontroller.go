@@ -12,6 +12,7 @@ import (
 	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/kustomize"
 	"github.com/thecodeisalreadydeployed/manifestgenerator"
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 )
 
@@ -61,7 +62,11 @@ func NewGitOpsController(logger *zap.Logger) GitOpsController {
 
 	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), "userspace", path)
 	if err = argoCDClient.CreateApp(); err != nil {
-		logger.Fatal("cannot create Argo CD application", zap.Error(err))
+		if !util.IsDevEnvironment() {
+			logger.Fatal("cannot create Argo CD application", zap.Error(err))
+		} else {
+			logger.Warn("cannot create Argo CD application", zap.Error(err))
+		}
 	}
 
 	return &gitOpsController{logger: logger, user: userspace, path: path, argoCDClient: argoCDClient}
