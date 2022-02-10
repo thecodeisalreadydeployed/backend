@@ -65,6 +65,4 @@ func SetDefault() {
 	viper.BindEnv(constant.DATABASE_PORT)
 	viper.BindEnv(constant.DATABASE_USERNAME)
 	viper.BindEnv(constant.USERSPACE_REPOSITORY)
-
-	viper.SetDefault(constant.USERSPACE_REPOSITORY, "/__w/userspace")
 }
