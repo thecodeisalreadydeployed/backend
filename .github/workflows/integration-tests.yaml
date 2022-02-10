@@ -63,4 +63,6 @@ jobs:
       - if: always()
         run: kubectl -n default logs deploy/codedeploy
       - if: always()
-        run: argocd app list
+        run: |
+          argocd app list
+          argocd app sync userspace
