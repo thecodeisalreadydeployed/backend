@@ -87,10 +87,12 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 		return errors.New("cannot write kustomization.yml")
 	}
 
-	_, commitErr := g.user.Commit([]string{"kustomization.yml", kustomizationFile}, projectID)
+	commitHash, commitErr := g.user.Commit([]string{"kustomization.yml", kustomizationFile}, projectID)
 	if commitErr != nil {
 		return commitErr
 	}
+
+	fmt.Printf("commitHash: %v\n", commitHash)
 
 	err := g.argoCDClient.Sync()
 	if err != nil {
