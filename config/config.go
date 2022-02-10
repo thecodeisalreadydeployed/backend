@@ -56,13 +56,13 @@ func Auth0Audience() string {
 }
 
 func BindEnv() {
-	viper.BindEnv(constant.ARGOCD_SERVER_HOST)
-	viper.BindEnv(constant.AUTH0_AUDIENCE)
-	viper.BindEnv(constant.AUTH0_DOMAIN)
-	viper.BindEnv(constant.DATABASE_HOST)
-	viper.BindEnv(constant.DATABASE_NAME)
-	viper.BindEnv(constant.DATABASE_PASSWORD)
-	viper.BindEnv(constant.DATABASE_PORT)
-	viper.BindEnv(constant.DATABASE_USERNAME)
-	viper.BindEnv(constant.USERSPACE_REPOSITORY)
+	_ = viper.BindEnv(constant.ARGOCD_SERVER_HOST)
+	_ = viper.BindEnv(constant.AUTH0_AUDIENCE)
+	_ = viper.BindEnv(constant.AUTH0_DOMAIN)
+	_ = viper.BindEnv(constant.DATABASE_HOST)
+	_ = viper.BindEnv(constant.DATABASE_NAME)
+	_ = viper.BindEnv(constant.DATABASE_PASSWORD)
+	_ = viper.BindEnv(constant.DATABASE_PORT)
+	_ = viper.BindEnv(constant.DATABASE_USERNAME)
+	_ = viper.BindEnv(constant.USERSPACE_REPOSITORY)
 }
