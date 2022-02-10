@@ -65,8 +65,10 @@ func (it kanikoGateway) Deploy() (string, error) {
 		MountPath: "/workspace",
 	}
 
+	UID := uuid.NewString()
+
 	objectLabel := map[string]string{
-		"beta.deploys.dev/uid":           uuid.NewString(),
+		"beta.deploys.dev/uid":           UID,
 		"beta.deploys.dev/deployment-id": it.deploymentID,
 		"beta.deploys.dev/component":     "imagebuilder",
 	}
@@ -77,7 +79,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 
 	configMap := apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "imagebuilder-" + it.deploymentID,
+			Name:   "builder-" + UID,
 			Labels: objectLabel,
 		},
 		Data: map[string]string{
@@ -89,7 +91,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "imagebuilder-" + it.deploymentID,
+			Name:   "builder-" + UID,
 			Labels: objectLabel,
 		},
 		Spec: apiv1.PodSpec{
@@ -106,7 +108,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 					VolumeSource: apiv1.VolumeSource{
 						ConfigMap: &apiv1.ConfigMapVolumeSource{
 							LocalObjectReference: apiv1.LocalObjectReference{
-								Name: "imagebuilder-" + it.deploymentID,
+								Name: "builder-" + UID,
 							},
 						},
 					},
