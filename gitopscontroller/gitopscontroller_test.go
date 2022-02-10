@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/constant"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
 	"go.uber.org/zap/zaptest"
 )
 
@@ -35,6 +36,10 @@ func TestGitOpsController(t *testing.T) {
 		viper.Set(constant.ArgoCDServerHostEnv, "http://localhost")
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
+
+		defaultHTTPTransport := argocd.HTTPTransport
+		defer func() { argocd.HTTPTransport = defaultHTTPTransport }()
+		argocd.HTTPTransport = httpmock.DefaultTransport
 
 		httpmock.RegisterResponder(
 			"GET",
