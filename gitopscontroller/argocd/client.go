@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/thecodeisalreadydeployed/config"
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 )
 
@@ -42,6 +43,10 @@ func NewArgoCDClient(logger *zap.Logger, appName string, repoPath string) ArgoCD
 }
 
 func (client *argoCDClient) CreateApp() error {
+	if util.IsDevEnvironment() {
+		return nil
+	}
+
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications"
 	u, _ := url.Parse(config.GitServerHost())
 	u.Path = client.appName
@@ -108,6 +113,10 @@ func (client *argoCDClient) CreateApp() error {
 }
 
 func (client *argoCDClient) Refresh() error {
+	if util.IsDevEnvironment() {
+		return nil
+	}
+
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications?name=" + client.appName + "&refresh=true"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -122,6 +131,10 @@ func (client *argoCDClient) Refresh() error {
 }
 
 func (client *argoCDClient) Sync() error {
+	if util.IsDevEnvironment() {
+		return nil
+	}
+
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/" + client.appName + "/sync"
 	req, err := http.NewRequest("POST", apiURL, nil)
 	if err != nil {
