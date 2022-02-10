@@ -9,6 +9,10 @@ func IsDevEnvironment() bool {
 	return os.Getenv("APP_ENV") == "DEV"
 }
 
+func IsProductionEnvironment() bool {
+	return os.Getenv("APP_ENV") == "PROD"
+}
+
 func IsTestEnvironment() bool {
 	return strings.HasPrefix(os.Getenv("APP_ENV"), "TEST")
 }
