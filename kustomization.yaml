@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - ./postgres
   - ./nginxingresscontroller
+  - ./gitserver/codedeploy-pvc.yaml
   - ./gitserver/gitserver.yaml
