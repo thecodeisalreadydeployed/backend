@@ -55,7 +55,7 @@ func Auth0Audience() string {
 	return viper.GetString(constant.AUTH0_AUDIENCE)
 }
 
-func SetDefault() {
+func BindEnv() {
 	viper.BindEnv(constant.ARGOCD_SERVER_HOST)
 	viper.BindEnv(constant.AUTH0_AUDIENCE)
 	viper.BindEnv(constant.AUTH0_DOMAIN)
