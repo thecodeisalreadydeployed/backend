@@ -43,7 +43,7 @@ func TestGitOpsController(t *testing.T) {
 
 		httpmock.RegisterResponder(
 			"GET",
-			"http://localhost/api/v1/application?name=codedeploy&refresh=true",
+			"http://localhost/api/v1/applications?name=userspace&refresh=true",
 			httpmock.NewStringResponder(200, ""),
 		)
 
