@@ -15,6 +15,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const CodeDeployInternalNamespace = "codedeploy-internal"
+
 type KubernetesInteractor interface {
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
 	CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error)
