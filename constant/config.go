@@ -1,5 +1,7 @@
 package constant
 
+type ConfigurationConstant string
+
 const USERSPACE_REPOSITORY = "USERSPACE_REPOSITORY"
 const ARGOCD_SERVER_HOST = "ARGOCD_SERVER_HOST"
 const AUTH0_DOMAIN = "AUTH0_DOMAIN"
