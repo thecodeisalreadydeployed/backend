@@ -4,12 +4,14 @@ import (
 	"github.com/ghodss/yaml"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type GenerateServiceOptions struct {
 	Name      string
 	Namespace string
 	Labels    map[string]string
+	Selector  map[string]string
 }
 
 func GenerateServiceYAML(opts *GenerateServiceOptions) (string, error) {
@@ -23,7 +25,18 @@ func GenerateServiceYAML(opts *GenerateServiceOptions) (string, error) {
 			Namespace: opts.Namespace,
 			Labels:    opts.Labels,
 		},
-		Spec: apiv1.ServiceSpec{},
+		Spec: apiv1.ServiceSpec{
+			Type: apiv1.ServiceTypeClusterIP,
+			Ports: []apiv1.ServicePort{
+				{
+					Port:       3000,
+					Protocol:   apiv1.ProtocolTCP,
+					TargetPort: intstr.FromInt(3000),
+					Name:       "http",
+				},
+			},
+			Selector: opts.Selector,
+		},
 	}
 
 	y, err := yaml.Marshal(srv)
