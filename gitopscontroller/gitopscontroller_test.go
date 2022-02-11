@@ -1,6 +1,7 @@
 package gitopscontroller_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -71,20 +72,44 @@ func TestGitOpsController(t *testing.T) {
 		err := controller.SetupProject("prj-test")
 		assert.NoError(t, err)
 
+		contents, err := os.ReadFile(filepath.Join(dir, "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/kustomization.yml): %v\n", contents)
+
 		err = controller.SetupApp("prj-test", "app-test")
 		assert.NoError(t, err)
+
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/kustomization.yml): %v\n", contents)
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
 		assert.NoError(t, err)
 
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/deployment.yml): %v\n", contents)
+
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
 		assert.NoError(t, err)
+
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/service.yml): %v\n", contents)
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
 
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", contents)
+
 		err = controller.SetContainerImage("prj-test", "app-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
 		assert.NoError(t, err)
+
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", contents)
 
 		clean()
 	}
