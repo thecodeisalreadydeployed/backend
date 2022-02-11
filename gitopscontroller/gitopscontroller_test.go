@@ -3,6 +3,7 @@ package gitopscontroller_test
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -110,6 +111,12 @@ func TestGitOpsController(t *testing.T) {
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
 		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", string(contents))
+
+		kustomizeCmd := exec.Command("kustomize", "build", ".")
+		kustomizeCmd.Dir = dir
+		if output, err := kustomizeCmd.CombinedOutput(); err == nil {
+			fmt.Printf("output: %v\n", string(output))
+		}
 
 		clean()
 	}
