@@ -150,6 +150,10 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 			"beta.deploys.dev/app-id":     appID,
 			"beta.deploys.dev/part-of":    "gitopscontroller",
 		},
+		Selector: map[string]string{
+			"beta.deploys.dev/project-id": projectID,
+			"beta.deploys.dev/app-id":     appID,
+		},
 	})
 
 	if generateErr != nil {
