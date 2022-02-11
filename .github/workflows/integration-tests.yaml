@@ -64,7 +64,7 @@ jobs:
         run: kubectl -n default logs deploy/codedeploy
       - if: always()
         run: |
-          sleep 1m
+          sleep 5m
           kubectl -n argocd logs deploy/argocd-server
       - if: always()
         run: kubectl -n argocd logs deploy/argocd-repo-server
