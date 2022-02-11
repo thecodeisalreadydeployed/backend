@@ -88,7 +88,7 @@ spec:
             - name: APP_ENV
               value: TEST_KUBERNETES
             - name: GITSERVER_HOST
-              value: git://gitserver.default.svc.cluster.local
+              value: git://gitserver.default.svc.cluster.local:9418
             - name: USERSPACE_REPOSITORY
               value: /etc/gitserver/userspace
           volumeMounts:
