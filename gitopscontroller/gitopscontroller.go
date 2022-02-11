@@ -76,13 +76,28 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
+	namespaceFile := fmt.Sprintf("%s/namespace.yml", projectID)
+	namespaceYAML, generateErr := manifestgenerator.GenerateNamespaceYAML(projectID)
+	if generateErr != nil {
+		return errors.New("cannot generate namespace.yml")
+	}
+	writeErr := g.user.WriteFile(namespaceFile, namespaceYAML)
+	if writeErr != nil {
+		return errors.New("cannot write namespace.yml")
+	}
+
 	kustomizationFile := fmt.Sprintf("%s/kustomization.yml", projectID)
-	writeErr := g.user.WriteFile(kustomizationFile, "")
+	writeErr = g.user.WriteFile(kustomizationFile, "")
 	if writeErr != nil {
 		return errors.New("cannot write kustomization.yml")
 	}
 
-	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, "kustomization.yml"), []string{projectID + "/"})
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, projectID+"/kustomization.yml"), []string{"namespace.yml"})
+	if kustomizeErr != nil {
+		return errors.New("cannot write kustomization.yml")
+	}
+
+	kustomizeErr = kustomize.AddResources(filepath.Join(g.path, "kustomization.yml"), []string{projectID + "/"})
 	if kustomizeErr != nil {
 		return errors.New("cannot write kustomization.yml")
 	}
