@@ -81,6 +81,7 @@ jobs:
           kubectl get deployments --all-namespaces
           kubectl get pods --all-namespaces
           kubectl get namespace
+          kubectl get events
           kubectl api-resources --namespaced=false
           argocd app logs userspace
       - run: kubectl -n default port-forward svc/gitserver 9418 &
