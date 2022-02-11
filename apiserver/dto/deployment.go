@@ -11,7 +11,6 @@ type CreateDeploymentEventRequest struct {
 	Text       string          `validate:"required"`
 	ExportedAt time.Time       `validate:"required"`
 	Type       model.EventType `validate:"required"`
-	Finish     bool            `validate:"required"`
 }
 
 type KanikoLog struct {

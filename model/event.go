@@ -21,7 +21,6 @@ type Event struct {
 	Type         EventType `json:"type"`
 	CreatedAt    time.Time `json:"createdAt"`
 	ExportedAt   time.Time `json:"exportedAt"`
-	Finish       bool      `json:"-"`
 }
 
 func GenerateEventID(exportedAt time.Time) string {
