@@ -34,7 +34,7 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 					Containers: []apiv1.Container{
 						{
 							Name:            opts.Name,
-							Image:           opts.ContainerImage,
+							Image:           "us-docker.pkg.dev/google-samples/containers/gke/hello-app:2.0",
 							ImagePullPolicy: apiv1.PullIfNotPresent,
 							Env: []apiv1.EnvVar{
 								{
