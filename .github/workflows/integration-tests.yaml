@@ -80,4 +80,4 @@ jobs:
           argocd app logs userspace
       - run: kubectl -n default port-forward svc/gitserver 9418 &
       - run: cd /tmp && git clone git://localhost/userspace
-      - run: cd userspace && kustomize build .
+      - run: cd /tmp/userspace && kustomize build .
