@@ -109,11 +109,6 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 
 	fmt.Printf("commitHash: %v\n", commitHash)
 
-	err := g.argoCDClient.Sync()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
