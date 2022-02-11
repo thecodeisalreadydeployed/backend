@@ -11,6 +11,7 @@ type GenerateDeploymentOptions struct {
 	Name           string
 	Namespace      string
 	Labels         map[string]string
+	Selector       map[string]string
 	ContainerImage string
 }
 
@@ -26,9 +27,12 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 			Labels:    opts.Labels,
 		},
 		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: opts.Selector,
+			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: opts.Labels,
+					Labels: opts.Selector,
 				},
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
