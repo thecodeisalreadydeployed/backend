@@ -66,8 +66,12 @@ jobs:
         run: |
           argocd app list
           argocd app get userspace
+          argocd app history userspace
+          argocd app resources userspace
+          argocd app manifests userspace
           kubectl get services --all-namespaces
           kubectl get deployments --all-namespaces
           kubectl get pods --all-namespaces
           kubectl get namespace
           kubectl api-resources --namespaced=false
+          argocd app logs userspace
