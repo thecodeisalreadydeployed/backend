@@ -37,7 +37,7 @@ spec:
           value: "3000"
         image: DeploymentContainerImage
         imagePullPolicy: IfNotPresent
-        name: DeploymentContainerImage
+        name: DeploymentName
         resources: {}
 status: {}`
 
