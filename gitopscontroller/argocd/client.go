@@ -151,7 +151,21 @@ func (client *argoCDClient) Sync() error {
 	client.logger.Info("syncing Argo CD application")
 
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/" + client.appName + "/sync"
-	req, err := http.NewRequest("POST", apiURL, nil)
+	requestBody, _ := json.Marshal(map[string]interface{}{
+		"dryRun":   false,
+		"prune":    false,
+		"revision": "master",
+		"strategy": map[string]interface{}{
+			"hook": map[string]bool{
+				"force": true,
+			},
+		},
+		"syncOptions": map[string]interface{}{
+			"items": []string{"CreateNamespace=true"},
+		},
+	})
+
+	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		client.logger.Error(err.Error(), zap.String("requestID", requestID))
 		return err
