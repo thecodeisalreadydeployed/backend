@@ -66,6 +66,7 @@ jobs:
         run: kubectl -n argocd logs deploy/argocd-server
       - if: always()
         run: |
+          sleep 1m
           argocd app list
           argocd app get userspace
           argocd app history userspace
