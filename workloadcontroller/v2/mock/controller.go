@@ -34,6 +34,21 @@ func (m *MockWorkloadController) EXPECT() *MockWorkloadControllerMockRecorder {
 	return m.recorder
 }
 
+// NewApp mocks base method.
+func (m *MockWorkloadController) NewApp(arg0 *model.App) (*model.App, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewApp", arg0)
+	ret0, _ := ret[0].(*model.App)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewApp indicates an expected call of NewApp.
+func (mr *MockWorkloadControllerMockRecorder) NewApp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewApp", reflect.TypeOf((*MockWorkloadController)(nil).NewApp), arg0)
+}
+
 // NewDeployment mocks base method.
 func (m *MockWorkloadController) NewDeployment(arg0 string, arg1 *string) (*model.Deployment, error) {
 	m.ctrl.T.Helper()
