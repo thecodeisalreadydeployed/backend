@@ -74,42 +74,42 @@ func TestGitOpsController(t *testing.T) {
 
 		contents, err := os.ReadFile(filepath.Join(dir, "kustomization.yml"))
 		assert.NoError(t, err)
-		fmt.Printf("contents (/kustomization.yml): %v\n", contents)
+		fmt.Printf("contents (/kustomization.yml): %v\n", string(contents))
 
 		err = controller.SetupApp("prj-test", "app-test")
 		assert.NoError(t, err)
 
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "kustomization.yml"))
 		assert.NoError(t, err)
-		fmt.Printf("contents (/prj-test/kustomization.yml): %v\n", contents)
+		fmt.Printf("contents (/prj-test/kustomization.yml): %v\n", string(contents))
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
 		assert.NoError(t, err)
 
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
 		assert.NoError(t, err)
-		fmt.Printf("contents (/prj-test/app-test/deployment.yml): %v\n", contents)
+		fmt.Printf("contents (/prj-test/app-test/deployment.yml): %v\n", string(contents))
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
 		assert.NoError(t, err)
 
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
 		assert.NoError(t, err)
-		fmt.Printf("contents (/prj-test/app-test/service.yml): %v\n", contents)
+		fmt.Printf("contents (/prj-test/app-test/service.yml): %v\n", string(contents))
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
 
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
-		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", contents)
+		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", string(contents))
 
 		err = controller.SetContainerImage("prj-test", "app-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
 		assert.NoError(t, err)
 
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
-		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", contents)
+		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", string(contents))
 
 		clean()
 	}
