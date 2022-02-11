@@ -63,14 +63,15 @@ jobs:
       - if: always()
         run: kubectl -n default logs deploy/codedeploy
       - if: always()
-        run: kubectl -n argocd logs deploy/argocd-server
+        run: |
+          sleep 1m
+          kubectl -n argocd logs deploy/argocd-server
       - if: always()
         run: kubectl -n argocd logs deploy/argocd-repo-server
       - if: always()
         run: kubectl -n argocd logs pod/argocd-application-controller-0
       - if: always()
         run: |
-          sleep 1m
           argocd app list
           argocd app get userspace
           argocd app history userspace
