@@ -15,7 +15,7 @@ func NewAppController(api fiber.Router, workloadController workloadcontroller.Wo
 	api.Get("/:appID", getApp)
 	api.Post("/:appID/deployments", createDeployment(workloadController))
 	api.Get("/:appID/deployments", listAppDeployments)
-	api.Post("/", createApp)
+	api.Post("/", createApp(workloadController))
 	api.Delete("/:appID", deleteApp)
 	api.Put("/:appID/observable/enable", enableObservable)
 	api.Put("/:appID/observable/disable", disableObservable)
@@ -45,17 +45,16 @@ func listAppDeployments(ctx *fiber.Ctx) error {
 
 }
 
-func createApp(ctx *fiber.Ctx) error {
-	input := dto.CreateAppRequest{}
-
-	if err := validator.ParseBodyAndValidate(ctx, &input); err != nil {
-		return err
+func createApp(workloadController workloadcontroller.WorkloadController) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		input := dto.CreateAppRequest{}
+		if err := validator.ParseBodyAndValidate(c, &input); err != nil {
+			return err
+		}
+		inputModel := input.ToModel()
+		app, createErr := workloadController.NewApp(&inputModel)
+		return writeResponse(c, app, createErr)
 	}
-
-	inputModel := input.ToModel()
-	app, createErr := datastore.SaveApp(datastore.GetDB(), &inputModel)
-
-	return writeResponse(ctx, app, createErr)
 }
 
 func deleteApp(ctx *fiber.Ctx) error {
