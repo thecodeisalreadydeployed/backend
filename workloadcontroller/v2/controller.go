@@ -10,6 +10,7 @@ import (
 
 type WorkloadController interface {
 	NewProject(project *model.Project) (*model.Project, error)
+	NewApp(app *model.App) (*model.App, error)
 	NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error)
 }
 
