@@ -67,6 +67,8 @@ jobs:
       - if: always()
         run: kubectl -n argocd logs deploy/argocd-repo-server
       - if: always()
+        run: kubectl -n argocd logs pod/argocd-application-controller-0
+      - if: always()
         run: |
           sleep 1m
           argocd app list
