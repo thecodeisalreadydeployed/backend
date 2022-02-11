@@ -59,6 +59,10 @@ func Auth0Audience() string {
 	return viper.GetString(constant.AUTH0_AUDIENCE)
 }
 
+func FirebaseServiceAccountKey() string {
+	return viper.GetString(constant.FIREBASE_SERVICE_ACCOUNT_KEY)
+}
+
 func BindEnv() {
 	_ = viper.BindEnv(constant.ARGOCD_SERVER_HOST)
 	_ = viper.BindEnv(constant.AUTH0_AUDIENCE)
@@ -69,5 +73,6 @@ func BindEnv() {
 	_ = viper.BindEnv(constant.DATABASE_PORT)
 	_ = viper.BindEnv(constant.DATABASE_USERNAME)
 	_ = viper.BindEnv(constant.GITSERVER_HOST)
+	_ = viper.BindEnv(constant.FIREBASE_SERVICE_ACCOUNT_KEY)
 	_ = viper.BindEnv(constant.USERSPACE_REPOSITORY)
 }
