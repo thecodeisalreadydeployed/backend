@@ -82,7 +82,7 @@ func (g *gitOpsController) SetupProject(projectID string) error {
 		return errors.New("cannot write kustomization.yml")
 	}
 
-	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, "kustomization.yml"), []string{filepath.Join(projectID, "/")})
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, "kustomization.yml"), []string{projectID + "/"})
 	if kustomizeErr != nil {
 		return errors.New("cannot write kustomization.yml")
 	}
@@ -161,7 +161,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errors.New("cannot write kustomization.yml")
 	}
 
-	kustomizeErr = kustomize.AddResources(filepath.Join(g.path, projectID, "kustomization.yml"), []string{filepath.Join(appID, "/")})
+	kustomizeErr = kustomize.AddResources(filepath.Join(g.path, projectID, "kustomization.yml"), []string{appID + "/"})
 	if kustomizeErr != nil {
 		return errors.New("cannot write kustomization.yml")
 	}
