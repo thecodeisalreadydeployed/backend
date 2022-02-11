@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	bou.ke/monkey v1.0.2
-	firebase.google.com/go v3.13.0+incompatible // indirect
+	firebase.google.com/go v3.13.0+incompatible
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/auth0/go-jwt-middleware/v2 v2.0.0
@@ -40,6 +40,7 @@ require (
 	go.uber.org/zap v1.19.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
+	google.golang.org/api v0.63.0
 	gorm.io/driver/mysql v1.1.2
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.13
