@@ -17,6 +17,7 @@ import (
 )
 
 func APIServer(port int, workloadController workloadcontroller.WorkloadController) {
+	firebaseAuth := auth.SetupFirebase()
 	gitAPIBackend := gitapi.NewGitAPIBackend(zap.L())
 	validator.Init()
 	app := fiber.New()
@@ -24,11 +25,11 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 	app.Use(cors.New())
 	app.Use(logger.New())
 
-	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated()), workloadController)
-	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated()), workloadController)
-	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated()), workloadController)
-	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated()))
-	controller.NewGitAPIController(app.Group("gitapi", auth.EnsureAuthenticated()), gitAPIBackend)
+	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
+	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
+	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
+	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated(firebaseAuth)))
+	controller.NewGitAPIController(app.Group("gitapi", auth.EnsureAuthenticated(firebaseAuth)), gitAPIBackend)
 
 	controller.NewHealthController(app.Group("health"))
 
