@@ -68,6 +68,7 @@ CMD node main
 
 	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, projectID)
+	time.Sleep(30 * time.Second)
 
 	expect.POST("/apps").
 		WithForm(dto.CreateAppRequest{
