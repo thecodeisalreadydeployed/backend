@@ -17,7 +17,7 @@ type GenerateServiceOptions struct {
 func GenerateServiceYAML(opts *GenerateServiceOptions) (string, error) {
 	srv := apiv1.Service{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "apps/v1",
+			APIVersion: "v1",
 			Kind:       "Service",
 		},
 		ObjectMeta: metav1.ObjectMeta{
