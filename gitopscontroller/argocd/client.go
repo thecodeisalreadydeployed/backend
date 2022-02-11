@@ -152,11 +152,12 @@ func (client *argoCDClient) Sync() error {
 
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/" + client.appName + "/sync"
 	requestBody, _ := json.Marshal(map[string]interface{}{
-		"dryRun":   false,
-		"prune":    false,
-		"revision": "master",
+		"dryRun":    false,
+		"prune":     true,
+		"resources": nil,
+		"revision":  "master",
 		"strategy": map[string]interface{}{
-			"hook": map[string]bool{
+			"apply": map[string]bool{
 				"force": true,
 			},
 		},
