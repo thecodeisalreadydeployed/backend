@@ -78,3 +78,5 @@ jobs:
           kubectl get namespace
           kubectl api-resources --namespaced=false
           argocd app logs userspace
+          argocd app sync userspace
+          argocd app wait userspace --timeout 300
