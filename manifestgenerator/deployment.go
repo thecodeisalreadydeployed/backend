@@ -33,7 +33,7 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
-							Name:            opts.ContainerImage,
+							Name:            opts.Name,
 							Image:           opts.ContainerImage,
 							ImagePullPolicy: apiv1.PullIfNotPresent,
 							Env: []apiv1.EnvVar{
