@@ -17,6 +17,8 @@ type ClusterBackend interface {
 	CreateNamespaceIfNotExists(name string) (string, error)
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
 	CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error)
+
+	Pods(namespace string, labels map[string]string) ([]apiv1.Pod, error)
 }
 
 type clusterBackend struct {
@@ -116,4 +118,19 @@ func (backend *clusterBackend) CreateConfigMap(configMap apiv1.ConfigMap, namesp
 	}
 
 	return "", nil
+}
+
+func (backend *clusterBackend) Pods(namespace string, labels map[string]string) ([]apiv1.Pod, error) {
+	labelSelector := v1.LabelSelector{}
+	for k, v := range labels {
+		v1.AddLabelToSelector(&labelSelector, k, v)
+	}
+
+	podList, err := backend.kubernetesClient.CoreV1().Pods(namespace).List(context.TODO(), v1.ListOptions{LabelSelector: v1.FormatLabelSelector(&labelSelector)})
+	if err != nil {
+		backend.logger.Error("cannot list Pods", zap.String("namespace", namespace), zap.Any("labels", labels), zap.Error(err))
+		return []apiv1.Pod{}, fmt.Errorf("cannot list Pods: %w", err)
+	}
+
+	return podList.Items, nil
 }
