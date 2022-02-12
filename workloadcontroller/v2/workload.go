@@ -1,11 +1,11 @@
 package workloadcontroller
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/model"
+	"go.uber.org/zap"
 )
 
 func (ctrl *workloadController) ObserveWorkloads() {
@@ -29,7 +29,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 				}
 
 				for _, p := range pods {
-					fmt.Printf("p.Status.Phase: %v\n", p.Status.Phase)
+					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
 				}
 			}
 		}
