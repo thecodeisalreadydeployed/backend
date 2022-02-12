@@ -4,6 +4,7 @@ import (
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 type ClusterBackend interface {
@@ -16,8 +17,18 @@ type clusterBackend struct {
 	kubernetesClient *kubernetes.Clientset
 }
 
-func NewClusterBackend() ClusterBackend {
-	backend := &clusterBackend{}
+func NewClusterBackend(logger *zap.Logger) ClusterBackend {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		logger.Fatal("cannot create in-cluster config", zap.Error(err))
+	}
+
+	kubernetesClient, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		logger.Fatal("cannot create Kubernetes client from in-cluster config", zap.Error(err))
+	}
+
+	backend := &clusterBackend{logger: logger, kubernetesClient: kubernetesClient}
 	return backend
 }
 
