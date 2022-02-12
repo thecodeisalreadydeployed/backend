@@ -6,6 +6,7 @@ import (
 
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -13,6 +14,7 @@ import (
 
 type ClusterBackend interface {
 	CreateNamespace(name string) (string, error)
+	CreateNamespaceIfNotExists(name string) (string, error)
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
 	CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error)
 }
@@ -51,6 +53,19 @@ func (backend *clusterBackend) CreateNamespace(name string) (string, error) {
 	}
 
 	return createdNamespace.Name, nil
+}
+
+func (backend *clusterBackend) CreateNamespaceIfNotExists(name string) (string, error) {
+	namespace, err := backend.kubernetesClient.CoreV1().Namespaces().Get(context.TODO(), name, v1.GetOptions{})
+	if err != nil && errors.IsNotFound(err) {
+		return backend.CreateNamespace(name)
+	}
+
+	if err != nil {
+		return "", fmt.Errorf("cannot find namespace %s: %w", name, err)
+	}
+
+	return namespace.Name, nil
 }
 
 func (backend *clusterBackend) CreatePod(pod apiv1.Pod, namespace string) (string, error) {
