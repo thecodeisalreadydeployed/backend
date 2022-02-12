@@ -27,7 +27,7 @@ func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller
 	kubernetesClient, err := kubernetesinteractor.NewKubernetesInteractor()
 	if err != nil {
 		if util.IsProductionEnvironment() || util.IsKubernetesTestEnvironment() {
-			logger.Fatal("cannot create Kubernetes client", zap.Error(err))
+			logger.Warn("cannot create Kubernetes client", zap.Error(err))
 		} else {
 			logger.Warn("cannot create Kubernetes client", zap.Error(err))
 		}
