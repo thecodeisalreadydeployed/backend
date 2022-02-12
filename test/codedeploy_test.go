@@ -148,17 +148,17 @@ CMD node main
 		events.Array().Length().Gt(0)
 	}
 
-	expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
-		Expect().Status(http.StatusOK)
+	// expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
+	// 	Expect().Status(http.StatusOK)
 
-	expect.DELETE(fmt.Sprintf("/projects/%s", projectID)).
-		Expect().Status(http.StatusOK)
+	// expect.DELETE(fmt.Sprintf("/projects/%s", projectID)).
+	// 	Expect().Status(http.StatusOK)
 
-	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
-		Expect().Status(http.StatusNotFound)
+	// expect.GET(fmt.Sprintf("/projects/%s", projectID)).
+	// 	Expect().Status(http.StatusNotFound)
 
-	expect.GET(fmt.Sprintf("/apps/%s", appID)).
-		Expect().Status(http.StatusNotFound)
+	// expect.GET(fmt.Sprintf("/apps/%s", appID)).
+	// 	Expect().Status(http.StatusNotFound)
 }
 
 func TestPresetIntegration(t *testing.T) {
