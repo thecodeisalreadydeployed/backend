@@ -9,9 +9,6 @@ import (
 )
 
 func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error) {
-	logger := zap.L().Sugar().With("appID", appID)
-	_ = logger
-
 	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
 	if err != nil {
 		return nil, err
@@ -60,7 +57,7 @@ func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *
 		return nil, err
 	}
 
-	kaniko, err := kanikogateway.NewKanikoGateway(app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
+	kaniko, err := kanikogateway.NewKanikoGateway(ctrl.logger.With(zap.String("appID", appID)), ctrl.clusterBackend, app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
 	if err == nil {
 		if err != nil {
 			return nil, err
