@@ -4,7 +4,9 @@ package workloadcontroller
 
 import (
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
+	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 )
 
@@ -18,8 +20,18 @@ type WorkloadController interface {
 type workloadController struct {
 	logger           *zap.Logger
 	gitOpsController gitopscontroller.GitOpsController
+	kubernetesClient *kubernetesinteractor.KubernetesInteractor
 }
 
 func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController) WorkloadController {
-	return &workloadController{logger: logger, gitOpsController: gitOpsController}
+	kubernetesClient, err := kubernetesinteractor.NewKubernetesInteractor()
+	if err != nil {
+		if util.IsProductionEnvironment() || util.IsKubernetesTestEnvironment() {
+			logger.Fatal("cannot create Kubernetes client", zap.Error(err))
+		} else {
+			logger.Warn("cannot create Kubernetes client", zap.Error(err))
+		}
+	}
+
+	return &workloadController{logger: logger, gitOpsController: gitOpsController, kubernetesClient: &kubernetesClient}
 }
