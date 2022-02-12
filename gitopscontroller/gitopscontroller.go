@@ -19,7 +19,7 @@ import (
 type GitOpsController interface {
 	SetupProject(projectID string) error
 	SetupApp(projectID string, appID string) error
-	SetContainerImage(projectID string, appID string, newImage string) error
+	SetContainerImage(projectID string, appID string, deploymentID string, newImage string) error
 }
 
 type gitOpsController struct {
