@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/subosito/gotenv"
 	"github.com/thecodeisalreadydeployed/apiserver"
+	"github.com/thecodeisalreadydeployed/clusterbackend"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
@@ -33,8 +34,9 @@ func main() {
 
 	config.BindEnv()
 	datastore.Migrate()
+	clusterBackend := clusterbackend.NewClusterBackend(zap.L())
 	gitOpsController := gitopscontroller.NewGitOpsController(zap.L())
-	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController)
+	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController, clusterBackend)
 	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), datastore.GetDB(), workloadController)
 	go repositoryObserver.ObserveGitSources()
 	go workloadController.ObserveWorkloads()

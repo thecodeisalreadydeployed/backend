@@ -3,8 +3,8 @@
 package workloadcontroller
 
 import (
+	"github.com/thecodeisalreadydeployed/clusterbackend"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
-	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 )
@@ -19,9 +19,9 @@ type WorkloadController interface {
 type workloadController struct {
 	logger           *zap.Logger
 	gitOpsController gitopscontroller.GitOpsController
-	kubernetesClient *kubernetesinteractor.KubernetesInteractor
+	clusterBackend   clusterbackend.ClusterBackend
 }
 
-func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController) WorkloadController {
-	return &workloadController{logger: logger, gitOpsController: gitOpsController, kubernetesClient: nil}
+func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController, clusterBackend clusterbackend.ClusterBAckend) WorkloadController {
+	return &workloadController{logger: logger, gitOpsController: gitOpsController, clusterBackend: clusterBackend}
 }
