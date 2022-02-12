@@ -6,6 +6,7 @@ import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
+	v1 "k8s.io/api/core/v1"
 )
 
 func (ctrl *workloadController) ObserveWorkloads() {
@@ -30,6 +31,12 @@ func (ctrl *workloadController) ObserveWorkloads() {
 
 				for _, p := range pods {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
+					switch p.Status.Phase {
+					case v1.PodSucceeded:
+						datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuildSucceeded)
+					case v1.PodFailed:
+						datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+					}
 				}
 			}
 		}
