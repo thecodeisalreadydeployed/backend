@@ -78,3 +78,15 @@ func (mr *MockWorkloadControllerMockRecorder) NewProject(arg0 interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewProject", reflect.TypeOf((*MockWorkloadController)(nil).NewProject), arg0)
 }
+
+// ObserveWorkloads mocks base method.
+func (m *MockWorkloadController) ObserveWorkloads() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ObserveWorkloads")
+}
+
+// ObserveWorkloads indicates an expected call of ObserveWorkloads.
+func (mr *MockWorkloadControllerMockRecorder) ObserveWorkloads() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ObserveWorkloads", reflect.TypeOf((*MockWorkloadController)(nil).ObserveWorkloads))
+}
