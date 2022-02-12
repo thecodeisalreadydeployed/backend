@@ -1,13 +1,18 @@
 package clusterbackend
 
 import (
+	"context"
+	"fmt"
+
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
 type ClusterBackend interface {
+	CreateNamespace(name string) (string, error)
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
 	CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error)
 }
@@ -30,6 +35,22 @@ func NewClusterBackend(logger *zap.Logger) ClusterBackend {
 
 	backend := &clusterBackend{logger: logger, kubernetesClient: kubernetesClient}
 	return backend
+}
+
+func (backend *clusterBackend) CreateNamespace(name string) (string, error) {
+	n := apiv1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name: name,
+		},
+	}
+
+	createdNamespace, createErr := backend.kubernetesClient.CoreV1().Namespaces().Create(context.TODO(), &n, v1.CreateOptions{})
+	if createErr != nil {
+		backend.logger.Error("cannot create namespace", zap.String("namespace", name), zap.Error(createErr))
+		return "", fmt.Errorf("cannot create namespace %s: %w", name, createErr)
+	}
+
+	return createdNamespace.Name, nil
 }
 
 func (backend *clusterBackend) CreatePod(pod apiv1.Pod, namespace string) (string, error) {
