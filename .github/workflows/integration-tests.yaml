@@ -58,6 +58,8 @@ jobs:
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
+      - if: always()
+        run: kubectl -n default logs deploy/codedeploy
       - id: integration-tests
         run: make test
       - if: always()
