@@ -22,6 +22,6 @@ type workloadController struct {
 	clusterBackend   clusterbackend.ClusterBackend
 }
 
-func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController, clusterBackend clusterbackend.ClusterBAckend) WorkloadController {
+func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController, clusterBackend clusterbackend.ClusterBackend) WorkloadController {
 	return &workloadController{logger: logger, gitOpsController: gitOpsController, clusterBackend: clusterBackend}
 }
