@@ -94,5 +94,26 @@ func (backend *clusterBackend) CreatePod(pod apiv1.Pod, namespace string) (strin
 }
 
 func (backend *clusterBackend) CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error) {
+	_, err := backend.CreateNamespaceIfNotExists(namespace)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = backend.kubernetesClient.CoreV1().ConfigMaps(namespace).Get(context.TODO(), configMap.Name, v1.GetOptions{})
+	if err != nil && errors.IsNotFound(err) {
+		createdConfigMap, createErr := backend.kubernetesClient.CoreV1().ConfigMaps(namespace).Create(context.TODO(), &configMap, v1.CreateOptions{})
+		if createErr != nil {
+			backend.logger.Error("cannot create ConfigMap", zap.String("namespace", namespace), zap.String("configMap", configMap.Name), zap.Error(createErr))
+			return "", fmt.Errorf("cannot create ConfigMap %s: %w", configMap.Name, createErr)
+		}
+
+		return createdConfigMap.Name, nil
+	}
+
+	if err != nil {
+		backend.logger.Error("cannot create ConfigMap", zap.String("namespace", namespace), zap.String("configMap", configMap.Name), zap.Error(err))
+		return "", fmt.Errorf("cannot create ConfigMap %s: %w", configMap.Name, err)
+	}
+
 	return "", nil
 }
