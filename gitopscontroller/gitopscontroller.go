@@ -199,13 +199,20 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	return nil
 }
 
-func (g *gitOpsController) SetContainerImage(projectID string, appID string, newImage string) error {
+func (g *gitOpsController) SetContainerImage(projectID string, appID string, deploymentID string, newImage string) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	prefix := fmt.Sprintf("%s/%s", projectID, appID)
 	kustomizationFile := filepath.Join(prefix, "kustomization.yml")
 	err := kustomize.SetImage(filepath.Join(g.path, kustomizationFile), "codedeploy://"+appID, newImage)
+	if err != nil {
+		return err
+	}
+
+	err = kustomize.SetLabel(filepath.Join(g.path, kustomizationFile), map[string]string{
+		"beta.deploys.dev/deployment-id": deploymentID,
+	})
 	if err != nil {
 		return err
 	}
