@@ -13,6 +13,31 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
+func GetPendingDeployments(DB *gorm.DB) (*[]model.Deployment, error) {
+	var _data []datamodel.Deployment
+	err := DB.Table("deployments").Where("state IN ?", []string{
+		string(model.DeploymentStateQueueing),
+		string(model.DeploymentStateBuilding),
+		string(model.DeploymentStateBuildSucceeded),
+		string(model.DeploymentStateBuildSucceeded),
+		string(model.DeploymentStateCommitted),
+	}).Find(&_data).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrNotFound
+	}
+
+	var _ret []model.Deployment
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
+}
+
 func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app-") {
 		zap.L().Error(MsgAppPrefix)
