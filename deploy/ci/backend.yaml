@@ -66,6 +66,7 @@ spec:
       labels:
         app: codedeploy
     spec:
+      restartPolicy: Never
       serviceAccountName: codedeploy
       containers:
         - image: ko://github.com/thecodeisalreadydeployed
