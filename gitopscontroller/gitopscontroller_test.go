@@ -105,7 +105,7 @@ func TestGitOpsController(t *testing.T) {
 		assert.NoError(t, err)
 		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", string(contents))
 
-		err = controller.SetContainerImage("prj-test", "app-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
+		err = controller.SetContainerImage("prj-test", "app-test", "dpl-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
 		assert.NoError(t, err)
 
 		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
