@@ -69,6 +69,27 @@ func (backend *clusterBackend) CreateNamespaceIfNotExists(name string) (string, 
 }
 
 func (backend *clusterBackend) CreatePod(pod apiv1.Pod, namespace string) (string, error) {
+	_, err := backend.CreateNamespaceIfNotExists(namespace)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = backend.kubernetesClient.CoreV1().Pods(namespace).Get(context.TODO(), pod.Name, v1.GetOptions{})
+	if err != nil && errors.IsNotFound(err) {
+		createdPod, createErr := backend.kubernetesClient.CoreV1().Pods(namespace).Create(context.TODO(), &pod, v1.CreateOptions{})
+		if createErr != nil {
+			backend.logger.Error("cannot create Pod", zap.String("namespace", namespace), zap.String("pod", pod.Name), zap.Error(createErr))
+			return "", fmt.Errorf("cannot create Pod %s: %w", pod.Name, createErr)
+		}
+
+		return createdPod.Name, nil
+	}
+
+	if err != nil {
+		backend.logger.Error("cannot create Pod", zap.String("namespace", namespace), zap.String("pod", pod.Name), zap.Error(err))
+		return "", fmt.Errorf("cannot create Pod %s: %w", pod.Name, err)
+	}
+
 	return "", nil
 }
 
