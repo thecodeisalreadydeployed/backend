@@ -1,6 +1,7 @@
 package workloadcontroller
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -21,11 +22,15 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					"beta.deploys.dev/deployment-id": deployment.ID,
 					"beta.deploys.dev/component":     "imagebuilder",
 				})
+
 				if err != nil {
 					ctrl.logger.Error(err.Error())
 					continue
 				}
-				_ = pods
+
+				for _, p := range pods {
+					fmt.Printf("p.Status.Phase: %v\n", p.Status.Phase)
+				}
 			}
 		}
 		time.Sleep(3 * time.Second)
