@@ -19,7 +19,6 @@ func GetPendingDeployments(DB *gorm.DB) (*[]model.Deployment, error) {
 		string(model.DeploymentStateQueueing),
 		string(model.DeploymentStateBuilding),
 		string(model.DeploymentStateBuildSucceeded),
-		string(model.DeploymentStateBuildSucceeded),
 		string(model.DeploymentStateCommitted),
 	}).Find(&_data).Error
 
