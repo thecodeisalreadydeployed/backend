@@ -63,6 +63,8 @@ jobs:
       - id: integration-tests
         run: make test
       - if: always()
+        run: kubectl -n default logs --previous deploy/codedeploy
+      - if: always()
         run: kubectl -n default logs deploy/codedeploy
       - if: always()
         run: |
