@@ -5,11 +5,16 @@ import (
 
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 )
 
 func (ctrl *workloadController) ObserveWorkloads() {
+	if util.IsDevEnvironment() || util.IsDockerTestEnvironment() {
+		return
+	}
+
 	for {
 		pendingDeployments, err := datastore.GetPendingDeployments(datastore.GetDB())
 		if err != nil {
