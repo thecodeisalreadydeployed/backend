@@ -3,7 +3,7 @@ package kanikogateway
 import (
 	"github.com/google/uuid"
 	"github.com/thecodeisalreadydeployed/clusterbackend"
-	"github.com/thecodeisalreadydeployed/containerregistry"
+	containerregistry "github.com/thecodeisalreadydeployed/containerregistry/types"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
