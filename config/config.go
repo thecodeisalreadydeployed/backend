@@ -74,6 +74,10 @@ func DefaultContainerRegistryConfiguration() containerregistry.ContainerRegistry
 		// of Secret field is cloud provider's credentials.
 		Secret:     "codedeploy-imagebuilder",
 		Repository: "senior-project",
+		Metadata: map[string]string{
+			"GOOGLE_CLOUD_PROJECT": "deploys-dev",
+			"GOOGLE_CLOUD_REGION":  "asia-southeast1",
+		},
 	}
 }
 
