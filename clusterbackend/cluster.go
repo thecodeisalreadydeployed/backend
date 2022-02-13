@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -27,6 +28,10 @@ type clusterBackend struct {
 }
 
 func NewClusterBackend(logger *zap.Logger) ClusterBackend {
+	if util.IsDevEnvironment() || util.IsDockerTestEnvironment() {
+		return &clusterBackend{logger: logger, kubernetesClient: nil}
+	}
+
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		logger.Fatal("cannot create in-cluster config", zap.Error(err))
