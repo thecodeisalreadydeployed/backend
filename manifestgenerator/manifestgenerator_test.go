@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateDeployment(t *testing.T) {
+func testGenerateDeployment(t *testing.T) {
 	options := &GenerateDeploymentOptions{
 		Name:           "DeploymentName",
 		Namespace:      "DeploymentNamespace",
@@ -47,7 +47,7 @@ status: {}`
 	assert.YAMLEq(t, expected, actual)
 }
 
-func TestGenerateService(t *testing.T) {
+func testGenerateService(t *testing.T) {
 	options := &GenerateServiceOptions{
 		Name:      "ServiceName",
 		Namespace: "ServiceNamespace",
