@@ -3,33 +3,32 @@ package gcr
 import (
 	"fmt"
 
-	"github.com/thecodeisalreadydeployed/containerregistry"
+	"github.com/thecodeisalreadydeployed/containerregistry/types"
 )
 
-func NewGCRGateway(hostname string, projectID string, authenticationMethod containerregistry.AuthenticationMethod, secret string) containerregistry.ContainerRegistry {
+func NewGCRGateway(hostname string, projectID string, authenticationMethod types.AuthenticationMethod, secret string) types.ContainerRegistry {
 	return &gcrGateway{hostname: hostname, projectID: projectID, authenticationMethod: authenticationMethod, secret: secret}
 }
 
 type gcrGateway struct {
-	hostname                 string
-	projectID                string
-	authenticationMethod     containerregistry.AuthenticationMethod
-	serviceAccountKey        string
-	kubernetesServiceAccount string
+	hostname             string
+	projectID            string
+	authenticationMethod types.AuthenticationMethod
+	secret               string
 }
 
 func (gcr *gcrGateway) RegistryFormat(repository string, tag string) string {
 	return fmt.Sprintf("%s/%s/%s:%s", gcr.hostname, gcr.projectID, repository, tag)
 }
 
-func (gcr *gcrGateway) Type() containerregistry.ContainerRegistryType {
-	return containerregistry.GCR
+func (gcr *gcrGateway) Type() types.ContainerRegistryType {
+	return types.GCR
 }
 
 func (gcr *gcrGateway) Secret() string {
-	return gcr.serviceAccountKey
+	return gcr.secret
 }
 
-func (gcr *gcrGateway) AuthenticationMethod() containerregistry.AuthenticationMethod {
+func (gcr *gcrGateway) AuthenticationMethod() types.AuthenticationMethod {
 	return gcr.authenticationMethod
 }
