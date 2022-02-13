@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"github.com/thecodeisalreadydeployed/constant"
-	"github.com/thecodeisalreadydeployed/containerregistry"
+	containerregistry "github.com/thecodeisalreadydeployed/containerregistry/types"
 	"go.uber.org/zap"
 )
 
