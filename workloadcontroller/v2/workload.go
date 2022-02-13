@@ -18,6 +18,7 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 	}
 
 	newImage := ctrl.containerRegistry.RegistryFormat(app.ID, deploymentID)
+	ctrl.logger.Info("setting container image", zap.String("appID", appID), zap.String("deploymentID", deploymentID), zap.String("newImage", newImage))
 	err = ctrl.gitOpsController.SetContainerImage(app.ProjectID, app.ID, deploymentID, newImage)
 	if err != nil {
 		ctrl.logger.Error("cannot set container image", zap.Error(err), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
