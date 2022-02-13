@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"sort"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewDeploymentController(api fiber.Router, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver) {
+func NewDeploymentController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
 	// Create a new deployment
 	api.Post("/", createDeployment(workloadController))
 
@@ -22,7 +21,6 @@ func NewDeploymentController(api fiber.Router, workloadController workloadcontro
 	api.Get("/:deploymentID/events", getDeploymentEvents)
 	api.Post("/:deploymentID/events", createDeploymentEvents)
 	api.Delete("/:deploymentID", deleteDeployment)
-	api.Get("/:deploymentID/refresh", forceRefresh(observer))
 }
 
 func createDeployment(workloadController workloadcontroller.WorkloadController) fiber.Handler {
@@ -110,22 +108,4 @@ func deleteDeployment(ctx *fiber.Ctx) error {
 		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 	return ctx.SendStatus(fiber.StatusOK)
-}
-
-func forceRefresh(observer repositoryobserver.RepositoryObserver) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		zap.L().Warn(`Depending on the circumstances, refreshing may not give you the desired results.
-Refreshing to fetch the codebase will only skip the idle duration of the repository observer.
-If the observer is refreshed while it is deploying, the observer will immediately fetch the codebase after deployment.
-If the observer is refreshed while waiting after an error occurs, the observer will not restart the deployment.
-If the observer is refreshed twice while idle, it will deploy the codebase twice.
-Please use the refresh function with full understanding and only when the observer is idle.`)
-		deploymentID := ctx.Params("deploymentID")
-		dpl, err := datastore.GetDeploymentByID(datastore.GetDB(), deploymentID)
-		if err != nil {
-			return fiber.NewError(errutil.MapStatusCode(err))
-		}
-		observer.Refresh(dpl.AppID)
-		return ctx.SendStatus(fiber.StatusOK)
-	}
 }

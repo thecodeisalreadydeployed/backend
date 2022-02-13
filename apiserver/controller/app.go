@@ -6,10 +6,11 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 )
 
-func NewAppController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
+func NewAppController(api fiber.Router, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver) {
 	api.Get("/list", listApps)
 	api.Get("/search", searchApp)
 	api.Get("/:appID", getApp)
@@ -19,6 +20,7 @@ func NewAppController(api fiber.Router, workloadController workloadcontroller.Wo
 	api.Delete("/:appID", deleteApp)
 	api.Put("/:appID/observable/enable", enableObservable)
 	api.Put("/:appID/observable/disable", disableObservable)
+	api.Get("/:appID/refresh", forceRefresh(observer))
 }
 
 func listApps(ctx *fiber.Ctx) error {
@@ -82,4 +84,12 @@ func disableObservable(ctx *fiber.Ctx) error {
 		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 	return ctx.SendStatus(fiber.StatusOK)
+}
+
+func forceRefresh(observer repositoryobserver.RepositoryObserver) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		appID := ctx.Params("appID")
+		observer.Refresh(appID)
+		return ctx.SendStatus(fiber.StatusOK)
+	}
 }
