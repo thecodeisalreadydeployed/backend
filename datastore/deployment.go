@@ -100,6 +100,14 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 		if err != nil {
 			return err
 		}
+	default:
+		err := DB.Table("deployments").
+			Where(datamodel.Deployment{ID: deploymentID}).
+			Update("state", state).
+			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
