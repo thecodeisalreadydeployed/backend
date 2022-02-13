@@ -139,7 +139,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 			"beta.deploys.dev/project-id": projectID,
 			"beta.deploys.dev/app-id":     appID,
 		},
-		ContainerImage: "codedeploy-" + appID,
+		ContainerImage: "codedeploy://" + appID,
 	})
 
 	if generateErr != nil {
@@ -205,7 +205,7 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, dep
 
 	prefix := fmt.Sprintf("%s/%s", projectID, appID)
 	kustomizationFile := filepath.Join(prefix, "kustomization.yml")
-	err := kustomize.SetImage(filepath.Join(g.path, kustomizationFile), "codedeploy-"+appID, newImage)
+	err := kustomize.SetImage(filepath.Join(g.path, kustomizationFile), "codedeploy://"+appID, newImage)
 	if err != nil {
 		return err
 	}
