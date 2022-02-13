@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"sort"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewDeploymentController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
+func NewDeploymentController(api fiber.Router, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver) {
 	// Create a new deployment
 	api.Post("/", createDeployment(workloadController))
 
@@ -21,6 +22,7 @@ func NewDeploymentController(api fiber.Router, workloadController workloadcontro
 	api.Get("/:deploymentID/events", getDeploymentEvents)
 	api.Post("/:deploymentID/events", createDeploymentEvents)
 	api.Delete("/:deploymentID", deleteDeployment)
+	api.Get("/:deploymentID/refresh", forceRefresh(observer))
 }
 
 func createDeployment(workloadController workloadcontroller.WorkloadController) fiber.Handler {
@@ -108,4 +110,16 @@ func deleteDeployment(ctx *fiber.Ctx) error {
 		return fiber.NewError(errutil.MapStatusCode(err))
 	}
 	return ctx.SendStatus(fiber.StatusOK)
+}
+
+func forceRefresh(observer repositoryobserver.RepositoryObserver) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		deploymentID := ctx.Params("deploymentID")
+		dpl, err := datastore.GetDeploymentByID(datastore.GetDB(), deploymentID)
+		if err != nil {
+			return fiber.NewError(errutil.MapStatusCode(err))
+		}
+		observer.Refresh(dpl.AppID)
+		return ctx.SendStatus(fiber.StatusOK)
+	}
 }

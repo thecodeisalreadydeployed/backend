@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"log"
 
 	"github.com/thecodeisalreadydeployed/apiserver/auth"
@@ -16,7 +17,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 )
 
-func APIServer(port int, workloadController workloadcontroller.WorkloadController) {
+func APIServer(port int, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver) {
 	firebaseAuth := auth.SetupFirebase()
 	gitAPIBackend := gitapi.NewGitAPIBackend(zap.L())
 	validator.Init()

@@ -40,5 +40,5 @@ func main() {
 	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), datastore.GetDB(), workloadController)
 	go repositoryObserver.ObserveGitSources()
 	go workloadController.ObserveWorkloads()
-	apiserver.APIServer(3000, workloadController)
+	apiserver.APIServer(3000, workloadController, repositoryObserver)
 }
