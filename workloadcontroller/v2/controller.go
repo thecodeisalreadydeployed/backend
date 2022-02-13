@@ -4,6 +4,7 @@ package workloadcontroller
 
 import (
 	"github.com/thecodeisalreadydeployed/clusterbackend"
+	containerregistry "github.com/thecodeisalreadydeployed/containerregistry/types"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
@@ -17,11 +18,22 @@ type WorkloadController interface {
 }
 
 type workloadController struct {
-	logger           *zap.Logger
-	gitOpsController gitopscontroller.GitOpsController
-	clusterBackend   clusterbackend.ClusterBackend
+	logger            *zap.Logger
+	gitOpsController  gitopscontroller.GitOpsController
+	clusterBackend    clusterbackend.ClusterBackend
+	containerRegistry containerregistry.ContainerRegistry
 }
 
-func NewWorkloadController(logger *zap.Logger, gitOpsController gitopscontroller.GitOpsController, clusterBackend clusterbackend.ClusterBackend) WorkloadController {
-	return &workloadController{logger: logger, gitOpsController: gitOpsController, clusterBackend: clusterBackend}
+func NewWorkloadController(
+	logger *zap.Logger,
+	gitOpsController gitopscontroller.GitOpsController,
+	clusterBackend clusterbackend.ClusterBackend,
+	containerRegistry containerregistry.ContainerRegistry,
+) WorkloadController {
+	return &workloadController{
+		logger:            logger,
+		gitOpsController:  gitOpsController,
+		clusterBackend:    clusterBackend,
+		containerRegistry: containerRegistry,
+	}
 }
