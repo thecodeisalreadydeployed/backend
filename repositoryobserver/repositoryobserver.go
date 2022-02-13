@@ -1,6 +1,8 @@
 package repositoryobserver
 
 import (
+	"context"
+	"github.com/spf13/cast"
 	"sync"
 	"time"
 
@@ -22,9 +24,13 @@ type repositoryObserver struct {
 	logger             *zap.Logger
 	db                 *gorm.DB
 	workloadController workloadcontroller.WorkloadController
-	observables        *sync.Map
 	appChan            chan *model.App
 	refreshChan        map[string]chan bool
+	refreshLock        *sync.Mutex
+	refreshCtx         context.Context
+
+	// {app.ID: true} if idle, {app.ID: false} if not idle, non-existent if not observable
+	idleObservables *sync.Map
 }
 
 func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
@@ -34,9 +40,10 @@ func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController w
 		logger:             logger,
 		db:                 DB,
 		workloadController: workloadController,
-		observables:        &sync.Map{},
 		appChan:            appChan,
 		refreshChan:        refreshChan,
+		refreshCtx:         context.Background(),
+		idleObservables:    &sync.Map{},
 	}
 }
 
@@ -50,8 +57,8 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			time.Sleep(WaitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
-				if _, ok := observer.observables.Load(app.ID); !ok {
-					observer.observables.Store(app.ID, nil)
+				if _, ok := observer.idleObservables.Load(app.ID); !ok {
+					observer.idleObservables.Store(app.ID, false)
 					observer.refreshChan[app.ID] = make(chan bool)
 					go observer.checkGitSourceWrapper(&app)
 				}
@@ -62,8 +69,8 @@ func (observer *repositoryObserver) ObserveGitSources() {
 
 	for {
 		app := <-observer.appChan
-		if _, ok := observer.observables.Load(app.ID); !ok {
-			observer.observables.Store(app.ID, nil)
+		if _, ok := observer.idleObservables.Load(app.ID); !ok {
+			observer.idleObservables.Store(app.ID, false)
 			observer.refreshChan[app.ID] = make(chan bool)
 			go observer.checkGitSourceWrapper(app)
 		}
@@ -71,7 +78,12 @@ func (observer *repositoryObserver) ObserveGitSources() {
 }
 
 func (observer *repositoryObserver) Refresh(id string) {
-	observer.refreshChan[id] <- true
+	observer.refreshLock.Lock()
+	idle, ok := observer.idleObservables.Load(id)
+	if ok && cast.ToBool(idle) {
+		observer.refreshChan[id] <- true
+	}
+	observer.refreshLock.Unlock()
 }
 
 func (observer *repositoryObserver) checkGitSourceWrapper(app *model.App) {
@@ -135,12 +147,16 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		}
 	}
 
+	observer.idleObservables.Store(app.ID, true)
 	select {
 	case <-time.After(duration):
 		break
 	case <-observer.refreshChan[app.ID]:
 		break
 	}
+	observer.refreshLock.
+		observer.idleObservables.Store(app.ID, false)
+	observer.refreshLock.Unlock()
 	return true
 }
 
@@ -154,7 +170,7 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	if observableNow {
 		return false, false
 	} else {
-		observer.observables.Delete(app.ID)
+		observer.idleObservables.Delete(app.ID)
 		return false, true
 	}
 }
