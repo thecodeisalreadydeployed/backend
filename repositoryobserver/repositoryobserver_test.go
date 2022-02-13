@@ -110,10 +110,8 @@ func TestObserveGitSources(t *testing.T) {
 	repositoryObserver := NewRepositoryObserver(logger, gdb, workloadController)
 	go repositoryObserver.ObserveGitSources()
 	timeout := time.After(2 * time.Second)
-	select {
-	case <-timeout:
-		break
-	}
+	<-timeout
+
 	err = db.Close()
 	assert.Nil(t, err)
 
