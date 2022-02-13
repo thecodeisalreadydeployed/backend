@@ -3,7 +3,7 @@ package workloadcontroller
 import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
-	"github.com/thecodeisalreadydeployed/kanikogateway/v2"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 )
