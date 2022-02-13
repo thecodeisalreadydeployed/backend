@@ -1,6 +1,8 @@
 package containerregistry
 
 import (
+	"fmt"
+
 	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
 	"github.com/thecodeisalreadydeployed/containerregistry/types"
 	"go.uber.org/zap"
@@ -12,8 +14,12 @@ func NewContainerRegistry(config types.ContainerRegistryConfiguration) types.Con
 			zap.L().Fatal("missing required metadata GOOGLE_CLOUD_PROJECT", zap.String("type", string(config.Type)))
 		}
 
+		if len(config.Metadata["GOOGLE_CLOUD_REGION"]) == 0 {
+			zap.L().Fatal("missing required metadata GOOGLE_CLOUD_REGION", zap.String("type", string(config.Type)))
+		}
+
 		containerRegistry := gcr.NewGCRGateway(
-			"asia-southeast1-docker.pkg.dev",
+			fmt.Sprintf("%s-docker.pkg.dev", config.Metadata["GOOGLE_CLOUD_REGION"]),
 			config.Metadata["GOOGLE_CLOUD_PROJECT"],
 			config.AuthenticationMethod,
 			config.Secret,
