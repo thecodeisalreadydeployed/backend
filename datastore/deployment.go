@@ -3,6 +3,7 @@ package datastore
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -80,12 +81,25 @@ func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, err
 }
 
 func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.DeploymentState) error {
-	err := DB.Table("deployments").
-		Where(datamodel.Deployment{ID: deploymentID}).
-		Update("state", state).
-		Error
-	if err != nil {
-		return err
+	switch state {
+	case model.DeploymentStateBuildSucceeded:
+		err := DB.Table("deployments").
+			Where(datamodel.Deployment{ID: deploymentID}).
+			Update("state", state).
+			Update("builtAt", state).
+			Error
+		if err != nil {
+			return err
+		}
+	case model.DeploymentStateCommitted:
+		err := DB.Table("deployments").
+			Where(datamodel.Deployment{ID: deploymentID}).
+			Update("state", state).
+			Update("committedAt", time.Now()).
+			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
