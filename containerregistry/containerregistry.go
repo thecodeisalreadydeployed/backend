@@ -1,5 +1,10 @@
 package containerregistry
 
+import (
+	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
+	"go.uber.org/zap"
+)
+
 type ContainerRegistryType string
 type AuthenticationMethod string
 
@@ -30,7 +35,6 @@ type ContainerRegistry interface {
 	Type() ContainerRegistryType
 	AuthenticationMethod() AuthenticationMethod
 	Secret() string
-	KubernetesServiceAccount() string
 }
 
 type ContainerRegistryConfiguration struct {
@@ -38,4 +42,25 @@ type ContainerRegistryConfiguration struct {
 	AuthenticationMethod AuthenticationMethod  `json:"authenticationMethod"`
 	Repository           string                `json:"repository"`
 	Secret               string                `json:"secret"`
+	Metadata             map[string]string     `json:"metadata"`
+}
+
+func NewContainerRegistry(config ContainerRegistryConfiguration) ContainerRegistry {
+	if config.Type == GCR {
+		if len(config.Metadata["GOOGLE_CLOUD_PROJECT"]) == 0 {
+			zap.L().Fatal("missing required metadata GOOGLE_CLOUD_PROJECT", zap.String("type", string(config.Type)))
+		}
+
+		containerRegistry := gcr.NewGCRGateway(
+			"asia-southeast1-docker.pkg.dev",
+			config.Metadata["GOOGLE_CLOUD_PROJECT"],
+			config.AuthenticationMethod,
+			config.Secret,
+		)
+
+		return containerRegistry
+	}
+
+	zap.L().Fatal("unsupported container registry", zap.String("type", string(config.Type)))
+	panic("unsupported container registry")
 }

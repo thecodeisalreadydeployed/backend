@@ -6,8 +6,8 @@ import (
 	"github.com/thecodeisalreadydeployed/containerregistry"
 )
 
-func NewGCRGateway(hostname string, projectID string, authenticationMethod containerregistry.AuthenticationMethod, serviceAccountKey string, kubernetesServiceAccount string) containerregistry.ContainerRegistry {
-	return &gcrGateway{hostname: hostname, projectID: projectID, authenticationMethod: authenticationMethod, serviceAccountKey: serviceAccountKey, kubernetesServiceAccount: kubernetesServiceAccount}
+func NewGCRGateway(hostname string, projectID string, authenticationMethod containerregistry.AuthenticationMethod, secret string) containerregistry.ContainerRegistry {
+	return &gcrGateway{hostname: hostname, projectID: projectID, authenticationMethod: authenticationMethod, secret: secret}
 }
 
 type gcrGateway struct {
@@ -32,8 +32,4 @@ func (gcr *gcrGateway) Secret() string {
 
 func (gcr *gcrGateway) AuthenticationMethod() containerregistry.AuthenticationMethod {
 	return gcr.authenticationMethod
-}
-
-func (gcr *gcrGateway) KubernetesServiceAccount() string {
-	return gcr.kubernetesServiceAccount
 }
