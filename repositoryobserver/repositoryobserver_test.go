@@ -65,8 +65,6 @@ func TestObserveGitSources(t *testing.T) {
 	})
 	defer monkey.UnpatchAll()
 
-	now := time.Now()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	datastore.ExpectVersionQuery(mock)
@@ -74,23 +72,28 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
+	// Simulate GetObservableApps failure.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
 		WillReturnError(errors.New("simulated failure"))
 
+	// Return fresh app.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
 		WillReturnRows(getObservableAppRows(t, false))
 
+	// Simulate IsObservableApp failure.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
 		WillReturnError(errors.New("simulated failure"))
 
+	// Return observable of same fresh app.
 	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
 		WillReturnRows(rows)
 
+	// Rerun, no longer any observable app.
 	rows = sqlmock.NewRows([]string{"Observable"}).AddRow(false)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
@@ -106,18 +109,14 @@ func TestObserveGitSources(t *testing.T) {
 
 	repositoryObserver := NewRepositoryObserver(logger, gdb, workloadController)
 	go repositoryObserver.ObserveGitSources()
+	timeout := time.After(2 * time.Second)
+	<-timeout
 
-	for {
-		if time.Now().After(now.Add(2 * time.Second)) {
-			err = db.Close()
-			assert.Nil(t, err)
+	err = db.Close()
+	assert.Nil(t, err)
 
-			err = mock.ExpectationsWereMet()
-			assert.Nil(t, err)
-
-			return
-		}
-	}
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
 }
 
 func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {

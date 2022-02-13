@@ -15,7 +15,6 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-playground/validator/v10 v10.9.0
-	github.com/gofiber/adaptor/v2 v2.1.17
 	github.com/gofiber/fiber/v2 v2.26.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
@@ -24,7 +23,6 @@ require (
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/compress v1.14.2 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/buildkit v0.9.1
 	github.com/nginxinc/kubernetes-ingress v1.12.0
 	github.com/segmentio/ksuid v1.0.4
@@ -33,6 +31,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
 	github.com/subosito/gotenv v1.2.0
+	github.com/valyala/fasthttp v1.33.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/automaxprocs v1.4.0
