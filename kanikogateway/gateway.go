@@ -78,9 +78,14 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 	}
 
 	kanikoDestination := ""
+	kubernetesServiceAccountName := ""
 	if gateway.registry != nil {
 		containerRegistry := *gateway.registry
 		kanikoDestination = containerRegistry.RegistryFormat(gateway.appID, gateway.deploymentID)
+
+		if containerRegistry.AuthenticationMethod() == containerregistry.KubernetesServiceAccount {
+			kubernetesServiceAccountName = containerRegistry.KubernetesServiceAccount()
+		}
 	}
 
 	pod := apiv1.Pod{
@@ -89,7 +94,8 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 			Labels: objectLabel,
 		},
 		Spec: apiv1.PodSpec{
-			RestartPolicy: apiv1.RestartPolicyNever,
+			ServiceAccountName: kubernetesServiceAccountName,
+			RestartPolicy:      apiv1.RestartPolicyNever,
 			Volumes: []apiv1.Volume{
 				{
 					Name: workspace.Name,

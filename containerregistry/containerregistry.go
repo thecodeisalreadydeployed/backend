@@ -28,7 +28,9 @@ const (
 type ContainerRegistry interface {
 	RegistryFormat(repository string, tag string) string
 	Type() ContainerRegistryType
+	AuthenticationMethod() AuthenticationMethod
 	Secret() string
+	KubernetesServiceAccount() string
 }
 
 type ContainerRegistryConfiguration struct {
