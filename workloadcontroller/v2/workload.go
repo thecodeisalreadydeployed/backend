@@ -38,9 +38,27 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
 					switch p.Status.Phase {
 					case v1.PodSucceeded:
-						datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuildSucceeded)
+						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuildSucceeded)
+						if err != nil {
+							ctrl.logger.Error(
+								"cannot set deployment state",
+								zap.String("deploymentID", deployment.ID),
+								zap.String("desiredState", string(model.DeploymentStateBuildSucceeded)),
+								zap.String("podSelfLink", p.SelfLink),
+								zap.Error(err),
+							)
+						}
 					case v1.PodFailed:
 						datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+						if err != nil {
+							ctrl.logger.Error(
+								"cannot set deployment state",
+								zap.String("deploymentID", deployment.ID),
+								zap.String("desiredState", string(model.DeploymentStateError)),
+								zap.String("podSelfLink", p.SelfLink),
+								zap.Error(err),
+							)
+						}
 					}
 				}
 			}
