@@ -57,7 +57,18 @@ func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *
 		return nil, err
 	}
 
-	kaniko, err := kanikogateway.NewKanikoGateway(ctrl.logger.With(zap.String("appID", appID)), ctrl.clusterBackend, app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
+	kaniko, err := kanikogateway.NewKanikoGateway(
+		ctrl.logger.With(zap.String("appID", appID)),
+		ctrl.clusterBackend,
+		app.ProjectID,
+		app.ID,
+		deployment.ID,
+		deployment.GitSource.RepositoryURL,
+		deployment.GitSource.Branch,
+		deployment.BuildConfiguration,
+		ctrl.containerRegistry,
+	)
+
 	if err == nil {
 		if err != nil {
 			return nil, err
