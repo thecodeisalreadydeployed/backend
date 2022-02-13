@@ -26,7 +26,7 @@ const (
 )
 
 type ContainerRegistry interface {
-	RegistryFormat(repository string, tag string) (string, error)
+	RegistryFormat(repository string, tag string) string
 	Type() ContainerRegistryType
 	Secret() string
 }

@@ -67,16 +67,20 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 		"beta.deploys.dev/component":     "imagebuilder",
 	}
 
-	buildScript := gateway.buildConfiguration.BuildScript
-
 	configMap := apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "builder-" + UID,
 			Labels: objectLabel,
 		},
 		Data: map[string]string{
-			"Dockerfile": buildScript,
+			"Dockerfile": gateway.buildConfiguration.BuildScript,
 		},
+	}
+
+	kanikoDestination := ""
+	if gateway.registry != nil {
+		containerRegistry := *gateway.registry
+		kanikoDestination = containerRegistry.RegistryFormat(gateway.appID, gateway.deploymentID)
 	}
 
 	pod := apiv1.Pod{
@@ -136,6 +140,7 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: gateway.deploymentID},
 						{Name: "CODEDEPLOY_KANIKO_LOG_VERBOSITY", Value: "info"},
 						{Name: "CODEDEPLOY_KANIKO_CONTEXT", Value: "/workspace/" + gateway.deploymentID},
+						{Name: "CODEDEPLOY_KANIKO_DESTINATION", Value: kanikoDestination},
 					},
 				},
 			},
