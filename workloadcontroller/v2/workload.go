@@ -49,7 +49,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 							)
 						}
 					case v1.PodFailed:
-						datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
 						if err != nil {
 							ctrl.logger.Error(
 								"cannot set deployment state",
