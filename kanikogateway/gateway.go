@@ -84,7 +84,7 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 		kanikoDestination = containerRegistry.RegistryFormat(gateway.appID, gateway.deploymentID)
 
 		if containerRegistry.AuthenticationMethod() == containerregistry.KubernetesServiceAccount {
-			kubernetesServiceAccountName = containerRegistry.KubernetesServiceAccount()
+			kubernetesServiceAccountName = containerRegistry.Secret()
 		}
 	}
 
