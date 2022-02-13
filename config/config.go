@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"github.com/thecodeisalreadydeployed/constant"
+	"github.com/thecodeisalreadydeployed/containerregistry"
 	"go.uber.org/zap"
 )
 
@@ -61,6 +62,19 @@ func Auth0Audience() string {
 
 func FirebaseServiceAccountKey() string {
 	return viper.GetString(constant.FIREBASE_SERVICE_ACCOUNT_KEY)
+}
+
+func DefaultContainerRegistryConfiguration() containerregistry.ContainerRegistryConfiguration {
+	return containerregistry.ContainerRegistryConfiguration{
+		Type:                 containerregistry.GCR,
+		AuthenticationMethod: containerregistry.KubernetesServiceAccount,
+		// The value of Secret field depends on the value of AuthenticationMethod field.
+		// If the value of AuthenticationMethod field is KubernetesServiceAccount, the
+		// value of Secret field is the Kubernetes service account. Otherwise, the value
+		// of Secret field is cloud provider's credentials.
+		Secret:     "codedeploy-imagebuilder",
+		Repository: "senior-project",
+	}
 }
 
 func BindEnv() {
