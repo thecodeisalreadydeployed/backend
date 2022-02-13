@@ -50,6 +50,7 @@ metadata:
   labels:
     app: codedeploy
   name: codedeploy
+  namespace: default
 spec:
   type: ClusterIP
   ports:
@@ -66,6 +67,7 @@ metadata:
   labels:
     app: codedeploy
   name: codedeploy
+  namespace: default
 spec:
   replicas: 1
   selector:
