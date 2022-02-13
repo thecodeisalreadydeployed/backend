@@ -15,6 +15,7 @@ import (
 
 type RepositoryObserver interface {
 	ObserveGitSources()
+	Refresh(id string)
 }
 
 type repositoryObserver struct {
@@ -23,11 +24,20 @@ type repositoryObserver struct {
 	workloadController workloadcontroller.WorkloadController
 	observables        *sync.Map
 	appChan            chan *model.App
+	refreshChan        map[string]chan bool
 }
 
 func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
 	appChan := make(chan *model.App)
-	return &repositoryObserver{logger: logger, db: DB, workloadController: workloadController, appChan: appChan, observables: &sync.Map{}}
+	refreshChan := make(map[string]chan bool)
+	return &repositoryObserver{
+		logger:             logger,
+		db:                 DB,
+		workloadController: workloadController,
+		observables:        &sync.Map{},
+		appChan:            appChan,
+		refreshChan:        refreshChan,
+	}
 }
 
 const WaitAfterErrorInterval = 10 * time.Second
@@ -42,6 +52,7 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
+					observer.refreshChan[app.ID] = make(chan bool)
 					go observer.checkGitSourceWrapper(&app)
 				}
 			}
@@ -53,9 +64,14 @@ func (observer *repositoryObserver) ObserveGitSources() {
 		app := <-observer.appChan
 		if _, ok := observer.observables.Load(app.ID); !ok {
 			observer.observables.Store(app.ID, nil)
+			observer.refreshChan[app.ID] = make(chan bool)
 			go observer.checkGitSourceWrapper(app)
 		}
 	}
+}
+
+func (observer *repositoryObserver) Refresh(id string) {
+	observer.refreshChan[id] <- true
 }
 
 func (observer *repositoryObserver) checkGitSourceWrapper(app *model.App) {
@@ -119,7 +135,12 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		}
 	}
 
-	time.Sleep(duration)
+	select {
+	case <-time.After(duration):
+		break
+	case <-observer.refreshChan[app.ID]:
+		break
+	}
 	return true
 }
 
