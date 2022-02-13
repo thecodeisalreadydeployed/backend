@@ -114,6 +114,12 @@ func deleteDeployment(ctx *fiber.Ctx) error {
 
 func forceRefresh(observer repositoryobserver.RepositoryObserver) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
+		zap.L().Warn(`Depending on the circumstances, refreshing may not give you the desired results.
+Refreshing to fetch the codebase will only skip the idle duration of the repository observer.
+If the observer is refreshed while it is deploying, the observer will immediately fetch the codebase after deployment.
+If the observer is refreshed while waiting after an error occurs, the observer will not restart the deployment.
+If the observer is refreshed twice while idle, it will deploy the codebase twice.
+Please use the refresh function with full understanding and only when the observer is idle.`)
 		deploymentID := ctx.Params("deploymentID")
 		dpl, err := datastore.GetDeploymentByID(datastore.GetDB(), deploymentID)
 		if err != nil {
