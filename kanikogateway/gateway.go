@@ -22,7 +22,7 @@ type kanikoGateway struct {
 	branch             string
 	buildConfiguration model.BuildConfiguration
 	clusterBackend     clusterbackend.ClusterBackend
-	registry           *containerregistry.ContainerRegistry
+	registry           containerregistry.ContainerRegistry
 	logger             *zap.Logger
 }
 
@@ -48,7 +48,7 @@ func NewKanikoGateway(
 		branch:             branch,
 		buildConfiguration: buildConfiguration,
 		clusterBackend:     clusterBackend,
-		registry:           &containerRegistry,
+		registry:           containerRegistry,
 		logger:             logger.With(zap.String("deploymentID", deploymentID)),
 	}, nil
 }
@@ -79,13 +79,11 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 
 	kanikoDestination := ""
 	kubernetesServiceAccountName := ""
-	if gateway.registry != nil {
-		containerRegistry := *gateway.registry
-		kanikoDestination = containerRegistry.RegistryFormat(gateway.appID, gateway.deploymentID)
+	containerRegistry := gateway.registry
+	kanikoDestination = containerRegistry.RegistryFormat(gateway.appID, gateway.deploymentID)
 
-		if containerRegistry.AuthenticationMethod() == containerregistry.KubernetesServiceAccount {
-			kubernetesServiceAccountName = containerRegistry.Secret()
-		}
+	if containerRegistry.AuthenticationMethod() == containerregistry.KubernetesServiceAccount {
+		kubernetesServiceAccountName = containerRegistry.Secret()
 	}
 
 	pod := apiv1.Pod{
