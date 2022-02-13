@@ -65,11 +65,6 @@ jobs:
       - if: always()
         run: kubectl -n default logs deploy/codedeploy
       - if: always()
-        run: |
-          sleep 5m
-      - if: always()
-        run: kubectl -n default logs deploy/codedeploy
-      - if: always()
         run: kubectl -n argocd logs deploy/argocd-server
       - if: always()
         run: kubectl -n argocd logs deploy/argocd-repo-server
@@ -92,10 +87,3 @@ jobs:
       - run: kubectl -n default port-forward svc/gitserver 9418 &
       - run: cd /tmp && git clone git://localhost/userspace
       - run: cd /tmp/userspace && git status && kustomize build .
-      - run: argocd app sync userspace
-      - run: argocd app wait userspace --timeout 300
-      - run: |
-          kubectl get services --all-namespaces
-          kubectl get deployments --all-namespaces
-          kubectl get pods --all-namespaces
-          kubectl get namespace
