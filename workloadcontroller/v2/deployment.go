@@ -5,6 +5,7 @@ import (
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 )
 
@@ -55,6 +56,10 @@ func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	if util.IsDevEnvironment() || util.IsDockerTestEnvironment() {
+		return deployment, nil
 	}
 
 	kaniko, err := kanikogateway.NewKanikoGateway(
