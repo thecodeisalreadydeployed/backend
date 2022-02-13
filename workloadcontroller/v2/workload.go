@@ -10,6 +10,21 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+func (ctrl *workloadController) setContainerImage(appID string, deploymentID string) {
+	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
+	if err != nil {
+		ctrl.logger.Error(err.Error(), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
+		return
+	}
+
+	newImage := ctrl.containerRegistry.RegistryFormat(app.ID, deploymentID)
+	err = ctrl.gitOpsController.SetContainerImage(app.ProjectID, app.ID, deploymentID, newImage)
+	if err != nil {
+		ctrl.logger.Error("cannot set container image", zap.Error(err), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
+		return
+	}
+}
+
 func (ctrl *workloadController) ObserveWorkloads() {
 	if util.IsDevEnvironment() || util.IsDockerTestEnvironment() {
 		return
@@ -48,6 +63,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 								zap.Error(err),
 							)
 						}
+						go ctrl.setContainerImage(deployment.AppID, deployment.ID)
 					case v1.PodFailed:
 						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
 						if err != nil {
