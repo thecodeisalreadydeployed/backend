@@ -146,6 +146,13 @@ CMD node main
 			JSON()
 
 		events.Array().Length().Gt(0)
+
+		time.Sleep(150 * time.Second)
+
+		expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
+			Expect().Status(http.StatusOK).JSON().
+			Object().
+			ContainsKey("state").ValueEqual("state", model.DeploymentStateBuildSucceeded)
 	}
 
 	// expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
