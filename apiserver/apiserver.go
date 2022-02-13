@@ -28,7 +28,7 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 
 	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
 	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
-	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
+	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated(firebaseAuth)), workloadController, observer)
 	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated(firebaseAuth)))
 	controller.NewGitAPIController(app.Group("gitapi", auth.EnsureAuthenticated(firebaseAuth)), gitAPIBackend)
 
