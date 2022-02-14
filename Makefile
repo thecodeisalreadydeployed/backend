@@ -47,6 +47,13 @@ kind:
 	sh deploy/0-kind-create-cluster.sh
 	sh deploy/1-kubectl-apply-argocd.sh
 
+.PHONY: kind-with-registry
+kind:
+	sh deploy/create-registry.sh
+	kind create cluster --config ./deploy/.kind-with-registry.config.yaml
+	sh deploy/connect-registry.sh
+	sh deploy/1-kubectl-apply-argocd.sh
+
 .PHONY: port-forward
 port-forward:
 	@kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
