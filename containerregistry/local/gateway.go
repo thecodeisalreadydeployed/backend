@@ -1,4 +1,4 @@
-package gcr
+package local
 
 import (
 	"fmt"

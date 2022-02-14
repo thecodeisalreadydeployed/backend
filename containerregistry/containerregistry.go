@@ -3,7 +3,9 @@ package containerregistry
 import (
 	"fmt"
 
+	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/containerregistry/gcr"
+	"github.com/thecodeisalreadydeployed/containerregistry/local"
 	"github.com/thecodeisalreadydeployed/containerregistry/types"
 	"go.uber.org/zap"
 )
@@ -22,6 +24,21 @@ func NewContainerRegistry(config types.ContainerRegistryConfiguration) types.Con
 			fmt.Sprintf("%s-docker.pkg.dev", config.Metadata["GOOGLE_CLOUD_REGION"]),
 			config.Metadata["GOOGLE_CLOUD_PROJECT"],
 			config.Repository,
+			config.AuthenticationMethod,
+			config.Secret,
+		)
+
+		return containerRegistry
+	}
+
+	if config.Type == types.LOCAL {
+		if len(config.Metadata["PORT"]) == 0 {
+			zap.L().Fatal("missing required metadata PORT", zap.String("type", string(config.Type)))
+		}
+
+		containerRegistry := local.NewLocalRegistryGateway(
+			"localhost",
+			cast.ToInt(config.Metadata["PORT"]),
 			config.AuthenticationMethod,
 			config.Secret,
 		)
