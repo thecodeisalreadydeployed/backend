@@ -48,7 +48,7 @@ kind:
 	sh deploy/1-kubectl-apply-argocd.sh
 
 .PHONY: kind-with-registry
-kind:
+kind-with-registry:
 	sh deploy/create-registry.sh
 	kind create cluster --config ./deploy/.kind-with-registry.config.yaml
 	sh deploy/connect-registry.sh
