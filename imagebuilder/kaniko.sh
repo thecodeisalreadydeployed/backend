@@ -1,3 +1,5 @@
+set -o pipefail
+
 [[ -z $CODEDEPLOY_DEPLOYMENT_ID ]] && exit 1
 [[ -z $CODEDEPLOY_KANIKO_LOG_VERBOSITY ]] && CODEDEPLOY_KANIKO_LOG_VERBOSITY="debug"
 [[ -z $CODEDEPLOY_KANIKO_LOG_FILE ]] && CODEDEPLOY_KANIKO_LOG_FILE="/kaniko/deploys-dev/kaniko.log"
