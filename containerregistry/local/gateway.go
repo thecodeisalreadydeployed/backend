@@ -6,30 +6,29 @@ import (
 	"github.com/thecodeisalreadydeployed/containerregistry/types"
 )
 
-func NewGCRGateway(hostname string, projectID string, repository string, authenticationMethod types.AuthenticationMethod, secret string) types.ContainerRegistry {
-	return &gcrGateway{hostname: hostname, projectID: projectID, repository: repository, authenticationMethod: authenticationMethod, secret: secret}
+func NewLocalRegistryGateway(hostname string, port int, authenticationMethod types.AuthenticationMethod, secret string) types.ContainerRegistry {
+	return &localRegistryGateway{hostname: hostname, port: port, authenticationMethod: authenticationMethod, secret: secret}
 }
 
-type gcrGateway struct {
+type localRegistryGateway struct {
 	hostname             string
-	projectID            string
-	repository           string
+	port                 int
 	authenticationMethod types.AuthenticationMethod
 	secret               string
 }
 
-func (gcr *gcrGateway) RegistryFormat(image string, tag string) string {
-	return fmt.Sprintf("%s/%s/%s/%s:%s", gcr.hostname, gcr.projectID, gcr.repository, image, tag)
+func (registry *localRegistryGateway) RegistryFormat(image string, tag string) string {
+	return fmt.Sprintf("%s:%d/%s:%s", registry.hostname, registry.port, image, tag)
 }
 
-func (gcr *gcrGateway) Type() types.ContainerRegistryType {
-	return types.GCR
+func (registry *localRegistryGateway) Type() types.ContainerRegistryType {
+	return types.LOCAL
 }
 
-func (gcr *gcrGateway) Secret() string {
-	return gcr.secret
+func (registry *localRegistryGateway) Secret() string {
+	return registry.secret
 }
 
-func (gcr *gcrGateway) AuthenticationMethod() types.AuthenticationMethod {
-	return gcr.authenticationMethod
+func (registry *localRegistryGateway) AuthenticationMethod() types.AuthenticationMethod {
+	return registry.authenticationMethod
 }
