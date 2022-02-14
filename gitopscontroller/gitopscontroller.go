@@ -121,6 +121,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 	kustomizationFile := fmt.Sprintf("%s/kustomization.yml", prefix)
 	deploymentFile := fmt.Sprintf("%s/deployment.yml", prefix)
 	serviceFile := fmt.Sprintf("%s/service.yml", prefix)
+	virtualServerFile := fmt.Sprintf("%s/virtual-server.yml", prefix)
 
 	writeErr := g.user.WriteFile(kustomizationFile, "")
 	if writeErr != nil {
@@ -164,6 +165,20 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errors.New("cannot generate service.yml")
 	}
 
+	virtualServerYAML, generateErr := manifestgenerator.GenerateVirtualServerYAML(&manifestgenerator.GenerateVirtualServerOptions{
+		AppID:     appID,
+		ProjectID: projectID,
+		Labels: map[string]string{
+			"beta.deploys.dev/project-id": projectID,
+			"beta.deploys.dev/app-id":     appID,
+			"beta.deploys.dev/part-of":    "gitopscontroller",
+		},
+	})
+
+	if generateErr != nil {
+		return errors.New("cannot generate service.yml")
+	}
+
 	writeErr = g.user.WriteFile(deploymentFile, deploymentYAML)
 	if writeErr != nil {
 		return errors.New("cannot write deployment.yml")
@@ -174,7 +189,12 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errors.New("cannot write service.yml")
 	}
 
-	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, kustomizationFile), []string{"deployment.yml", "service.yml"})
+	writeErr = g.user.WriteFile(virtualServerFile, virtualServerYAML)
+	if writeErr != nil {
+		return errors.New("cannot write virtual-server.yml")
+	}
+
+	kustomizeErr := kustomize.AddResources(filepath.Join(g.path, kustomizationFile), []string{"deployment.yml", "service.yml", "virtual-server.yml"})
 	if kustomizeErr != nil {
 		return errors.New("cannot write kustomization.yml")
 	}
@@ -184,7 +204,7 @@ func (g *gitOpsController) SetupApp(projectID string, appID string) error {
 		return errors.New("cannot write kustomization.yml")
 	}
 
-	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile, filepath.Join(projectID, "kustomization.yml")}, prefix)
+	commit, commitErr := g.user.Commit([]string{kustomizationFile, deploymentFile, serviceFile, virtualServerFile, filepath.Join(projectID, "kustomization.yml")}, prefix)
 	if commitErr != nil {
 		return commitErr
 	}
