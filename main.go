@@ -35,7 +35,12 @@ func main() {
 
 	config.BindEnv()
 	datastore.Migrate()
+
 	containerRegistry := containerregistry.NewContainerRegistry(config.DefaultContainerRegistryConfiguration())
+	if util.IsKubernetesTestEnvironment() {
+		containerRegistry = containerregistry.NewContainerRegistry(config.KindLocalRegistryConfiguration(5000))
+	}
+
 	clusterBackend := clusterbackend.NewClusterBackend(zap.L())
 	gitOpsController := gitopscontroller.NewGitOpsController(zap.L())
 	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController, clusterBackend, containerRegistry)
