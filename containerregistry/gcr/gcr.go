@@ -18,7 +18,7 @@ type gcrGateway struct {
 }
 
 func (gcr *gcrGateway) RegistryFormat(repository string, tag string) string {
-	return fmt.Sprintf("%s/%s/%s:%s", gcr.hostname, gcr.projectID, repository, tag)
+	return fmt.Sprintf("%s/%s/codedeploy/%s:%s", gcr.hostname, gcr.projectID, repository, tag)
 }
 
 func (gcr *gcrGateway) Type() types.ContainerRegistryType {
