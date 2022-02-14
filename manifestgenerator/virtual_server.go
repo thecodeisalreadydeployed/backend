@@ -27,7 +27,7 @@ func GenerateVirtualServerYAML(opts *GenerateVirtualServerOptions) (string, erro
 			Labels:    opts.Labels,
 		},
 		Spec: nginx.VirtualServerSpec{
-			Host: fmt.Sprintf("%s.containers.deploys.dev", opts.AppID),
+			Host: fmt.Sprintf("%s.svc.deploys.dev", opts.AppID),
 			TLS: &nginx.TLS{
 				Secret: "",
 			},
