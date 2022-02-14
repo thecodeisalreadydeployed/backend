@@ -21,6 +21,7 @@ func NewContainerRegistry(config types.ContainerRegistryConfiguration) types.Con
 		containerRegistry := gcr.NewGCRGateway(
 			fmt.Sprintf("%s-docker.pkg.dev", config.Metadata["GOOGLE_CLOUD_REGION"]),
 			config.Metadata["GOOGLE_CLOUD_PROJECT"],
+			config.Repository,
 			config.AuthenticationMethod,
 			config.Secret,
 		)
