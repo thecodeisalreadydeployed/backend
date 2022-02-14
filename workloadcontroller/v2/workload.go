@@ -54,6 +54,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
 					switch p.Status.Phase {
 					case v1.PodSucceeded:
+						ctrl.logger.Info(p.Name, zap.Any("pod", p), zap.Any("containerStatuses", p.Status.ContainerStatuses))
 						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuildSucceeded)
 						if err != nil {
 							ctrl.logger.Error(
