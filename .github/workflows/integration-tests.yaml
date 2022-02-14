@@ -30,7 +30,7 @@ jobs:
       - run: |
           sudo apt update
           sudo apt install wait-for-it
-          make kind
+          make kind-with-registry
       - uses: imjasonh/setup-ko@v0.4
         env:
           KO_DOCKER_REPO: kind.local
