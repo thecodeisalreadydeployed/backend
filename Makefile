@@ -49,9 +49,7 @@ kind:
 
 .PHONY: kind-with-registry
 kind-with-registry:
-	sh deploy/create-registry.sh
-	kind create cluster --config ./deploy/.kind-with-registry.config.yaml
-	sh deploy/connect-registry.sh
+	sh deploy/kind-with-registry.sh
 	sh deploy/1-kubectl-apply-argocd.sh
 
 .PHONY: port-forward
