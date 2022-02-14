@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -77,6 +78,18 @@ func DefaultContainerRegistryConfiguration() containerregistry.ContainerRegistry
 		Metadata: map[string]string{
 			"GOOGLE_CLOUD_PROJECT": "deploys-dev",
 			"GOOGLE_CLOUD_REGION":  "asia-southeast1",
+		},
+	}
+}
+
+func KindLocalRegistryConfiguration(port int) containerregistry.ContainerRegistryConfiguration {
+	return containerregistry.ContainerRegistryConfiguration{
+		Type:                 containerregistry.LOCAL,
+		AuthenticationMethod: containerregistry.Secret,
+		Secret:               "",
+		Repository:           "",
+		Metadata: map[string]string{
+			"PORT": fmt.Sprintf("%d", port),
 		},
 	}
 }
