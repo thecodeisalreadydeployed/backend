@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -20,11 +21,13 @@ func EnsureAuthenticated(firebaseAuth *auth.Client) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		parts := strings.Split(c.GetReqHeaders()["Authorization"], " ")
 		if len(parts) != 2 {
+			fmt.Printf("parts: %v\n", parts)
 			return c.SendStatus(http.StatusUnauthorized)
 		}
 
 		_, err := firebaseAuth.VerifyIDToken(context.Background(), parts[1])
 		if err != nil {
+			fmt.Printf("err: %v\n", err)
 			return c.SendStatus(http.StatusUnauthorized)
 		}
 
