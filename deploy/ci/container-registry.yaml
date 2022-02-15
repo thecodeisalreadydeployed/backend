@@ -124,3 +124,23 @@ spec:
       resources:
         requests:
           storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: docker-registry
+  name: docker-registry
+  namespace: container-registry
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: registry
+    nodePort: 31500
+    port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: docker-registry
+  sessionAffinity: None
+  type: NodePort
