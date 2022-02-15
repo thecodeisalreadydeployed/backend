@@ -89,7 +89,8 @@ func KindLocalRegistryConfiguration(port int) containerregistry.ContainerRegistr
 		Secret:               "",
 		Repository:           "",
 		Metadata: map[string]string{
-			"PORT": fmt.Sprintf("%d", port),
+			"HOSTNAME": "docker.container-registry.svc.cluster.local",
+			"PORT":     fmt.Sprintf("%d", port),
 		},
 	}
 }
