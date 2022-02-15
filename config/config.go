@@ -89,8 +89,8 @@ func KindLocalRegistryConfiguration() containerregistry.ContainerRegistryConfigu
 		Secret:               "",
 		Repository:           "",
 		Metadata: map[string]string{
-			"HOSTNAME": "kind-registry",
-			"PORT":     fmt.Sprintf("%d", 5001),
+			"HOSTNAME": "localhost",
+			"PORT":     fmt.Sprintf("%d", 5000),
 		},
 	}
 }
