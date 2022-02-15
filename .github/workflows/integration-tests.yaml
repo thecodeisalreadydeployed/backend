@@ -59,7 +59,7 @@ jobs:
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
       - run: |
-          kubectl -n container-registry wait pod/docker-registry-0 --for condition=Ready --timeout 15m
+          kubectl -n container-registry wait deploy/registry --for condition=available --timeout 5m
         timeout-minutes: 15
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
       - if: always()
