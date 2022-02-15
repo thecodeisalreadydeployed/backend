@@ -34,6 +34,12 @@ func GenerateServiceYAML(opts *GenerateServiceOptions) (string, error) {
 					TargetPort: intstr.FromInt(3000),
 					Name:       "http",
 				},
+				{
+					Port:       5000,
+					Protocol:   apiv1.ProtocolTCP,
+					TargetPort: intstr.FromInt(5000),
+					Name:       "http-metadata",
+				},
 			},
 			Selector: opts.Selector,
 		},
