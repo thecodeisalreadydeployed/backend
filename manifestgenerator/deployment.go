@@ -76,6 +76,30 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 										},
 									},
 								},
+								{
+									Name: "PROJECT_ID",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.labels['beta.deploys.dev/project-id']",
+										},
+									},
+								},
+								{
+									Name: "APP_ID",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.labels['beta.deploys.dev/app-id']",
+										},
+									},
+								},
+								{
+									Name: "DEPLOYMENT_ID",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.labels['beta.deploys.dev/deployment-id']",
+										},
+									},
+								},
 							},
 						},
 					},
