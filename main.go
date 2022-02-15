@@ -38,7 +38,7 @@ func main() {
 
 	containerRegistry := containerregistry.NewContainerRegistry(config.DefaultContainerRegistryConfiguration())
 	if util.IsKubernetesTestEnvironment() {
-		containerRegistry = containerregistry.NewContainerRegistry(config.KindLocalRegistryConfiguration(5001))
+		containerRegistry = containerregistry.NewContainerRegistry(config.KindLocalRegistryConfiguration(5000))
 	}
 
 	clusterBackend := clusterbackend.NewClusterBackend(zap.L())
