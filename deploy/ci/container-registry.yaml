@@ -31,7 +31,7 @@ metadata:
   namespace: container-registry
 ---
 apiVersion: v1
-data:
+secretData:
   haSharedSecret: senior-project
 kind: Secret
 metadata:
