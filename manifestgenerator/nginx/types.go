@@ -3,6 +3,7 @@ package types
 type Metadata struct {
 	Name      string
 	Namespace string
+	Labels    map[string]string
 }
 
 type TLSRedirect struct {
