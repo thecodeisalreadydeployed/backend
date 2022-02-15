@@ -32,12 +32,16 @@ func NewContainerRegistry(config types.ContainerRegistryConfiguration) types.Con
 	}
 
 	if config.Type == types.LOCAL {
+		if len(config.Metadata["HOSTNAME"]) == 0 {
+			zap.L().Fatal("missing required metadata HOSTNAME", zap.String("type", string(config.Type)))
+		}
+
 		if len(config.Metadata["PORT"]) == 0 {
 			zap.L().Fatal("missing required metadata PORT", zap.String("type", string(config.Type)))
 		}
 
 		containerRegistry := local.NewLocalRegistryGateway(
-			"localhost",
+			config.Metadata["HOSTNAME"],
 			cast.ToInt(config.Metadata["PORT"]),
 			config.AuthenticationMethod,
 			config.Secret,
