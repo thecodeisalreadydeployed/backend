@@ -51,6 +51,32 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 							Name:            "metadataserver",
 							Image:           "ghcr.io/thecodeisalreadydeployed/metadataserver:latest",
 							ImagePullPolicy: apiv1.PullIfNotPresent,
+							Env: []apiv1.EnvVar{
+								{
+									Name: "NODE_NAME",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "spec.nodeName",
+										},
+									},
+								},
+								{
+									Name: "POD_NAME",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: "POD_NAMESPACE",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
+										},
+									},
+								},
+							},
 						},
 					},
 				},
