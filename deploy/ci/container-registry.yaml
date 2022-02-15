@@ -9,8 +9,12 @@ metadata:
   name: registry
   namespace: container-registry
 spec:
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
   ports:
     - protocol: TCP
+      nodePort: 31500
       name: registry
       port: 5000
   selector:
