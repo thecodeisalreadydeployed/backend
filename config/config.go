@@ -90,7 +90,7 @@ func KindLocalRegistryConfiguration() containerregistry.ContainerRegistryConfigu
 		Repository:           "",
 		Metadata: map[string]string{
 			"HOSTNAME": "172.18.0.1",
-			"PORT":     fmt.Sprintf("%d", 5000),
+			"PORT":     fmt.Sprintf("%d", 5001),
 		},
 	}
 }
