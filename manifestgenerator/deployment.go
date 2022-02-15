@@ -47,6 +47,11 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 								},
 							},
 						},
+						{
+							Name:            "metadataserver",
+							Image:           "ghcr.io/thecodeisalreadydeployed/metadataserver:latest",
+							ImagePullPolicy: apiv1.PullIfNotPresent,
+						},
 					},
 				},
 			},
