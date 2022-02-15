@@ -46,6 +46,8 @@ if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${registryN
   docker network connect "kind" "${registryName}"
 fi
 
+docker network inspect kind
+
 # Document the local registry
 # https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
 cat <<EOF | kubectl apply -f -
