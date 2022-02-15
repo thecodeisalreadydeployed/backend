@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	nginx "github.com/nginxinc/kubernetes-ingress/pkg/apis/configuration/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	nginx "github.com/thecodeisalreadydeployed/manifestgenerator/nginx"
 )
 
 type GenerateVirtualServerOptions struct {
@@ -17,31 +16,32 @@ type GenerateVirtualServerOptions struct {
 
 func GenerateVirtualServerYAML(opts *GenerateVirtualServerOptions) (string, error) {
 	virtualServer := nginx.VirtualServer{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "k8s.nginx.org/v1",
-			Kind:       "VirtualServer",
-		},
-		ObjectMeta: metav1.ObjectMeta{
+		APIVersion: "k8s.nginx.org/v1",
+		Kind:       "VirtualServer",
+		Metadata: nginx.Metadata{
 			Name:      opts.AppID,
 			Namespace: opts.ProjectID,
 			Labels:    opts.Labels,
 		},
-		Spec: nginx.VirtualServerSpec{
+		Spec: nginx.Spec{
 			Host: fmt.Sprintf("%s.svc.deploys.dev", opts.AppID),
-			TLS: &nginx.TLS{
+			TLS: nginx.TLS{
 				Secret: "",
+				Redirect: nginx.TLSRedirect{
+					Enable: true,
+				},
 			},
 			Upstreams: []nginx.Upstream{
 				{
 					Name:    opts.AppID,
 					Service: opts.AppID,
-					Port:    uint16(3000),
+					Port:    3000,
 				},
 			},
 			Routes: []nginx.Route{
 				{
 					Path: "/",
-					Action: &nginx.Action{
+					Action: nginx.RouteAction{
 						Pass: opts.AppID,
 					},
 				},
