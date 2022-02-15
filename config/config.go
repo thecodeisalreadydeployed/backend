@@ -82,15 +82,15 @@ func DefaultContainerRegistryConfiguration() containerregistry.ContainerRegistry
 	}
 }
 
-func KindLocalRegistryConfiguration(port int) containerregistry.ContainerRegistryConfiguration {
+func KindLocalRegistryConfiguration() containerregistry.ContainerRegistryConfiguration {
 	return containerregistry.ContainerRegistryConfiguration{
 		Type:                 containerregistry.LOCAL,
 		AuthenticationMethod: containerregistry.Secret,
 		Secret:               "",
 		Repository:           "",
 		Metadata: map[string]string{
-			"HOSTNAME": "docker-registry.container-registry.svc.cluster.local",
-			"PORT":     fmt.Sprintf("%d", port),
+			"HOSTNAME": "kind-registry",
+			"PORT":     fmt.Sprintf("%d", 5001),
 		},
 	}
 }
