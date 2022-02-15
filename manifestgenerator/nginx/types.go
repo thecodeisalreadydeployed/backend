@@ -1,45 +1,45 @@
 package types
 
 type Metadata struct {
-	Name      string
-	Namespace string
-	Labels    map[string]string
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Labels    map[string]string `json:"labels"`
 }
 
 type TLSRedirect struct {
-	Enable bool
+	Enable bool `json:"enable"`
 }
 
 type TLS struct {
-	Secret   string
-	Redirect TLSRedirect
+	Secret   string      `json:"secret"`
+	Redirect TLSRedirect `json:"redirect"`
 }
 
 type Upstream struct {
-	Name    string
-	Service string
-	Port    int
+	Name    string `json:"name"`
+	Service string `json:"service"`
+	Port    int    `json:"port"`
 }
 
 type RouteAction struct {
-	Pass string
+	Pass string `json:"pass"`
 }
 
 type Route struct {
-	Path   string
-	Action RouteAction
+	Path   string      `json:"path"`
+	Action RouteAction `json:"action"`
 }
 
 type Spec struct {
-	Host      string
-	TLS       TLS
-	Upstreams []Upstream
-	Routes    []Route
+	Host      string     `json:"host"`
+	TLS       TLS        `json:"tls"`
+	Upstreams []Upstream `json:"upstreams"`
+	Routes    []Route    `json:"routes"`
 }
 
 type VirtualServer struct {
-	APIVersion string
-	Kind       string
-	Metadata   Metadata
-	Spec       Spec
+	APIVersion string   `json:"apiVersion"`
+	Kind       string   `json:"kind"`
+	Metadata   Metadata `json:"metadata"`
+	Spec       Spec     `json:"spec"`
 }
