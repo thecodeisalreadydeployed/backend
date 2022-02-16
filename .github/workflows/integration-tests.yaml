@@ -88,7 +88,8 @@ jobs:
           kubectl get namespace
           kubectl get events
           kubectl api-resources --namespaced=false
-          argocd app logs userspace
+          argocd app logs userspace --container container0
+          argocd app logs userspace --container metadataserver
       - run: kubectl -n default port-forward svc/gitserver 9418 &
       - run: cd /tmp && git clone git://localhost/userspace
       - run: cd /tmp/userspace && git status && kustomize build .
