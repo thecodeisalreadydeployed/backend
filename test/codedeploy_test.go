@@ -176,7 +176,10 @@ CMD node main
 
 			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
 			deploymentState := deployment.Object().Value("state").String().Raw()
-			if deploymentState != string(model.DeploymentStateBuildSucceeded) || deploymentState != string(model.DeploymentStateCommitted) {
+			if deploymentState != string(model.DeploymentStateBuildSucceeded) {
+				if deploymentState == string(model.DeploymentStateCommitted) {
+					break
+				}
 				time.Sleep(100 * time.Millisecond)
 				continue
 			} else {
