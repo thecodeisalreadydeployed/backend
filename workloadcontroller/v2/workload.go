@@ -87,6 +87,47 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					}
 				}
 			}
+
+			if deployment.State == model.DeploymentStateCommitted {
+				pods, err := ctrl.clusterBackend.Pods("", map[string]string{
+					"beta.deploys.dev/deployment-id": deployment.ID,
+				})
+
+				if err != nil {
+					ctrl.logger.Error(err.Error())
+					continue
+				}
+
+				for _, p := range pods {
+					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
+					switch p.Status.Phase {
+					case v1.PodRunning:
+						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateReady)
+						if err != nil {
+							ctrl.logger.Error(
+								"cannot set deployment state",
+								zap.String("deploymentID", deployment.ID),
+								zap.String("desiredState", string(model.DeploymentStateError)),
+								zap.String("podSelfLink", p.SelfLink),
+								zap.Error(err),
+							)
+						}
+					case v1.PodPending:
+						continue
+					default:
+						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+						if err != nil {
+							ctrl.logger.Error(
+								"cannot set deployment state",
+								zap.String("deploymentID", deployment.ID),
+								zap.String("desiredState", string(model.DeploymentStateError)),
+								zap.String("podSelfLink", p.SelfLink),
+								zap.Error(err),
+							)
+						}
+					}
+				}
+			}
 		}
 		time.Sleep(3 * time.Second)
 	}
