@@ -196,6 +196,25 @@ CMD node main
 			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
 			deploymentState := deployment.Object().Value("state").String().Raw()
 			if deploymentState != string(model.DeploymentStateCommitted) {
+				if deploymentState == string(model.DeploymentStateReady) {
+					break
+				}
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(15 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateReady) {
 				time.Sleep(100 * time.Millisecond)
 				continue
 			} else {
