@@ -29,6 +29,8 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 		ctrl.logger.Error("cannot set container image", zap.Error(err), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
 		return
 	}
+
+	_ = datastore.SetDeploymentState(datastore.GetDB(), deploymentID, model.DeploymentStateCommitted)
 }
 
 func (ctrl *workloadController) ObserveWorkloads() {
