@@ -186,6 +186,38 @@ CMD node main
 				break
 			}
 		}
+
+		timeLimit = time.Now().Add(1 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateCommitted) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(5 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			appStatus := expect.GET(fmt.Sprintf("/apps/%s/status", appID)).Expect().Status(http.StatusOK).JSON()
+			appStatusDeploymentID := appStatus.Object().Value("deploymentID").String().Raw()
+			if appStatusDeploymentID != deploymentID {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
 	}
 
 	// expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
