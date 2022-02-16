@@ -139,3 +139,17 @@ func (backend *clusterBackend) Pods(namespace string, labels map[string]string) 
 
 	return podList.Items, nil
 }
+
+func (backend *clusterBackend) DeletePod(namespace string, name string) error {
+	_, err := backend.kubernetesClient.CoreV1().Pods(namespace).Get(context.TODO(), name, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		return fmt.Errorf("cannot find Pod %s: %w", name, err)
+	}
+
+	err = backend.kubernetesClient.CoreV1().Pods(namespace).Delete(context.TODO(), name, v1.DeleteOptions{})
+	if err != nil {
+		return fmt.Errorf("cannot delete Pod %s: %w", name, err)
+	}
+
+	return nil
+}
