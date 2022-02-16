@@ -119,7 +119,6 @@ func (ctrl *workloadController) ObserveWorkloads() {
 								zap.Error(err),
 							)
 						}
-						break
 					case v1.PodPending:
 						continue
 					case v1.PodFailed:
