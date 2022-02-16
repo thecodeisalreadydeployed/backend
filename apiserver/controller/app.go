@@ -7,10 +7,16 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
+	"github.com/thecodeisalreadydeployed/statusapi"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 )
 
-func NewAppController(api fiber.Router, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver) {
+func NewAppController(
+	api fiber.Router,
+	workloadController workloadcontroller.WorkloadController,
+	observer repositoryobserver.RepositoryObserver,
+	statusAPIBackend statusapi.StatusAPIBackend,
+) {
 	api.Get("/list", listApps)
 	api.Get("/search", searchApp)
 	api.Get("/:appID", getApp)
