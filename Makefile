@@ -28,7 +28,7 @@ lint:
 
 .PHONY: test
 test:
-	go test -v ./test
+	go test -timeout 30m -v ./test
 
 .PHONY: lint-ci
 lint-ci:
