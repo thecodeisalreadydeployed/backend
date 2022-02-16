@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 
@@ -45,5 +46,5 @@ func main() {
 		_, _ = w.Write([]byte(`{"ok": true}`))
 	})
 
-	http.ListenAndServe(":5000", nil)
+	log.Fatal(http.ListenAndServe(":5000", nil))
 }
