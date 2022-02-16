@@ -76,7 +76,7 @@ jobs:
         run: kubectl -n argocd logs pod/argocd-application-controller-0
       - if: always()
         run: |
-          sleep 2m
+          sleep 5m
           argocd app list
           argocd app get userspace
           argocd app history userspace
