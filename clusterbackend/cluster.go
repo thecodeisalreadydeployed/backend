@@ -17,6 +17,7 @@ type ClusterBackend interface {
 	CreateNamespace(name string) (string, error)
 	CreateNamespaceIfNotExists(name string) (string, error)
 	CreatePod(pod apiv1.Pod, namespace string) (string, error)
+	DeletePod(namespace string, name string) error
 	CreateConfigMap(configMap apiv1.ConfigMap, namespace string) (string, error)
 
 	Pods(namespace string, labels map[string]string) ([]apiv1.Pod, error)
