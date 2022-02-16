@@ -203,7 +203,7 @@ CMD node main
 			}
 		}
 
-		timeLimit = time.Now().Add(5 * time.Minute)
+		timeLimit = time.Now().Add(15 * time.Minute)
 		for {
 			if time.Now().After(timeLimit) {
 				t.Fatal("didn't see result in time")
