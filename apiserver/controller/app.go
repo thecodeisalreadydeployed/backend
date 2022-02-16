@@ -20,13 +20,14 @@ func NewAppController(
 	api.Get("/list", listApps)
 	api.Get("/search", searchApp)
 	api.Get("/:appID", getApp)
+	api.Get("/:appID/status", getAppStatus(statusAPIBackend))
 	api.Post("/:appID/deployments", createDeployment(workloadController))
 	api.Get("/:appID/deployments", listAppDeployments)
 	api.Post("/", createApp(workloadController))
 	api.Delete("/:appID", deleteApp)
 	api.Put("/:appID/observable/enable", enableObservable)
 	api.Put("/:appID/observable/disable", disableObservable)
-	api.Get("/:appID/refresh", forceRefresh(observer))
+	api.Post("/:appID/refresh", forceRefresh(observer))
 }
 
 func listApps(ctx *fiber.Ctx) error {
@@ -38,6 +39,14 @@ func getApp(ctx *fiber.Ctx) error {
 	appID := ctx.Params("appID")
 	result, err := datastore.GetAppByID(datastore.GetDB(), appID)
 	return writeResponse(ctx, result, err)
+}
+
+func getAppStatus(statusAPIBackend statusapi.StatusAPIBackend) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		appID := ctx.Params("appID")
+		result, err := statusAPIBackend.GetActiveDeploymentID(appID)
+		return writeResponse(ctx, result, err)
+	}
 }
 
 func searchApp(ctx *fiber.Ctx) error {
