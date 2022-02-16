@@ -45,7 +45,7 @@ func getAppStatus(statusAPIBackend statusapi.StatusAPIBackend) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		appID := ctx.Params("appID")
 		result, err := statusAPIBackend.GetActiveDeploymentID(appID)
-		return writeResponse(ctx, result, err)
+		return writeResponse(ctx, map[string]string{"deploymentID": result}, err)
 	}
 }
 
