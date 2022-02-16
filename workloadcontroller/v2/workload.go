@@ -77,7 +77,15 @@ func (ctrl *workloadController) ObserveWorkloads() {
 								zap.Error(err),
 							)
 						}
-						ctrl.clusterBackend.DeletePod(p.Namespace, p.Name)
+						err = ctrl.clusterBackend.DeletePod(p.Namespace, p.Name)
+						if err != nil {
+							ctrl.logger.Error(
+								"cannot delete Pod",
+								zap.String("deploymentID", deployment.ID),
+								zap.String("podSelfLink", p.SelfLink),
+								zap.Error(err),
+							)
+						}
 						go ctrl.setContainerImage(deployment.AppID, deployment.ID)
 					case v1.PodFailed:
 						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
