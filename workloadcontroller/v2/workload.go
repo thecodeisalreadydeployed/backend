@@ -107,8 +107,8 @@ func (ctrl *workloadController) ObserveWorkloads() {
 				numberOfFailedPods := 0
 				for _, p := range pods {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
-					switch p.Status.Phase {
-					case v1.PodRunning:
+
+					if p.Status.Phase == v1.PodRunning {
 						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateReady)
 						if err != nil {
 							ctrl.logger.Error(
@@ -119,12 +119,11 @@ func (ctrl *workloadController) ObserveWorkloads() {
 								zap.Error(err),
 							)
 						}
-					case v1.PodPending:
-						continue
-					case v1.PodFailed:
-						numberOfFailedPods++
-					default:
 						break
+					}
+
+					if p.Status.Phase == v1.PodFailed {
+						numberOfFailedPods++
 					}
 				}
 
