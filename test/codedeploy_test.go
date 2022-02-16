@@ -131,28 +131,58 @@ CMD node main
 		ValueEqual("state", model.DeploymentStateQueueing)
 
 	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
-		time.Sleep(30 * time.Second)
-
 		deploymentID := deployment.Object().Value("id").String().Raw()
 
-		expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
-			Expect().Status(http.StatusOK).JSON().
-			Object().
-			ContainsKey("state").ValueEqual("state", model.DeploymentStateBuilding)
+		timeLimit := time.Now().Add(1 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
 
-		events := expect.GET("/deployments/" + deploymentID + "/events").
-			Expect().
-			Status(http.StatusOK).
-			JSON()
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateBuilding) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
 
-		events.Array().Length().Gt(0)
+		timeLimit = time.Now().Add(30 * time.Second)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
 
-		time.Sleep(150 * time.Second)
+			events := expect.GET("/deployments/" + deploymentID + "/events").
+				Expect().
+				Status(http.StatusOK).
+				JSON().Array().Raw()
 
-		expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
-			Expect().Status(http.StatusOK).JSON().
-			Object().
-			ContainsKey("state").ValueEqual("state", model.DeploymentStateBuildSucceeded)
+			if len(events) == 0 {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(3 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateBuildSucceeded) || deploymentState != string(model.DeploymentStateCommitted) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
 	}
 
 	// expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
