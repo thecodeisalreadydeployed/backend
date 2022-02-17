@@ -4,6 +4,7 @@ package gitopscontroller
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"sync"
 
@@ -35,6 +36,10 @@ var mutex sync.Mutex
 func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
+		if _, err := os.Stat(path); os.IsExist(err) {
+			return
+		}
+
 		gateway, err := gitgateway.NewGitRepository(path)
 		if err != nil {
 			panic(err)
