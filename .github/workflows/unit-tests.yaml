@@ -10,7 +10,6 @@ jobs:
         pkg: [
           'gitgateway/v2',
           'repositoryobserver',
-          'manifestgenerator',
           'datastore',
           'datamodel',
           'gitopscontroller',
