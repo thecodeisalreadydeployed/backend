@@ -3,9 +3,9 @@ WORKDIR /__w
 ADD go.mod go.sum ./
 RUN go mod download
 ADD . .
-RUN go build main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main -ldflags '-w -s' main.go
 
-FROM golang:1.16-alpine
+FROM scratch
 WORKDIR /__w
 ADD https://github.com/trif0lium/secrets-resolve/releases/download/v0.0.3/secrets-resolve_0.0.3_linux_amd64 /__w/secrets-resolve
 RUN chmod +x /__w/secrets-resolve
