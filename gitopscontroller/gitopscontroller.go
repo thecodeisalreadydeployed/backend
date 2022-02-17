@@ -36,7 +36,7 @@ var mutex sync.Mutex
 func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
-		if _, err := os.Stat(path); os.IsExist(err) {
+		if _, err := os.Stat(path); err == nil {
 			return
 		}
 
