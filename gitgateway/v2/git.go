@@ -44,7 +44,7 @@ type gitGateway struct {
 func NewGitRepository(path string) (GitGateway, error) {
 	repo, initErr := git.PlainInit(path, false)
 	if initErr != nil {
-		return nil, errutil.ErrFailedPrecondition
+		return nil, fmt.Errorf("cannot initialize new Git repository: %w", initErr)
 	}
 	return &gitGateway{repo: repo}, nil
 }
