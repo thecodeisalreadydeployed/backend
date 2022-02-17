@@ -10,4 +10,4 @@ WORKDIR /__w
 COPY --from=build-env /__w/main /__w
 EXPOSE 3000
 ENV APP_ENV=PROD
-CMD /__w/main
+ENTRYPOINT /__w/main
