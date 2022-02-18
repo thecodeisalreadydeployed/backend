@@ -5,11 +5,11 @@ import (
 )
 
 type CreateAppRequest struct {
-	ProjectID     string `validate:"required"`
-	Name          string `validate:"required"`
-	RepositoryURL string `validate:"required"`
-	BuildScript   string `validate:"required"`
-	Branch        string `validate:"required"`
+	ProjectID     string `json:"projectID" validate:"required"`
+	Name          string `json:"name" validate:"required"`
+	RepositoryURL string `json:"repositoryURL" validate:"required"`
+	BuildScript   string `json:"buildScript" validate:"required"`
+	Branch        string `json:"branch" validate:"required"`
 }
 
 func (req *CreateAppRequest) ToModel() model.App {
