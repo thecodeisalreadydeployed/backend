@@ -46,7 +46,9 @@ func (ctrl *workloadController) ObserveWorkloads() {
 		}
 
 		numberOfPendingDeployments := len(*pendingDeployments)
-		ctrl.logger.Debug("number of pending deployments is " + fmt.Sprint(numberOfPendingDeployments))
+		if numberOfPendingDeployments != 0 {
+			ctrl.logger.Debug("number of pending deployments is " + fmt.Sprint(numberOfPendingDeployments))
+		}
 
 		for _, deployment := range *pendingDeployments {
 			ctrl.logger.Debug("processing deployment", zap.Any("deployment", deployment))
