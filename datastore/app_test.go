@@ -134,7 +134,13 @@ func TestSaveApp(t *testing.T) {
 		WithArgs(
 			"prj-test",
 			"Best App",
-			model.GetGitSourceString(model.GitSource{}),
+			model.GetGitSourceString(model.GitSource{
+				CommitSHA:        "a",
+				CommitMessage:    "a",
+				CommitAuthorName: "a",
+				RepositoryURL:    "a",
+				Branch:           "a",
+			}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
@@ -285,7 +291,13 @@ func TestSetObservable(t *testing.T) {
 		WithArgs(
 			"prj-test",
 			"Best App",
-			model.GetGitSourceString(model.GitSource{}),
+			model.GetGitSourceString(model.GitSource{
+				CommitSHA:        "a",
+				CommitMessage:    "a",
+				CommitAuthorName: "a",
+				RepositoryURL:    "a",
+				Branch:           "a",
+			}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
