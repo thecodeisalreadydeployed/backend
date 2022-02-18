@@ -187,16 +187,19 @@ func (observer *repositoryObserver) checkChanges(repoURL string, branch string, 
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
+		observer.logger.Error("cannot checkout", zap.Error(err))
 		return nil, -1
 	}
 
 	ref, err := git.Head()
 	if err != nil {
+		observer.logger.Error("cannot get repository head", zap.Error(err))
 		return nil, -1
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
+		observer.logger.Error("cannot get commit diff", zap.Error(err))
 		return nil, -1
 	}
 
