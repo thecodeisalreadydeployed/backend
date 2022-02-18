@@ -36,23 +36,22 @@ var mutex sync.Mutex
 func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
-		if _, err := os.Stat(path); err == nil {
-			return
-		}
+		_, err := os.Stat(path)
+		if err != nil && os.IsNotExist(err) {
+			gateway, err := gitgateway.NewGitRepository(path)
+			if err != nil {
+				panic(err)
+			}
 
-		gateway, err := gitgateway.NewGitRepository(path)
-		if err != nil {
-			panic(err)
-		}
+			writeErr := gateway.WriteFile("kustomization.yml", "")
+			if writeErr != nil {
+				panic("cannot write kustomization.yml")
+			}
 
-		writeErr := gateway.WriteFile("kustomization.yml", "")
-		if writeErr != nil {
-			panic("cannot write kustomization.yml")
-		}
-
-		_, commitErr := gateway.Commit([]string{"kustomization.yml"}, "initial commit")
-		if commitErr != nil {
-			panic(commitErr)
+			_, commitErr := gateway.Commit([]string{"kustomization.yml"}, "initial commit")
+			if commitErr != nil {
+				panic(commitErr)
+			}
 		}
 	})
 }
