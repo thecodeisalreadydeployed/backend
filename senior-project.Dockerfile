@@ -8,6 +8,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main -ldflags '-w -s' main
 FROM scratch
 WORKDIR /__w
 COPY --from=build-env /__w/main /__w
+COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 3000
 ENV APP_ENV=PROD
 ENTRYPOINT ["/__w/main"]
