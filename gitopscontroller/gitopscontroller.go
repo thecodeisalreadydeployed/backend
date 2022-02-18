@@ -37,7 +37,7 @@ func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
 		_, err := os.Stat(path)
-		if err != nil && os.IsNotExist(err) {
+		if os.IsNotExist(err) {
 			gateway, err := gitgateway.NewGitRepository(path)
 			if err != nil {
 				panic(err)
