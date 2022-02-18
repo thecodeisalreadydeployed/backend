@@ -21,7 +21,7 @@ func EnsureAuthenticated(firebaseAuth *auth.Client) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		isInternalRequest := string(c.Request().Header.Peek("X-CodeDeploy-Internal-Request")) == "True" && len(c.Request().Header.Peek("X-Forwarded-For")) == 0
 		if isInternalRequest {
-			c.Next()
+			return c.Next()
 		}
 
 		parts := strings.Split(c.GetReqHeaders()["Authorization"], " ")
