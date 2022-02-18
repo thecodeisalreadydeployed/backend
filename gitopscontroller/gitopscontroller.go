@@ -36,7 +36,7 @@ var mutex sync.Mutex
 func setupUserspace() {
 	once.Do(func() {
 		path := config.DefaultUserspaceRepository()
-		_, err := os.Stat(path)
+		_, err := os.Stat(filepath.Join(path, ".git"))
 		if os.IsNotExist(err) {
 			gateway, err := gitgateway.NewGitRepository(path)
 			if err != nil {
