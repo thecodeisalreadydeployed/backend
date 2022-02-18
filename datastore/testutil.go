@@ -95,7 +95,13 @@ func GetAppRows() *sqlmock.Rows {
 			"app-test",
 			"prj-test",
 			"Best App",
-			model.GetGitSourceString(model.GitSource{}),
+			model.GetGitSourceString(model.GitSource{
+				CommitSHA:        "a",
+				CommitMessage:    "a",
+				CommitAuthorName: "a",
+				RepositoryURL:    "a",
+				Branch:           "a",
+			}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
@@ -142,10 +148,16 @@ func GetExpectedDeployment() *model.Deployment {
 
 func GetExpectedApp() *model.App {
 	return &model.App{
-		ID:                 "app-test",
-		ProjectID:          "prj-test",
-		Name:               "Best App",
-		GitSource:          model.GitSource{},
+		ID:        "app-test",
+		ProjectID: "prj-test",
+		Name:      "Best App",
+		GitSource: model.GitSource{
+			CommitSHA:        "a",
+			CommitMessage:    "a",
+			CommitAuthorName: "a",
+			RepositoryURL:    "a",
+			Branch:           "a",
+		},
 		CreatedAt:          time.Unix(0, 0),
 		UpdatedAt:          time.Unix(0, 0),
 		BuildConfiguration: model.BuildConfiguration{},
