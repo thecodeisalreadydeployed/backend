@@ -3,6 +3,7 @@ package gitgateway
 import (
 	"errors"
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -32,6 +33,7 @@ type GitGateway interface {
 	GetBranches() ([]string, error)
 	GetFiles(branch string) ([]string, error)
 	GetRaw(branch string, path string) (string, error)
+	repository() *git.Repository
 
 	// CommitInterval Calculate average commit interval for the last 10 commit intervals
 	CommitInterval() (time.Duration, error)
@@ -413,4 +415,42 @@ func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
 	}
 
 	return raw, nil
+}
+
+func Info(repoURL string, branch string) (model.GitSource, error) {
+	g, err := NewGitGatewayRemote(repoURL)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrInvalidArgument
+	}
+
+	err = g.Checkout(branch)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrInvalidArgument
+	}
+
+	ref, err := g.repository().Head()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrUnknown
+	}
+
+	commit, err := g.repository().CommitObject(ref.Hash())
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrUnknown
+	}
+
+	return model.GitSource{
+		CommitSHA:        commit.Hash.String(),
+		CommitMessage:    commit.Message,
+		CommitAuthorName: commit.Author.String(),
+		RepositoryURL:    repoURL,
+		Branch:           branch,
+	}, nil
+}
+
+func (g *gitGateway) repository() *git.Repository {
+	return g.repo
 }
