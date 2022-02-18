@@ -18,6 +18,7 @@ else
   /kaniko/executor \
     --destination=$CODEDEPLOY_KANIKO_DESTINATION \
     --force \
+    --cache=true \
     --log-format=json \
     --verbosity=$CODEDEPLOY_KANIKO_LOG_VERBOSITY \
     --dockerfile=$CODEDEPLOY_KANIKO_DOCKERFILE \
