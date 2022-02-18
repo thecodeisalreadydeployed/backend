@@ -109,7 +109,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 	var duration time.Duration
 	var restart bool
 	for {
-		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
+		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA, observer)
 
 		if duration > gitgateway.MaximumInterval {
 			duration = gitgateway.MaximumInterval
@@ -172,14 +172,16 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	}
 }
 
-func checkChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
+func checkChanges(repoURL string, branch string, currentCommitSHA string, observer *repositoryObserver) (*string, time.Duration) {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
+		observer.logger.Error("cannot connect to remote", zap.Error(err))
 		return nil, -1
 	}
 
 	duration, err := git.CommitInterval()
 	if err != nil {
+		observer.logger.Error("cannot get commit interval", zap.Error(err))
 		return nil, -1
 	}
 
