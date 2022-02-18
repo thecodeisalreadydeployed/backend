@@ -33,7 +33,7 @@ type GitGateway interface {
 	GetFiles(branch string) ([]string, error)
 	GetRaw(branch string, path string) (string, error)
 
-	// Calculate average commit interval for the last 10 commit intervals
+	// CommitInterval Calculate average commit interval for the last 10 commit intervals
 	CommitInterval() (time.Duration, error)
 }
 
@@ -277,11 +277,13 @@ const MaximumInterval = 30 * time.Minute
 func (g *gitGateway) CommitInterval() (time.Duration, error) {
 	ref, refErr := g.repo.Head()
 	if refErr != nil {
+		zap.L().Error(refErr.Error())
 		return -1, errutil.ErrFailedPrecondition
 	}
 
 	cIter, logErr := g.repo.Log(&git.LogOptions{From: ref.Hash()})
 	if logErr != nil {
+		zap.L().Error(refErr.Error())
 		return -1, errutil.ErrFailedPrecondition
 	}
 
@@ -380,7 +382,6 @@ func (g *gitGateway) GetFiles(branch string) ([]string, error) {
 }
 
 func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
-	plumbing.NewHash("b3cbd5bbd7e81436d2eee04537ea2b4c0cad4cdf")
 	err := g.Checkout(branch)
 	if err != nil {
 		zap.L().Error(err.Error())
