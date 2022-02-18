@@ -53,7 +53,7 @@ func NewGitGatewayLocal(path string) (GitGateway, error) {
 	repo, openErr := git.PlainOpen(path)
 
 	if openErr != nil {
-		return nil, errutil.ErrFailedPrecondition
+		return nil, fmt.Errorf("cannot open Git repository: %w", openErr)
 	}
 
 	return &gitGateway{repo: repo}, nil
