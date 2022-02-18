@@ -114,6 +114,11 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 			},
 			InitContainers: []apiv1.Container{
 				{
+					Name:    "workload-identity-init-container",
+					Image:   "gcr.io/google.com/cloudsdktool/cloud-sdk:326.0.0-alpine",
+					Command: []string{"/bin/bash", "-c", "curl -s -H 'Metadata-Flavor: Google' 'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token' --retry 30 --retry-connrefused --retry-max-time 30 > /dev/null || exit 1"},
+				},
+				{
 					Name:         "imagebuilder-workspace",
 					Image:        "ghcr.io/thecodeisalreadydeployed/imagebuilder-workspace:" + imageTag,
 					VolumeMounts: []apiv1.VolumeMount{workspace},
