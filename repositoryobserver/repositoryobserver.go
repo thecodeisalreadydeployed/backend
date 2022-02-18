@@ -16,6 +16,7 @@ import (
 type RepositoryObserver interface {
 	ObserveGitSources()
 	Refresh(id string)
+	CheckChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration)
 }
 
 type repositoryObserver struct {
@@ -109,7 +110,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 	var duration time.Duration
 	var restart bool
 	for {
-		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
+		commit, duration = observer.CheckChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 
 		if duration > gitgateway.MaximumInterval {
 			duration = gitgateway.MaximumInterval
@@ -172,29 +173,34 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	}
 }
 
-func checkChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
+func (observer *repositoryObserver) CheckChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
+		observer.logger.Error("cannot connect to remote", zap.Error(err))
 		return nil, -1
 	}
 
 	duration, err := git.CommitInterval()
 	if err != nil {
+		observer.logger.Error("cannot get commit interval", zap.Error(err))
 		return nil, -1
 	}
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
+		observer.logger.Error("cannot checkout", zap.Error(err))
 		return nil, -1
 	}
 
 	ref, err := git.Head()
 	if err != nil {
+		observer.logger.Error("cannot get repository head", zap.Error(err))
 		return nil, -1
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
+		observer.logger.Error("cannot get commit diff", zap.Error(err))
 		return nil, -1
 	}
 

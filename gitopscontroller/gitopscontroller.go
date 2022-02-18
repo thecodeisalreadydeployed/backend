@@ -61,7 +61,7 @@ func NewGitOpsController(logger *zap.Logger) GitOpsController {
 	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
 	if err != nil {
-		panic(err)
+		logger.Error("cannot set userspace")
 	}
 
 	argoCDClient := argocd.NewArgoCDClient(logger.With(zap.String("userspace", path)), "userspace", path)

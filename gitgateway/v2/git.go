@@ -3,6 +3,7 @@ package gitgateway
 import (
 	"errors"
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -32,8 +33,9 @@ type GitGateway interface {
 	GetBranches() ([]string, error)
 	GetFiles(branch string) ([]string, error)
 	GetRaw(branch string, path string) (string, error)
+	repository() *git.Repository
 
-	// Calculate average commit interval for the last 10 commit intervals
+	// CommitInterval Calculate average commit interval for the last 10 commit intervals
 	CommitInterval() (time.Duration, error)
 }
 
@@ -277,11 +279,13 @@ const MaximumInterval = 30 * time.Minute
 func (g *gitGateway) CommitInterval() (time.Duration, error) {
 	ref, refErr := g.repo.Head()
 	if refErr != nil {
+		zap.L().Error(refErr.Error())
 		return -1, errutil.ErrFailedPrecondition
 	}
 
 	cIter, logErr := g.repo.Log(&git.LogOptions{From: ref.Hash()})
 	if logErr != nil {
+		zap.L().Error(refErr.Error())
 		return -1, errutil.ErrFailedPrecondition
 	}
 
@@ -380,7 +384,6 @@ func (g *gitGateway) GetFiles(branch string) ([]string, error) {
 }
 
 func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
-	plumbing.NewHash("b3cbd5bbd7e81436d2eee04537ea2b4c0cad4cdf")
 	err := g.Checkout(branch)
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -412,4 +415,42 @@ func (g *gitGateway) GetRaw(branch string, path string) (string, error) {
 	}
 
 	return raw, nil
+}
+
+func Info(repoURL string, branch string) (model.GitSource, error) {
+	g, err := NewGitGatewayRemote(repoURL)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrInvalidArgument
+	}
+
+	err = g.Checkout(branch)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrInvalidArgument
+	}
+
+	ref, err := g.repository().Head()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrUnknown
+	}
+
+	commit, err := g.repository().CommitObject(ref.Hash())
+	if err != nil {
+		zap.L().Error(err.Error())
+		return model.GitSource{}, errutil.ErrUnknown
+	}
+
+	return model.GitSource{
+		CommitSHA:        commit.Hash.String(),
+		CommitMessage:    commit.Message,
+		CommitAuthorName: commit.Author.String(),
+		RepositoryURL:    repoURL,
+		Branch:           branch,
+	}, nil
+}
+
+func (g *gitGateway) repository() *git.Repository {
+	return g.repo
 }
