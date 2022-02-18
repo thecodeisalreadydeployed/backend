@@ -3,6 +3,7 @@ package datastore
 import (
 	"errors"
 	"fmt"
+	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"go.uber.org/zap"
 	"strings"
 	"sync"
@@ -135,6 +136,15 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 	if !strings.HasPrefix(app.ID, "app-") {
 		zap.L().Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
+	}
+
+	if app.GitSource.CommitSHA == "" || app.GitSource.CommitMessage == "" || app.GitSource.CommitAuthorName == "" {
+		gs, err := gitgateway.Info(app.GitSource.RepositoryURL, app.GitSource.Branch)
+		if err != nil {
+			zap.L().Error(err.Error())
+			return nil, errutil.ErrInvalidArgument
+		}
+		app.GitSource = gs
 	}
 
 	a := datamodel.NewAppFromModel(app)
