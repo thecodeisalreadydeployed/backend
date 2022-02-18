@@ -51,6 +51,21 @@ func (ctrl *workloadController) ObserveWorkloads() {
 		for _, deployment := range *pendingDeployments {
 			ctrl.logger.Debug("processing deployment", zap.Any("deployment", deployment))
 
+			if deployment.State == model.DeploymentStateQueueing {
+				timeLimit := deployment.UpdatedAt.Add(15 * time.Minute)
+				if time.Now().After(timeLimit) {
+					err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+					if err != nil {
+						ctrl.logger.Error(
+							"cannot set deployment state",
+							zap.String("deploymentID", deployment.ID),
+							zap.String("desiredState", string(model.DeploymentStateError)),
+							zap.Error(err),
+						)
+					}
+				}
+			}
+
 			if deployment.State == model.DeploymentStateBuilding {
 				pods, err := ctrl.clusterBackend.Pods("codedeploy-internal", map[string]string{
 					"beta.deploys.dev/deployment-id": deployment.ID,
