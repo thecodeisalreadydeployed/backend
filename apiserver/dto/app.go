@@ -31,6 +31,6 @@ func (req *CreateAppRequest) ToModel() model.App {
 			RepositoryURL: req.RepositoryURL,
 			Branch:        req.Branch,
 		},
-		Observable: true,
+		Observable: false,
 	}
 }
