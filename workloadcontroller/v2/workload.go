@@ -129,8 +129,6 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					continue
 				}
 
-				numberOfPods := len(pods)
-				numberOfFailedPods := 0
 				for _, p := range pods {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
 
@@ -146,22 +144,6 @@ func (ctrl *workloadController) ObserveWorkloads() {
 							)
 						}
 						break
-					}
-
-					if p.Status.Phase == v1.PodFailed {
-						numberOfFailedPods++
-					}
-				}
-
-				if numberOfFailedPods >= numberOfPods {
-					err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
-					if err != nil {
-						ctrl.logger.Error(
-							"cannot set deployment state",
-							zap.String("deploymentID", deployment.ID),
-							zap.String("desiredState", string(model.DeploymentStateError)),
-							zap.Error(err),
-						)
 					}
 				}
 			}
