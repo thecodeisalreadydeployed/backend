@@ -23,19 +23,16 @@ type repositoryObserver struct {
 	logger             *zap.Logger
 	db                 *gorm.DB
 	workloadController workloadcontroller.WorkloadController
-	appChan            chan *model.App
 	refreshChan        map[string]chan bool
 	observables        *sync.Map
 }
 
 func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
-	appChan := make(chan *model.App)
 	refreshChan := make(map[string]chan bool)
 	return &repositoryObserver{
 		logger:             logger,
 		db:                 DB,
 		workloadController: workloadController,
-		appChan:            appChan,
 		refreshChan:        refreshChan,
 		observables:        &sync.Map{},
 	}
@@ -58,15 +55,6 @@ func (observer *repositoryObserver) ObserveGitSources() {
 				}
 			}
 			break
-		}
-	}
-
-	for {
-		app := <-observer.appChan
-		if _, ok := observer.observables.Load(app.ID); !ok {
-			observer.observables.Store(app.ID, nil)
-			observer.refreshChan[app.ID] = make(chan bool)
-			go observer.checkGitSourceWrapper(app)
 		}
 	}
 }
