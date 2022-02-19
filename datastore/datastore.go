@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
-
-	"github.com/thecodeisalreadydeployed/model"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/util"
@@ -17,16 +14,6 @@ import (
 )
 
 var DB *gorm.DB
-var appChan = make(chan *model.App)
-var observables sync.Map
-
-func GetAppChannel() chan *model.App {
-	return appChan
-}
-
-func GetObservables() *sync.Map {
-	return &observables
-}
 
 func Migrate() {
 	// dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
