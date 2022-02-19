@@ -14,6 +14,9 @@ require (
 	github.com/ghodss/yaml v1.0.0 //ct
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/go-openapi/jsonpointer v0.19.5 // indirect
+	github.com/go-openapi/jsonreference v0.19.5 // indirect
+	github.com/go-openapi/swag v0.19.14 // indirect
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/gofiber/fiber/v2 v2.26.0
 	github.com/golang/mock v1.6.0
@@ -24,7 +27,8 @@ require (
 	github.com/klauspost/compress v1.14.2 // indirect
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/moby/buildkit v0.9.1
-	github.com/nginxinc/kubernetes-ingress v1.12.0
+	github.com/onsi/ginkgo v1.16.4 // indirect
+	github.com/onsi/gomega v1.13.0 // indirect
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/spf13/cast v1.4.1
