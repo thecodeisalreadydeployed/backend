@@ -3,11 +3,12 @@ package gitgateway
 import (
 	"errors"
 	"fmt"
-	"github.com/thecodeisalreadydeployed/model"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/thecodeisalreadydeployed/model"
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
@@ -67,7 +68,7 @@ func NewGitGatewayRemote(url string) (GitGateway, error) {
 	})
 
 	if cloneErr != nil {
-		return nil, errutil.ErrFailedPrecondition
+		return nil, fmt.Errorf("cannot clone Git repository: %w", cloneErr)
 	}
 
 	return &gitGateway{repo: repo}, nil
@@ -76,8 +77,7 @@ func NewGitGatewayRemote(url string) (GitGateway, error) {
 func (g *gitGateway) Checkout(branch string) error {
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
-		fmt.Printf("worktreeErr: %v\n", worktreeErr)
-		return errors.New("git: cannot get worktree")
+		return fmt.Errorf("cannot get Git worktree: %w", worktreeErr)
 	}
 
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
@@ -87,8 +87,7 @@ func (g *gitGateway) Checkout(branch string) error {
 
 	if checkoutErr != nil {
 		if !errors.Is(checkoutErr, plumbing.ErrReferenceNotFound) {
-			fmt.Printf("checkoutErr: %v\n", checkoutErr)
-			return errors.New("git: cannot checkout")
+			return fmt.Errorf("cannot checkout: %w", checkoutErr)
 		} else {
 			err := w.Checkout(&git.CheckoutOptions{
 				Branch: plumbing.NewBranchReferenceName(branch),
@@ -97,8 +96,7 @@ func (g *gitGateway) Checkout(branch string) error {
 			})
 
 			if err != nil {
-				fmt.Printf("err: %v\n", err)
-				return errors.New("git: cannot checkout")
+				return fmt.Errorf("cannot checkout: %w", checkoutErr)
 			}
 		}
 	}
@@ -109,7 +107,7 @@ func (g *gitGateway) Checkout(branch string) error {
 func (g *gitGateway) Head() (string, error) {
 	ref, err := g.repo.Head()
 	if err != nil {
-		return "", errutil.ErrFailedPrecondition
+		return "", err
 	}
 	return ref.Hash().String(), nil
 }
@@ -119,17 +117,17 @@ func (g *gitGateway) OpenFile(filePath string) (string, error) {
 
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
-		return "", errutil.ErrFailedPrecondition
+		return "", worktreeErr
 	}
 
 	f, openErr := w.Filesystem.OpenFile(filePath, os.O_RDONLY, defaultMode)
 	if openErr != nil {
-		return "", errutil.ErrFailedPrecondition
+		return "", fmt.Errorf("cannot open file: %w", openErr)
 	}
 
 	read, readErr := ioutil.ReadAll(f)
 	if readErr != nil {
-		return "", errutil.ErrFailedPrecondition
+		return "", fmt.Errorf("cannot read file: %w", readErr)
 	}
 
 	return cast.ToString(read), nil
@@ -140,32 +138,25 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
-		fmt.Printf("worktreeErr: %v\n", worktreeErr)
-		zap.L().Error(worktreeErr.Error())
-		return errutil.ErrFailedPrecondition
+		return worktreeErr
 	}
 
 	_, statErr := w.Filesystem.Stat(filePath)
 	if os.IsNotExist(statErr) {
 		_, createErr := w.Filesystem.Create(filePath)
 		if createErr != nil {
-			fmt.Printf("createErr: %v\n", createErr)
-			return errutil.ErrFailedPrecondition
+			return fmt.Errorf("cannot create file: %w", createErr)
 		}
 	}
 
 	f, openErr := w.Filesystem.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, defaultMode)
 	if openErr != nil {
-		fmt.Printf("openErr: %v\n", openErr)
-		zap.L().Error(openErr.Error())
-		return errutil.ErrFailedPrecondition
+		return fmt.Errorf("cannot open file: %w", openErr)
 	}
 
 	_, writeErr := f.Write([]byte(data))
 	if writeErr != nil {
-		fmt.Printf("writeErr: %v\n", writeErr)
-		zap.L().Error(writeErr.Error())
-		return errutil.ErrFailedPrecondition
+		return fmt.Errorf("cannot write file: %w", openErr)
 	}
 
 	return nil
@@ -174,13 +165,13 @@ func (g *gitGateway) WriteFile(filePath string, data string) error {
 func (g *gitGateway) Commit(files []string, message string) (string, error) {
 	w, worktreeErr := g.repo.Worktree()
 	if worktreeErr != nil {
-		return "", errors.New("git: cannot get worktree")
+		return "", worktreeErr
 	}
 
 	for _, f := range files {
 		_, addErr := w.Add(f)
 		if addErr != nil {
-			return "", errors.New("git: cannot add")
+			return "", fmt.Errorf("cannot add: %w", addErr)
 		}
 	}
 
@@ -189,7 +180,7 @@ func (g *gitGateway) Commit(files []string, message string) (string, error) {
 	})
 
 	if commitErr != nil {
-		return "", errors.New("git: cannot commit")
+		return "", fmt.Errorf("cannot commit: %w", commitErr)
 	}
 
 	commitHash := commit.String()
