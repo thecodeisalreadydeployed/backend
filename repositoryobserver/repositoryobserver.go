@@ -54,8 +54,8 @@ func (observer *repositoryObserver) ObserveGitSources() {
 					go observer.checkGitSourceWrapper(&app)
 				}
 			}
-			break
 		}
+		time.Sleep(3 * time.Minute)
 	}
 }
 
