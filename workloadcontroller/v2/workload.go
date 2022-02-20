@@ -2,6 +2,7 @@ package workloadcontroller
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datastore"
@@ -144,6 +145,23 @@ func (ctrl *workloadController) ObserveWorkloads() {
 							)
 						}
 						break
+					}
+
+					if p.Status.Phase == v1.PodFailed {
+						for _, container := range p.Spec.Containers {
+							if container.Name == "container0" && !strings.HasPrefix(container.Image, "codedeploy://") {
+								err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+								if err != nil {
+									ctrl.logger.Error(
+										"cannot set deployment state",
+										zap.String("deploymentID", deployment.ID),
+										zap.String("desiredState", string(model.DeploymentStateError)),
+										zap.String("podSelfLink", p.SelfLink),
+										zap.Error(err),
+									)
+								}
+							}
+						}
 					}
 				}
 			}
