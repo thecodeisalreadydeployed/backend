@@ -38,14 +38,14 @@ func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController w
 	}
 }
 
-const WaitAfterErrorInterval = 10 * time.Second
+const waitAfterErrorInterval = 10 * time.Second
 
 func (observer *repositoryObserver) ObserveGitSources() {
 	for {
 		apps, err := datastore.GetObservableApps(observer.db)
 		if err != nil {
 			observer.logger.Error("cannot get observable apps", zap.Error(err))
-			time.Sleep(WaitAfterErrorInterval)
+			time.Sleep(waitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
@@ -106,7 +106,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		if commit == nil {
 			if duration == -1 {
 				logger.Error("failed to fetch the repository, waiting for the next retry")
-				time.Sleep(WaitAfterErrorInterval)
+				time.Sleep(waitAfterErrorInterval)
 			} else {
 				logger.Info("no changes in the application, waiting for the next repository check")
 				select {
@@ -131,7 +131,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		_, err := observer.workloadController.NewDeployment(app.ID, commit)
 		if err != nil {
 			logger.Error("failed to deploy new revision, waiting for the next retry", zap.Error(err))
-			time.Sleep(WaitAfterErrorInterval)
+			time.Sleep(waitAfterErrorInterval)
 		} else {
 			break
 		}
@@ -150,7 +150,7 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	observableNow, err := datastore.IsObservableApp(observer.db, app.ID)
 	if err != nil {
 		logger.Error("application status check failed", zap.Error(err))
-		time.Sleep(WaitAfterErrorInterval)
+		time.Sleep(waitAfterErrorInterval)
 		return true, false
 	}
 	if observableNow {
