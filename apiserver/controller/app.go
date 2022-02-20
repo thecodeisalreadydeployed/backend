@@ -25,8 +25,8 @@ func NewAppController(
 	api.Get("/:appID/deployments", listAppDeployments)
 	api.Post("/", createApp(workloadController))
 	api.Delete("/:appID", deleteApp)
-	api.Put("/:appID/observable/enable", enableObservable)
-	api.Put("/:appID/observable/disable", disableObservable)
+	api.Post("/:appID/observable/enable", enableObservable)
+	api.Post("/:appID/observable/disable", disableObservable)
 	api.Post("/:appID/refresh", forceRefresh(observer))
 }
 
