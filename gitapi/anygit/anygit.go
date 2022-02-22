@@ -40,10 +40,10 @@ func (api *anyGitAPI) GetRaw(branch string, path string) (string, error) {
 	return git.GetRaw(branch, path)
 }
 
-func (api *anyGitAPI) FillGitSource(gs model.GitSource) (model.GitSource, error) {
-	gs, err := gitgateway.Info(gs.RepositoryURL, gs.Branch)
+func (api *anyGitAPI) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
+	gs_, err := gitgateway.Info(gs.RepositoryURL, gs.Branch)
 	if err != nil {
-		return model.GitSource{}, err
+		return &model.GitSource{}, err
 	}
-	return gs, nil
+	return &gs_, nil
 }

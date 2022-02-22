@@ -3,6 +3,7 @@ package github
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"io"
 	"net/http"
 
@@ -49,8 +50,8 @@ func (gh *gitHubAPI) GetBranches() ([]string, error) {
 
 // List all file names in strings given a GitHub url string and branch name.
 func (gh *gitHubAPI) GetFiles(branch string) ([]string, error) {
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", gh.owner, gh.repo, branch)
-	res, err := http.Get(urlapi)
+	urlApi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", gh.owner, gh.repo, branch)
+	res, err := http.Get(urlApi)
 	defer closeHTTP(res)
 	if err != nil {
 		gh.logger.Error(err.Error())
@@ -90,6 +91,11 @@ func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
 		return "", errutil.ErrUnknown
 	}
 	return string(bytes), nil
+}
+
+// Fills GitSource fields.
+func (gh *gitHubAPI) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
+
 }
 
 // Gets JSON from HTTP response.

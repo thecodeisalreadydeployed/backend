@@ -7,11 +7,9 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitapi"
-	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/statusapi"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
-	"go.uber.org/zap"
 )
 
 func NewAppController(
@@ -19,7 +17,7 @@ func NewAppController(
 	workloadController workloadcontroller.WorkloadController,
 	observer repositoryobserver.RepositoryObserver,
 	statusAPIBackend statusapi.StatusAPIBackend,
-	gitAPIBackend gitapi.GitAPIBackend
+	gitAPIBackend gitapi.GitAPIBackend,
 ) {
 	api.Get("/list", listApps)
 	api.Get("/search", searchApp)
@@ -73,11 +71,11 @@ func createApp(workloadController workloadcontroller.WorkloadController, gitAPIB
 			return err
 		}
 		inputModel := input.ToModel()
-		gs, err := gitAPIBackend.FillGitSource(inputModel.GitSource)
+		gs, err := gitAPIBackend.FillGitSource(&(inputModel.GitSource))
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest)
 		}
-		inputModel.GitSource = gs
+		inputModel.GitSource = *gs
 		app, createErr := workloadController.NewApp(&inputModel)
 		return writeResponse(c, app, createErr)
 	}

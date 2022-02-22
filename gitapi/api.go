@@ -16,7 +16,7 @@ type GitAPIBackend interface {
 	GetBranches(repoURL string) ([]string, error)
 	GetFiles(repoURL string, branch string) ([]string, error)
 	GetRaw(repoURL string, branch string, path string) (string, error)
-	FillGitSource(gs model.GitSource) (model.GitSource, error)
+	FillGitSource(gs *model.GitSource) (*model.GitSource, error)
 }
 
 type gitAPIBackend struct {
@@ -121,10 +121,10 @@ func (backend *gitAPIBackend) GetRaw(repoURL string, branch string, path string)
 	return (*providerAPI).GetRaw(branch, path)
 }
 
-func (backend *gitAPIBackend) FillGitSource(gs model.GitSource) (model.GitSource, error) {
+func (backend *gitAPIBackend) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
 	providerAPI, err := backend.getGitProviderAPI(gs.RepositoryURL)
 	if err != nil {
-		return model.GitSource{}, err
+		return &model.GitSource{}, err
 	}
 	return (*providerAPI).FillGitSource(gs)
 }
