@@ -95,7 +95,28 @@ func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
 
 // Fills GitSource fields.
 func (gh *gitHubAPI) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
+	urlApi := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?sha=%s", gh.owner, gh.repo, gs.Branch)
+	res, err := http.Get(urlApi)
+	defer closeHTTP(res)
+	if err != nil {
+		gh.logger.Error(err.Error())
+		return nil, errutil.ErrUnavailable
+	}
 
+	var body []CommitDetails
+	err = getJSON(res, &body)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	return &model.GitSource{
+		CommitSHA:        body[0].SHA,
+		CommitMessage:    body[0].Commit.Message,
+		CommitAuthorName: body[0].Commit.Author.Name,
+		RepositoryURL:    gs.RepositoryURL,
+		Branch:           gs.Branch,
+	}, nil
 }
 
 // Gets JSON from HTTP response.
