@@ -131,7 +131,7 @@ CMD node main
 	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
 		deploymentID := deployment.Object().Value("id").String().Raw()
 
-		timeLimit := time.Now().Add(2 * time.Minute)
+		timeLimit := time.Now().Add(5 * time.Minute)
 		for {
 			if time.Now().After(timeLimit) {
 				t.Fatal("didn't see result in time")
