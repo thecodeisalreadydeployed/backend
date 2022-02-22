@@ -6,9 +6,12 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/errutil"
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 	"github.com/thecodeisalreadydeployed/datastore"
+	"github.com/thecodeisalreadydeployed/gitapi"
+	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
 	"github.com/thecodeisalreadydeployed/statusapi"
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
+	"go.uber.org/zap"
 )
 
 func NewAppController(
@@ -16,6 +19,7 @@ func NewAppController(
 	workloadController workloadcontroller.WorkloadController,
 	observer repositoryobserver.RepositoryObserver,
 	statusAPIBackend statusapi.StatusAPIBackend,
+	gitAPIBackend gitapi.GitAPIBackend
 ) {
 	api.Get("/list", listApps)
 	api.Get("/search", searchApp)
@@ -23,7 +27,7 @@ func NewAppController(
 	api.Get("/:appID/status", getAppStatus(statusAPIBackend))
 	api.Post("/:appID/deployments", createDeployment(workloadController))
 	api.Get("/:appID/deployments", listAppDeployments)
-	api.Post("/", createApp(workloadController))
+	api.Post("/", createApp(workloadController, gitAPIBackend))
 	api.Delete("/:appID", deleteApp)
 	api.Post("/:appID/observable/enable", enableObservable)
 	api.Post("/:appID/observable/disable", disableObservable)
@@ -62,13 +66,18 @@ func listAppDeployments(ctx *fiber.Ctx) error {
 
 }
 
-func createApp(workloadController workloadcontroller.WorkloadController) fiber.Handler {
+func createApp(workloadController workloadcontroller.WorkloadController, gitAPIBackend gitapi.GitAPIBackend) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		input := dto.CreateAppRequest{}
 		if err := validator.ParseBodyAndValidate(c, &input); err != nil {
 			return err
 		}
 		inputModel := input.ToModel()
+		gs, err := gitAPIBackend.FillGitSource(inputModel.GitSource)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest)
+		}
+		inputModel.GitSource = gs
 		app, createErr := workloadController.NewApp(&inputModel)
 		return writeResponse(c, app, createErr)
 	}
