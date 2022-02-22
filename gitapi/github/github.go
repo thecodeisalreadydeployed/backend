@@ -22,7 +22,7 @@ func NewGitHubAPI(logger *zap.Logger, owner string, repo string) provider.GitPro
 	return &gitHubAPI{logger: logger, owner: owner, repo: repo}
 }
 
-// List branches in strings given a GitHub utl string.
+// List branches in strings given a GitHub url string.
 func (gh *gitHubAPI) GetBranches() ([]string, error) {
 	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", gh.owner, gh.repo)
 	res, err := http.Get(urlapi)
