@@ -25,8 +25,8 @@ func NewGitHubAPI(logger *zap.Logger, owner string, repo string) provider.GitPro
 
 // List branches in strings given a GitHub url string.
 func (gh *gitHubAPI) GetBranches() ([]string, error) {
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", gh.owner, gh.repo)
-	res, err := http.Get(urlapi)
+	urlApi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", gh.owner, gh.repo)
+	res, err := http.Get(urlApi)
 	defer closeHTTP(res)
 	if err != nil {
 		gh.logger.Error(err.Error())
@@ -77,8 +77,8 @@ func (gh *gitHubAPI) GetFiles(branch string) ([]string, error) {
 
 // Get raw file given GitHub url string, branch, and file path.
 func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
-	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", gh.owner, gh.repo, branch, path)
-	res, err := http.Get(urlapi)
+	urlApi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", gh.owner, gh.repo, branch, path)
+	res, err := http.Get(urlApi)
 	defer closeHTTP(res)
 	if err != nil {
 		gh.logger.Error(err.Error())
