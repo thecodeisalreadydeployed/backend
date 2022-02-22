@@ -68,13 +68,15 @@ CMD node main
 
 	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, projectID)
-	time.Sleep(30 * time.Second)
+	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
+		time.Sleep(30 * time.Second)
+	}
 
 	expect.POST("/apps").
 		WithForm(dto.CreateAppRequest{
 			ProjectID:     projectID,
 			Name:          appName,
-			RepositoryURL: "https://github.com/thecodeisalreadydeployed/fixture-nest.git",
+			RepositoryURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
 			BuildScript:   fixtureNest,
 			Branch:        "main",
 		}).Expect().Status(http.StatusOK)
