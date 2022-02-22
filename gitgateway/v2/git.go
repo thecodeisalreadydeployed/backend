@@ -436,7 +436,7 @@ func Info(repoURL string, branch string) (model.GitSource, error) {
 	return model.GitSource{
 		CommitSHA:        commit.Hash.String(),
 		CommitMessage:    commit.Message,
-		CommitAuthorName: commit.Author.String(),
+		CommitAuthorName: commit.Author.Name,
 		RepositoryURL:    repoURL,
 		Branch:           branch,
 	}, nil
