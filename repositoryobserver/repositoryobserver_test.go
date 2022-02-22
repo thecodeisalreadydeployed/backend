@@ -2,12 +2,10 @@ package repositoryobserver
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/mock/gomock"
 	"github.com/thecodeisalreadydeployed/config"
@@ -61,11 +59,6 @@ func TestCheckChanges(t *testing.T) {
 }
 
 func TestObserveGitSources(t *testing.T) {
-	monkey.Patch(time.Sleep, func(d time.Duration) {
-		fmt.Println("Sleep skipped.")
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	datastore.ExpectVersionQuery(mock)
@@ -73,20 +66,10 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
-	// Simulate GetObservableApps failure.
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
-		WithArgs(true).
-		WillReturnError(errors.New("simulated failure"))
-
 	// Return fresh app.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
-		WillReturnRows(getObservableAppRows(t, false))
-
-	// Simulate IsObservableApp failure.
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
-		WithArgs("app-test").
-		WillReturnError(errors.New("simulated failure"))
+		WillReturnRows(getObservableAppRows(t))
 
 	// Return observable of same fresh app.
 	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
@@ -94,11 +77,10 @@ func TestObserveGitSources(t *testing.T) {
 		WithArgs("app-test").
 		WillReturnRows(rows)
 
-	// Rerun, no longer any observable app.
-	rows = sqlmock.NewRows([]string{"Observable"}).AddRow(false)
+	// Return error fetching datastore after deploying once.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
-		WillReturnRows(rows)
+		WillReturnError(errors.New("simulated failure"))
 
 	mock.ExpectClose()
 
@@ -120,7 +102,7 @@ func TestObserveGitSources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
+func getObservableAppRows(t *testing.T) *sqlmock.Rows {
 	path, clean := gitgateway.InitRepository()
 	defer clean()
 
@@ -138,7 +120,7 @@ func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
 	assert.Nil(t, err)
 
 	revisedMsg := "This is another commit."
-	revisedHash, err := git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
+	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
 	assert.Nil(t, err)
 
 	app := model.App{
@@ -156,11 +138,6 @@ func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
 		UpdatedAt:          time.Unix(0, 0),
 		BuildConfiguration: model.BuildConfiguration{},
 		Observable:         true,
-	}
-
-	if revised {
-		app.GitSource.CommitSHA = revisedHash
-		app.GitSource.CommitMessage = revisedMsg
 	}
 
 	a := datamodel.NewAppFromModel(&app)
