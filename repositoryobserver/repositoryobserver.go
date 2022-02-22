@@ -39,6 +39,7 @@ func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController w
 }
 
 const waitAfterErrorInterval = 10 * time.Second
+const sleepObserverInterval = 3 * time.Minute
 
 func (observer *repositoryObserver) ObserveGitSources() {
 	for {
@@ -51,11 +52,11 @@ func (observer *repositoryObserver) ObserveGitSources() {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
 					observer.refreshChan[app.ID] = make(chan bool)
-					go observer.checkGitSourceWrapper(&app)
+					observer.checkGitSourceWrapper(&app)
 				}
 			}
 		}
-		time.Sleep(3 * time.Minute)
+		time.Sleep(sleepObserverInterval)
 	}
 }
 
