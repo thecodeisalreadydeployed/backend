@@ -34,6 +34,21 @@ func (m *MockWorkloadController) EXPECT() *MockWorkloadControllerMockRecorder {
 	return m.recorder
 }
 
+// NewApp mocks base method.
+func (m *MockWorkloadController) NewApp(arg0 *model.App) (*model.App, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewApp", arg0)
+	ret0, _ := ret[0].(*model.App)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewApp indicates an expected call of NewApp.
+func (mr *MockWorkloadControllerMockRecorder) NewApp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewApp", reflect.TypeOf((*MockWorkloadController)(nil).NewApp), arg0)
+}
+
 // NewDeployment mocks base method.
 func (m *MockWorkloadController) NewDeployment(arg0 string, arg1 *string) (*model.Deployment, error) {
 	m.ctrl.T.Helper()
@@ -47,4 +62,31 @@ func (m *MockWorkloadController) NewDeployment(arg0 string, arg1 *string) (*mode
 func (mr *MockWorkloadControllerMockRecorder) NewDeployment(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewDeployment", reflect.TypeOf((*MockWorkloadController)(nil).NewDeployment), arg0, arg1)
+}
+
+// NewProject mocks base method.
+func (m *MockWorkloadController) NewProject(arg0 *model.Project) (*model.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewProject", arg0)
+	ret0, _ := ret[0].(*model.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewProject indicates an expected call of NewProject.
+func (mr *MockWorkloadControllerMockRecorder) NewProject(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewProject", reflect.TypeOf((*MockWorkloadController)(nil).NewProject), arg0)
+}
+
+// ObserveWorkloads mocks base method.
+func (m *MockWorkloadController) ObserveWorkloads() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ObserveWorkloads")
+}
+
+// ObserveWorkloads indicates an expected call of ObserveWorkloads.
+func (mr *MockWorkloadControllerMockRecorder) ObserveWorkloads() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ObserveWorkloads", reflect.TypeOf((*MockWorkloadController)(nil).ObserveWorkloads))
 }

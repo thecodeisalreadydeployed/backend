@@ -2,6 +2,7 @@ package gitapi
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"net/url"
 	"strings"
 
@@ -15,6 +16,7 @@ type GitAPIBackend interface {
 	GetBranches(repoURL string) ([]string, error)
 	GetFiles(repoURL string, branch string) ([]string, error)
 	GetRaw(repoURL string, branch string, path string) (string, error)
+	FillGitSource(gs *model.GitSource) (*model.GitSource, error)
 }
 
 type gitAPIBackend struct {
@@ -73,9 +75,9 @@ func (backend *gitAPIBackend) getGitProvider(repoURL string) gitProvider {
 
 func (backend *gitAPIBackend) getGitProviderAPI(repoURL string) (*provider.GitProvider, error) {
 	logger := backend.logger.With(zap.String("repoURL", repoURL))
-	provider := backend.getGitProvider(repoURL)
+	gProvider := backend.getGitProvider(repoURL)
 	owner, repo := backend.getOwnerAndRepo(repoURL)
-	if provider != unknown {
+	if gProvider != unknown {
 		if len(owner) == 0 {
 			logger.Error("repository owner cannot be empty")
 			return nil, fmt.Errorf("repository owner cannot be empty")
@@ -85,7 +87,7 @@ func (backend *gitAPIBackend) getGitProviderAPI(repoURL string) (*provider.GitPr
 			return nil, fmt.Errorf("repository name cannot be empty")
 		}
 	}
-	switch provider {
+	switch gProvider {
 	case gitHub:
 		api := github.NewGitHubAPI(logger, owner, repo)
 		return &api, nil
@@ -117,4 +119,12 @@ func (backend *gitAPIBackend) GetRaw(repoURL string, branch string, path string)
 		return "", err
 	}
 	return (*providerAPI).GetRaw(branch, path)
+}
+
+func (backend *gitAPIBackend) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
+	providerAPI, err := backend.getGitProviderAPI(gs.RepositoryURL)
+	if err != nil {
+		return &model.GitSource{}, err
+	}
+	return (*providerAPI).FillGitSource(gs)
 }

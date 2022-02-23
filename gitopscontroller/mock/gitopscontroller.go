@@ -34,17 +34,17 @@ func (m *MockGitOpsController) EXPECT() *MockGitOpsControllerMockRecorder {
 }
 
 // SetContainerImage mocks base method.
-func (m *MockGitOpsController) SetContainerImage(arg0, arg1, arg2 string) error {
+func (m *MockGitOpsController) SetContainerImage(arg0, arg1, arg2, arg3 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetContainerImage", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "SetContainerImage", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SetContainerImage indicates an expected call of SetContainerImage.
-func (mr *MockGitOpsControllerMockRecorder) SetContainerImage(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockGitOpsControllerMockRecorder) SetContainerImage(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContainerImage", reflect.TypeOf((*MockGitOpsController)(nil).SetContainerImage), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContainerImage", reflect.TypeOf((*MockGitOpsController)(nil).SetContainerImage), arg0, arg1, arg2, arg3)
 }
 
 // SetupApp mocks base method.

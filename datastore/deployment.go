@@ -3,6 +3,7 @@ package datastore
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -12,6 +13,30 @@ import (
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
 )
+
+func GetPendingDeployments(DB *gorm.DB) (*[]model.Deployment, error) {
+	var _data []datamodel.Deployment
+	err := DB.Table("deployments").Where("state IN ?", []string{
+		string(model.DeploymentStateQueueing),
+		string(model.DeploymentStateBuilding),
+		string(model.DeploymentStateBuildSucceeded),
+		string(model.DeploymentStateCommitted),
+	}).Find(&_data).Error
+
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrNotFound
+	}
+
+	var _ret []model.Deployment
+	for _, data := range _data {
+		m := data.ToModel()
+		_ret = append(_ret, m)
+	}
+
+	ret := &_ret
+	return ret, nil
+}
 
 func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app-") {
@@ -56,12 +81,33 @@ func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, err
 }
 
 func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.DeploymentState) error {
-	err := DB.Table("deployments").
-		Where(datamodel.Deployment{ID: deploymentID}).
-		Update("state", state).
-		Error
-	if err != nil {
-		return err
+	switch state {
+	case model.DeploymentStateBuildSucceeded:
+		err := DB.Table("deployments").
+			Where(datamodel.Deployment{ID: deploymentID}).
+			Update("state", state).
+			Update("built_at", time.Now()).
+			Error
+		if err != nil {
+			return err
+		}
+	case model.DeploymentStateCommitted:
+		err := DB.Table("deployments").
+			Where(datamodel.Deployment{ID: deploymentID}).
+			Update("state", state).
+			Update("committed_at", time.Now()).
+			Error
+		if err != nil {
+			return err
+		}
+	default:
+		err := DB.Table("deployments").
+			Where(datamodel.Deployment{ID: deploymentID}).
+			Update("state", state).
+			Error
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -13,7 +13,7 @@ services:
       DATABASE_PASSWORD: password
       DATABASE_NAME: codedeploy
       DATABASE_PORT: "5432"
-      APP_ENV: TEST
+      APP_ENV: TEST_DOCKER
     ports:
       - 3000:3000
     networks:

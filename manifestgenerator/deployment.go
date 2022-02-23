@@ -11,6 +11,7 @@ type GenerateDeploymentOptions struct {
 	Name           string
 	Namespace      string
 	Labels         map[string]string
+	Selector       map[string]string
 	ContainerImage string
 }
 
@@ -26,20 +27,78 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 			Labels:    opts.Labels,
 		},
 		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: opts.Selector,
+			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: opts.Labels,
+					Labels: opts.Selector,
 				},
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
-							Name:            opts.ContainerImage,
+							Name:            "container0",
 							Image:           opts.ContainerImage,
 							ImagePullPolicy: apiv1.PullIfNotPresent,
 							Env: []apiv1.EnvVar{
 								{
 									Name:  "PORT",
 									Value: "3000",
+								},
+							},
+						},
+						{
+							Name:            "metadataserver",
+							Image:           "ghcr.io/thecodeisalreadydeployed/metadataserver:latest",
+							ImagePullPolicy: apiv1.PullIfNotPresent,
+							Env: []apiv1.EnvVar{
+								{
+									Name: "NODE_NAME",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "spec.nodeName",
+										},
+									},
+								},
+								{
+									Name: "POD_NAME",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.name",
+										},
+									},
+								},
+								{
+									Name: "POD_NAMESPACE",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.namespace",
+										},
+									},
+								},
+								{
+									Name: "PROJECT_ID",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.labels['beta.deploys.dev/project-id']",
+										},
+									},
+								},
+								{
+									Name: "APP_ID",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.labels['beta.deploys.dev/app-id']",
+										},
+									},
+								},
+								{
+									Name: "DEPLOYMENT_ID",
+									ValueFrom: &apiv1.EnvVarSource{
+										FieldRef: &apiv1.ObjectFieldSelector{
+											FieldPath: "metadata.labels['beta.deploys.dev/deployment-id']",
+										},
+									},
 								},
 							},
 						},

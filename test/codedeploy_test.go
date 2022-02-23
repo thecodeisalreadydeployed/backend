@@ -68,18 +68,17 @@ CMD node main
 
 	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, projectID)
+	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
+		time.Sleep(30 * time.Second)
+	}
 
 	expect.POST("/apps").
 		WithForm(dto.CreateAppRequest{
-			ProjectID:       projectID,
-			Name:            appName,
-			RepositoryURL:   "https://github.com/thecodeisalreadydeployed/fixture-nest.git",
-			BuildScript:     fixtureNest,
-			InstallCommand:  "yarn install --frozen-lockfile",
-			BuildCommand:    "yarn build",
-			OutputDirectory: "dist",
-			StartCommand:    "node main",
-			Branch:          "main",
+			ProjectID:     projectID,
+			Name:          appName,
+			RepositoryURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
+			BuildScript:   fixtureNest,
+			Branch:        "main",
 		}).Expect().Status(http.StatusOK)
 
 	apps := expect.GET("/projects/" + projectID + "/apps").
@@ -92,7 +91,7 @@ CMD node main
 	appID := apps.Array().Element(0).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, appID)
 
-	expect.PUT(fmt.Sprintf("/apps/%s/observable/disable", appID)).Expect().Status(http.StatusOK)
+	expect.POST(fmt.Sprintf("/apps/%s/observable/disable", appID)).Expect().Status(http.StatusOK)
 
 	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
 		Expect().Status(http.StatusOK).JSON().
@@ -130,34 +129,125 @@ CMD node main
 		ValueEqual("state", model.DeploymentStateQueueing)
 
 	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
-		time.Sleep(30 * time.Second)
-
 		deploymentID := deployment.Object().Value("id").String().Raw()
 
-		expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).
-			Expect().Status(http.StatusOK).JSON().
-			Object().
-			ContainsKey("state").ValueEqual("state", model.DeploymentStateBuilding)
+		timeLimit := time.Now().Add(1 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
 
-		events := expect.GET("/deployments/" + deploymentID + "/events").
-			Expect().
-			Status(http.StatusOK).
-			JSON()
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateBuilding) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
 
-		events.Array().Length().Gt(0)
+		timeLimit = time.Now().Add(30 * time.Second)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			events := expect.GET("/deployments/" + deploymentID + "/events").
+				Expect().
+				Status(http.StatusOK).
+				JSON().Array().Raw()
+
+			if len(events) == 0 {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(5 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateBuildSucceeded) {
+				if deploymentState == string(model.DeploymentStateCommitted) {
+					break
+				}
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(1 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateCommitted) {
+				if deploymentState == string(model.DeploymentStateReady) {
+					break
+				}
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(15 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			deployment := expect.GET(fmt.Sprintf("/deployments/%s", deploymentID)).Expect().Status(http.StatusOK).JSON()
+			deploymentState := deployment.Object().Value("state").String().Raw()
+			if deploymentState != string(model.DeploymentStateReady) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
+
+		timeLimit = time.Now().Add(15 * time.Minute)
+		for {
+			if time.Now().After(timeLimit) {
+				t.Fatal("didn't see result in time")
+			}
+
+			appStatus := expect.GET(fmt.Sprintf("/apps/%s/status", appID)).Expect().Status(http.StatusOK).JSON()
+			appStatusDeploymentID := appStatus.Object().Value("deploymentID").String().Raw()
+			if appStatusDeploymentID != deploymentID {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else {
+				break
+			}
+		}
 	}
 
-	expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
-		Expect().Status(http.StatusOK)
+	// expect.DELETE(fmt.Sprintf("/apps/%s", appID)).
+	// 	Expect().Status(http.StatusOK)
 
-	expect.DELETE(fmt.Sprintf("/projects/%s", projectID)).
-		Expect().Status(http.StatusOK)
+	// expect.DELETE(fmt.Sprintf("/projects/%s", projectID)).
+	// 	Expect().Status(http.StatusOK)
 
-	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
-		Expect().Status(http.StatusNotFound)
+	// expect.GET(fmt.Sprintf("/projects/%s", projectID)).
+	// 	Expect().Status(http.StatusNotFound)
 
-	expect.GET(fmt.Sprintf("/apps/%s", appID)).
-		Expect().Status(http.StatusNotFound)
+	// expect.GET(fmt.Sprintf("/apps/%s", appID)).
+	// 	Expect().Status(http.StatusNotFound)
 }
 
 func TestPresetIntegration(t *testing.T) {

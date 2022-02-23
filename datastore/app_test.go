@@ -2,7 +2,6 @@ package datastore
 
 import (
 	"regexp"
-	"sync"
 	"testing"
 	"time"
 
@@ -134,7 +133,13 @@ func TestSaveApp(t *testing.T) {
 		WithArgs(
 			"prj-test",
 			"Best App",
-			model.GetGitSourceString(model.GitSource{}),
+			model.GetGitSourceString(model.GitSource{
+				CommitSHA:        "a",
+				CommitMessage:    "a",
+				CommitAuthorName: "a",
+				RepositoryURL:    "a",
+				Branch:           "a",
+			}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
@@ -152,15 +157,7 @@ func TestSaveApp(t *testing.T) {
 
 	expected := GetExpectedApp()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		a := <-GetAppChannel()
-		assert.Equal(t, expected, a)
-		wg.Done()
-	}()
 	actual, err := SaveApp(gdb, expected)
-	wg.Wait()
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
@@ -285,7 +282,13 @@ func TestSetObservable(t *testing.T) {
 		WithArgs(
 			"prj-test",
 			"Best App",
-			model.GetGitSourceString(model.GitSource{}),
+			model.GetGitSourceString(model.GitSource{
+				CommitSHA:        "a",
+				CommitMessage:    "a",
+				CommitAuthorName: "a",
+				RepositoryURL:    "a",
+				Branch:           "a",
+			}),
 			time.Unix(0, 0),
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),

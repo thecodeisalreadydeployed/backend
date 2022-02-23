@@ -2,12 +2,10 @@ package repositoryobserver
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/mock/gomock"
 	"github.com/thecodeisalreadydeployed/config"
@@ -22,7 +20,8 @@ import (
 )
 
 func TestCheckChanges(t *testing.T) {
-	changeString, duration := checkChanges(
+	observer := NewRepositoryObserver(nil, nil, nil)
+	changeString, duration := observer.CheckChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"37e8e4d20d889924780f2373453a246591b6b11a",
@@ -31,7 +30,7 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, "5da29979c5ef986dc8ec6aa603e0862310abc96e", *changeString)
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
-	changeString, duration = checkChanges(
+	changeString, duration = observer.CheckChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"5da29979c5ef986dc8ec6aa603e0862310abc96e",
@@ -40,7 +39,7 @@ func TestCheckChanges(t *testing.T) {
 	assert.Nil(t, changeString)
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
-	changeString, duration = checkChanges(
+	changeString, duration = observer.CheckChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
 		"main",
 		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
@@ -49,7 +48,7 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
 	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 
-	changeString, duration = checkChanges(
+	changeString, duration = observer.CheckChanges(
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
 		"dev",
 		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
@@ -60,13 +59,6 @@ func TestCheckChanges(t *testing.T) {
 }
 
 func TestObserveGitSources(t *testing.T) {
-	monkey.Patch(time.Sleep, func(d time.Duration) {
-		fmt.Println("Sleep skipped.")
-	})
-	defer monkey.UnpatchAll()
-
-	now := time.Now()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	datastore.ExpectVersionQuery(mock)
@@ -74,27 +66,21 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
+	// Return fresh app.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
-		WillReturnError(errors.New("simulated failure"))
+		WillReturnRows(getObservableAppRows(t))
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
-		WithArgs(true).
-		WillReturnRows(getObservableAppRows(t, false))
-
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
-		WithArgs("app-test").
-		WillReturnError(errors.New("simulated failure"))
-
+	// Return observable of same fresh app.
 	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
 		WillReturnRows(rows)
 
-	rows = sqlmock.NewRows([]string{"Observable"}).AddRow(false)
+	// Return error fetching datastore after deploying once.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
-		WillReturnRows(rows)
+		WillReturnError(errors.New("simulated failure"))
 
 	mock.ExpectClose()
 
@@ -106,21 +92,17 @@ func TestObserveGitSources(t *testing.T) {
 
 	repositoryObserver := NewRepositoryObserver(logger, gdb, workloadController)
 	go repositoryObserver.ObserveGitSources()
+	timeout := time.After(2 * time.Second)
+	<-timeout
 
-	for {
-		if time.Now().After(now.Add(2 * time.Second)) {
-			err = db.Close()
-			assert.Nil(t, err)
+	err = db.Close()
+	assert.Nil(t, err)
 
-			err = mock.ExpectationsWereMet()
-			assert.Nil(t, err)
-
-			return
-		}
-	}
+	err = mock.ExpectationsWereMet()
+	assert.Nil(t, err)
 }
 
-func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
+func getObservableAppRows(t *testing.T) *sqlmock.Rows {
 	path, clean := gitgateway.InitRepository()
 	defer clean()
 
@@ -138,7 +120,7 @@ func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
 	assert.Nil(t, err)
 
 	revisedMsg := "This is another commit."
-	revisedHash, err := git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
+	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
 	assert.Nil(t, err)
 
 	app := model.App{
@@ -156,11 +138,6 @@ func getObservableAppRows(t *testing.T, revised bool) *sqlmock.Rows {
 		UpdatedAt:          time.Unix(0, 0),
 		BuildConfiguration: model.BuildConfiguration{},
 		Observable:         true,
-	}
-
-	if revised {
-		app.GitSource.CommitSHA = revisedHash
-		app.GitSource.CommitMessage = revisedMsg
 	}
 
 	a := datamodel.NewAppFromModel(&app)

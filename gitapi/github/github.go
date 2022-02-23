@@ -3,6 +3,7 @@ package github
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
 	"io"
 	"net/http"
 
@@ -22,10 +23,10 @@ func NewGitHubAPI(logger *zap.Logger, owner string, repo string) provider.GitPro
 	return &gitHubAPI{logger: logger, owner: owner, repo: repo}
 }
 
-// List branches in strings given a GitHub utl string.
+// List branches in strings given a GitHub url string.
 func (gh *gitHubAPI) GetBranches() ([]string, error) {
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", gh.owner, gh.repo)
-	res, err := http.Get(urlapi)
+	urlApi := fmt.Sprintf("https://api.github.com/repos/%s/%s/branches", gh.owner, gh.repo)
+	res, err := http.Get(urlApi)
 	defer closeHTTP(res)
 	if err != nil {
 		gh.logger.Error(err.Error())
@@ -49,8 +50,8 @@ func (gh *gitHubAPI) GetBranches() ([]string, error) {
 
 // List all file names in strings given a GitHub url string and branch name.
 func (gh *gitHubAPI) GetFiles(branch string) ([]string, error) {
-	urlapi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", gh.owner, gh.repo, branch)
-	res, err := http.Get(urlapi)
+	urlApi := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/%s?recursive=1", gh.owner, gh.repo, branch)
+	res, err := http.Get(urlApi)
 	defer closeHTTP(res)
 	if err != nil {
 		gh.logger.Error(err.Error())
@@ -76,8 +77,8 @@ func (gh *gitHubAPI) GetFiles(branch string) ([]string, error) {
 
 // Get raw file given GitHub url string, branch, and file path.
 func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
-	urlapi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", gh.owner, gh.repo, branch, path)
-	res, err := http.Get(urlapi)
+	urlApi := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", gh.owner, gh.repo, branch, path)
+	res, err := http.Get(urlApi)
 	defer closeHTTP(res)
 	if err != nil {
 		gh.logger.Error(err.Error())
@@ -90,6 +91,32 @@ func (gh *gitHubAPI) GetRaw(branch string, path string) (string, error) {
 		return "", errutil.ErrUnknown
 	}
 	return string(bytes), nil
+}
+
+// Fills GitSource fields.
+func (gh *gitHubAPI) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
+	urlApi := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits?sha=%s", gh.owner, gh.repo, gs.Branch)
+	res, err := http.Get(urlApi)
+	defer closeHTTP(res)
+	if err != nil {
+		gh.logger.Error(err.Error())
+		return nil, errutil.ErrUnavailable
+	}
+
+	var body []CommitDetails
+	err = getJSON(res, &body)
+	if err != nil {
+		zap.L().Error(err.Error())
+		return nil, errutil.ErrUnknown
+	}
+
+	return &model.GitSource{
+		CommitSHA:        body[0].SHA,
+		CommitMessage:    body[0].Commit.Message,
+		CommitAuthorName: body[0].Commit.Author.Name,
+		RepositoryURL:    gs.RepositoryURL,
+		Branch:           gs.Branch,
+	}, nil
 }
 
 // Gets JSON from HTTP response.

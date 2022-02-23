@@ -28,7 +28,7 @@ lint:
 
 .PHONY: test
 test:
-	go test -v ./test
+	go test -timeout 30m -v ./test
 
 .PHONY: lint-ci
 lint-ci:
@@ -45,6 +45,11 @@ dev-image-detach:
 .PHONY: kind
 kind:
 	sh deploy/0-kind-create-cluster.sh
+	sh deploy/1-kubectl-apply-argocd.sh
+
+.PHONY: kind-with-registry
+kind-with-registry:
+	sh deploy/kind-with-registry.sh
 	sh deploy/1-kubectl-apply-argocd.sh
 
 .PHONY: port-forward

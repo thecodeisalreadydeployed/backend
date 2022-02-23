@@ -3,9 +3,9 @@ package datastore
 import (
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"strings"
-	"sync"
+
+	"go.uber.org/zap"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
@@ -62,11 +62,6 @@ func SetObservable(DB *gorm.DB, appID string, observable bool) error {
 	if err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrNotFound
-	}
-
-	if observable {
-		app_ := app.ToModel()
-		appChan <- &app_
 	}
 
 	return nil
@@ -154,17 +149,6 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 		return nil, errutil.ErrUnknown
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		if a.Observable {
-			a_ := a.ToModel()
-			GetAppChannel() <- &a_
-		}
-		wg.Done()
-	}()
-	wg.Wait()
-
 	return GetAppByID(DB, app.ID)
 }
 
@@ -182,10 +166,6 @@ func RemoveApp(DB *gorm.DB, id string) error {
 	if err := DB.Delete(&a).Error; err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrUnknown
-	}
-
-	if a.Observable {
-		observables.Delete(a.ID)
 	}
 	return nil
 }

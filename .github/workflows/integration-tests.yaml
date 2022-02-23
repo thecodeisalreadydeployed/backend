@@ -28,9 +28,7 @@ jobs:
           restore-keys: |
             ko-
       - run: |
-          sudo apt update
-          sudo apt install wait-for-it
-          make kind
+          make kind-with-registry
       - uses: imjasonh/setup-ko@v0.4
         env:
           KO_DOCKER_REPO: kind.local
@@ -53,10 +51,42 @@ jobs:
           kubectl -n default wait pod/postgres-1-0 --for condition=Ready --timeout 5m
         timeout-minutes: 5
       - run: |
-          ko resolve -f deploy/ci/backend.yaml | kubectl -n default apply -f -
+          kubectl apply -f deploy/ci/container-registry.yaml
+          ko resolve -f deploy/ci/backend.yaml | kubectl apply -f -
       - run: |
           kubectl -n default wait deploy/codedeploy --for condition=available --timeout 5m
         timeout-minutes: 5
+      - run: |
+          kubectl -n container-registry wait deploy/registry --for condition=available --timeout 5m
+        timeout-minutes: 15
       - run: kubectl -n default port-forward svc/codedeploy 3000:3000 &
-      - run: make test
-      - run: kubectl -n default logs deploy/codedeploy
+      - if: always()
+        run: kubectl -n default logs deploy/codedeploy
+      - id: integration-tests
+        run: make test
+      - if: always()
+        run: kubectl -n default logs deploy/codedeploy
+      - if: always()
+        run: kubectl -n argocd logs deploy/argocd-server
+      - if: always()
+        run: kubectl -n argocd logs deploy/argocd-repo-server
+      - if: always()
+        run: kubectl -n argocd logs pod/argocd-application-controller-0
+      - if: always()
+        run: |
+          argocd app list
+          argocd app get userspace
+          argocd app history userspace
+          argocd app resources userspace
+          argocd app manifests userspace
+          kubectl get services --all-namespaces
+          kubectl get deployments --all-namespaces
+          kubectl get pods --all-namespaces
+          kubectl get namespace
+          kubectl get events
+          kubectl api-resources --namespaced=false
+          argocd app logs userspace --container container0
+          argocd app logs userspace --container metadataserver
+      - run: kubectl -n default port-forward svc/gitserver 9418 &
+      - run: cd /tmp && git clone git://localhost/userspace
+      - run: cd /tmp/userspace && git status && kustomize build .

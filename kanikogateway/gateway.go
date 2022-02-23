@@ -1,9 +1,9 @@
 package kanikogateway
 
 import (
-	"github.com/thecodeisalreadydeployed/containerregistry"
-	"github.com/thecodeisalreadydeployed/errutil"
-	"github.com/thecodeisalreadydeployed/kubernetesinteractor/v2"
+	"github.com/google/uuid"
+	"github.com/thecodeisalreadydeployed/clusterbackend"
+	containerregistry "github.com/thecodeisalreadydeployed/containerregistry/types"
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
@@ -21,14 +21,17 @@ type kanikoGateway struct {
 	repositoryURL      string
 	branch             string
 	buildConfiguration model.BuildConfiguration
-	kubernetes         kubernetesinteractor.KubernetesInteractor
-	registry           *containerregistry.ContainerRegistry
-	logger             *zap.SugaredLogger
+	clusterBackend     clusterbackend.ClusterBackend
+	registry           containerregistry.ContainerRegistry
+	logger             *zap.Logger
 }
 
+const codeDeployInternalNamespace = "codedeploy-internal"
 const imageTag = "latest"
 
 func NewKanikoGateway(
+	logger *zap.Logger,
+	clusterBackend clusterbackend.ClusterBackend,
 	projectID string,
 	appID string,
 	deploymentID string,
@@ -37,14 +40,6 @@ func NewKanikoGateway(
 	buildConfiguration model.BuildConfiguration,
 	containerRegistry containerregistry.ContainerRegistry,
 ) (KanikoGateway, error) {
-	logger := zap.L().Sugar().With("deploymentID", deploymentID)
-	it, err := kubernetesinteractor.NewKubernetesInteractor()
-
-	if err != nil {
-		logger.Error("failed to initialize KubernetesInteractor")
-		return nil, errutil.ErrFailedPrecondition
-	}
-
 	return kanikoGateway{
 		projectID:          projectID,
 		appID:              appID,
@@ -52,46 +47,53 @@ func NewKanikoGateway(
 		repositoryURL:      repositoryURL,
 		branch:             branch,
 		buildConfiguration: buildConfiguration,
-		kubernetes:         it,
-		registry:           &containerRegistry,
-		logger:             logger,
+		clusterBackend:     clusterBackend,
+		registry:           containerRegistry,
+		logger:             logger.With(zap.String("deploymentID", deploymentID)),
 	}, nil
 }
 
-func (it kanikoGateway) Deploy() (string, error) {
+func (gateway kanikoGateway) Deploy() (string, error) {
 	workspace := apiv1.VolumeMount{
 		Name:      "workspace",
 		MountPath: "/workspace",
 	}
 
+	UID := uuid.NewString()
+
 	objectLabel := map[string]string{
-		"deployment.api.deploys.dev/id":        it.deploymentID,
-		"deployment.api.deploys.dev/component": "imagebuilder",
+		"beta.deploys.dev/uid":           UID,
+		"beta.deploys.dev/deployment-id": gateway.deploymentID,
+		"beta.deploys.dev/component":     "imagebuilder",
 	}
-
-	it.logger.Info(objectLabel)
-
-	buildScript := it.buildConfiguration.BuildScript
 
 	configMap := apiv1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "imagebuilder-" + it.deploymentID,
+			Name:   "builder-" + UID,
 			Labels: objectLabel,
 		},
 		Data: map[string]string{
-			"Dockerfile": buildScript,
+			"Dockerfile": gateway.buildConfiguration.BuildScript,
 		},
 	}
 
-	it.logger.Info(configMap)
+	kanikoDestination := ""
+	kubernetesServiceAccountName := ""
+	containerRegistry := gateway.registry
+	kanikoDestination = containerRegistry.RegistryFormat(gateway.appID, gateway.deploymentID)
+
+	if containerRegistry.AuthenticationMethod() == containerregistry.KubernetesServiceAccount {
+		kubernetesServiceAccountName = containerRegistry.Secret()
+	}
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "imagebuilder-" + it.deploymentID,
+			Name:   "builder-" + UID,
 			Labels: objectLabel,
 		},
 		Spec: apiv1.PodSpec{
-			RestartPolicy: apiv1.RestartPolicyNever,
+			ServiceAccountName: kubernetesServiceAccountName,
+			RestartPolicy:      apiv1.RestartPolicyNever,
 			Volumes: []apiv1.Volume{
 				{
 					Name: workspace.Name,
@@ -104,7 +106,7 @@ func (it kanikoGateway) Deploy() (string, error) {
 					VolumeSource: apiv1.VolumeSource{
 						ConfigMap: &apiv1.ConfigMapVolumeSource{
 							LocalObjectReference: apiv1.LocalObjectReference{
-								Name: "imagebuilder-" + it.deploymentID,
+								Name: "builder-" + UID,
 							},
 						},
 					},
@@ -112,15 +114,20 @@ func (it kanikoGateway) Deploy() (string, error) {
 			},
 			InitContainers: []apiv1.Container{
 				{
+					Name:    "workload-identity-init-container",
+					Image:   "gcr.io/google.com/cloudsdktool/cloud-sdk:326.0.0-alpine",
+					Command: []string{"/bin/bash", "-c", "curl -s -H 'Metadata-Flavor: Google' 'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token' --retry 30 --retry-connrefused --retry-max-time 30 > /dev/null || exit 1"},
+				},
+				{
 					Name:         "imagebuilder-workspace",
 					Image:        "ghcr.io/thecodeisalreadydeployed/imagebuilder-workspace:" + imageTag,
 					VolumeMounts: []apiv1.VolumeMount{workspace},
 					Env: []apiv1.EnvVar{
 						// TODO(trif0lium): use environment variable
 						{Name: "CODEDEPLOY_API_URL", Value: "http://codedeploy.default.svc.cluster.local:3000"},
-						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: it.deploymentID},
-						{Name: "CODEDEPLOY_GIT_REPOSITORY", Value: it.repositoryURL},
-						{Name: "CODEDEPLOY_GIT_REFERENCE", Value: it.branch},
+						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: gateway.deploymentID},
+						{Name: "CODEDEPLOY_GIT_REPOSITORY", Value: gateway.repositoryURL},
+						{Name: "CODEDEPLOY_GIT_REFERENCE", Value: gateway.branch},
 					},
 				},
 			},
@@ -139,28 +146,25 @@ func (it kanikoGateway) Deploy() (string, error) {
 					Env: []apiv1.EnvVar{
 						// TODO(trif0lium): use environment variable
 						{Name: "CODEDEPLOY_API_URL", Value: "http://codedeploy.default.svc.cluster.local:3000"},
-						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: it.deploymentID},
+						{Name: "CODEDEPLOY_DEPLOYMENT_ID", Value: gateway.deploymentID},
 						{Name: "CODEDEPLOY_KANIKO_LOG_VERBOSITY", Value: "info"},
-						{Name: "CODEDEPLOY_KANIKO_CONTEXT", Value: "/workspace/" + it.deploymentID},
+						{Name: "CODEDEPLOY_KANIKO_CONTEXT", Value: "/workspace/" + gateway.deploymentID},
+						{Name: "CODEDEPLOY_KANIKO_DESTINATION", Value: kanikoDestination},
 					},
 				},
 			},
 		},
 	}
 
-	it.logger.Infof("%#v", pod)
-
-	_, err := it.kubernetes.CreateConfigMap(configMap, it.projectID)
+	_, err := gateway.clusterBackend.CreateConfigMap(configMap, codeDeployInternalNamespace)
 	if err != nil {
-		it.logger.Error("failed to create imagebuilder ConfigMap")
-		return "", errutil.ErrFailedPrecondition
+		return "", err
 	}
 
-	_, err = it.kubernetes.CreatePod(pod, it.projectID)
+	_, err = gateway.clusterBackend.CreatePod(pod, codeDeployInternalNamespace)
 	if err != nil {
-		it.logger.Error("failed to create imagebuilder pod")
-		return "", errutil.ErrFailedPrecondition
+		return "", err
 	}
 
-	return it.deploymentID, nil
+	return gateway.deploymentID, nil
 }

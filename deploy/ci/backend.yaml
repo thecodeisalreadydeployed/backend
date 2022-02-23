@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: codedeploy-internal
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: codedeploy-imagebuilder
+  namespace: codedeploy-internal
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -39,6 +50,7 @@ metadata:
   labels:
     app: codedeploy
   name: codedeploy
+  namespace: default
 spec:
   type: ClusterIP
   ports:
@@ -55,6 +67,7 @@ metadata:
   labels:
     app: codedeploy
   name: codedeploy
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -66,6 +79,7 @@ spec:
       labels:
         app: codedeploy
     spec:
+      restartPolicy: Always
       serviceAccountName: codedeploy
       containers:
         - image: ko://github.com/thecodeisalreadydeployed
@@ -86,5 +100,16 @@ spec:
             - name: DATABASE_NAME
               value: codedeploy
             - name: APP_ENV
-              value: TEST
+              value: TEST_KUBERNETES
+            - name: GITSERVER_HOST
+              value: git://gitserver.default.svc.cluster.local:9418
+            - name: USERSPACE_REPOSITORY
+              value: /etc/gitserver/userspace
+          volumeMounts:
+            - mountPath: /etc/gitserver
+              name: codedeploy-pv
+      volumes:
+        - name: codedeploy-pv
+          persistentVolumeClaim:
+            claimName: codedeploy-pvc
 status: {}

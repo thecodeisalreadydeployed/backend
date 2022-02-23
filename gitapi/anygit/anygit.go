@@ -3,6 +3,7 @@ package anygit
 import (
 	"github.com/thecodeisalreadydeployed/gitapi/provider"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
+	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 )
 
@@ -37,4 +38,12 @@ func (api *anyGitAPI) GetRaw(branch string, path string) (string, error) {
 		return "", gitErr
 	}
 	return git.GetRaw(branch, path)
+}
+
+func (api *anyGitAPI) FillGitSource(gs *model.GitSource) (*model.GitSource, error) {
+	gs_, err := gitgateway.Info(gs.RepositoryURL, gs.Branch)
+	if err != nil {
+		return &model.GitSource{}, err
+	}
+	return &gs_, nil
 }

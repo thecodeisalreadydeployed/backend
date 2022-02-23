@@ -9,9 +9,7 @@ on:
       - ".github/workflows/build-imagebuilder.yaml"
     branches:
       - main
-      - v2/kanikogateway
-      - dev/imagebuilder
-      - dev/imagebuilder-docker
+      - ci/senior-project
 jobs:
   test:
     runs-on: ubuntu-20.04

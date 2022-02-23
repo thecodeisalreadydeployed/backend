@@ -1,7 +1,9 @@
 package gitopscontroller_test
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -13,7 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/constant"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
-	mock_argocd "github.com/thecodeisalreadydeployed/gitopscontroller/argocd/mock"
+	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
+	"go.uber.org/zap/zaptest"
 )
 
 func temporalDir() (path string, clean func()) {
@@ -32,45 +35,88 @@ func temporalDir() (path string, clean func()) {
 
 func TestGitOpsController(t *testing.T) {
 	if os.Getenv("CI") == "true" && os.Getenv("GITHUB_WORKFLOW") == "test: unit" {
-		viper.Set(constant.ArgoCDServerHostEnv, "http://localhost")
+		viper.Set(constant.ARGOCD_SERVER_HOST, "http://localhost")
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
+		defaultHTTPTransport := argocd.HTTPTransport
+		defer func() { argocd.HTTPTransport = defaultHTTPTransport }()
+		argocd.HTTPTransport = httpmock.DefaultTransport
+
 		httpmock.RegisterResponder(
 			"GET",
-			"http://localhost/api/v1/application?name=codedeploy&refresh=true",
+			"http://localhost/api/v1/applications?name=userspace&refresh=true",
+			httpmock.NewStringResponder(200, ""),
+		)
+
+		httpmock.RegisterResponder(
+			"POST",
+			"http://localhost/api/v1/applications",
+			httpmock.NewStringResponder(200, ""),
+		)
+
+		httpmock.RegisterResponder(
+			"POST",
+			"http://localhost/api/v1/applications/userspace/sync",
 			httpmock.NewStringResponder(200, ""),
 		)
 
 		dir, clean := temporalDir()
-		viper.Set(constant.UserspaceRepository, dir)
-		gitopscontroller.SetupUserspace()
+		viper.Set(constant.USERSPACE_REPOSITORY, dir)
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		argocd := mock_argocd.NewMockArgoCDClient(ctrl)
-		argocd.EXPECT().Refresh().Return(nil).Times(3)
-
-		controller := gitopscontroller.NewGitOpsController(argocd)
+		logger := zaptest.NewLogger(t)
+		controller := gitopscontroller.NewGitOpsController(logger)
 
 		err := controller.SetupProject("prj-test")
 		assert.NoError(t, err)
 
+		contents, err := os.ReadFile(filepath.Join(dir, "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/kustomization.yml): %v\n", string(contents))
+
 		err = controller.SetupApp("prj-test", "app-test")
 		assert.NoError(t, err)
+
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/kustomization.yml): %v\n", string(contents))
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
 		assert.NoError(t, err)
 
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "deployment.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/deployment.yml): %v\n", string(contents))
+
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
 		assert.NoError(t, err)
+
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "service.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/service.yml): %v\n", string(contents))
 
 		_, err = os.Stat(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
 
-		err = controller.SetContainerImage("prj-test", "app-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
 		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", string(contents))
+
+		err = controller.SetContainerImage("prj-test", "app-test", "dpl-test", "ghcr.io/thecodeisalreadydeployed/imagebuilder:latest")
+		assert.NoError(t, err)
+
+		contents, err = os.ReadFile(filepath.Join(dir, "prj-test", "app-test", "kustomization.yml"))
+		assert.NoError(t, err)
+		fmt.Printf("contents (/prj-test/app-test/kustomization.yml): %v\n", string(contents))
+
+		kustomizeCmd := exec.Command("kustomize", "build", ".")
+		kustomizeCmd.Dir = dir
+		if output, err := kustomizeCmd.CombinedOutput(); err == nil {
+			fmt.Printf("output: %v\n", string(output))
+		}
 
 		clean()
 	}

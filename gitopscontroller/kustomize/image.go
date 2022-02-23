@@ -41,6 +41,7 @@ func SetImage(kustomizationFilePath string, image string, newImage string) error
 	}
 
 	imageMap := map[string]types.Image{}
+	imageMap[img.Name] = img
 
 	for _, im := range m.Images {
 		if im.Name == img.Name {

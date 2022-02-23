@@ -21,6 +21,7 @@ func (c CustomClaims) Validate(ctx context.Context) error {
 	return nil
 }
 
+//nolint
 func ensureValidToken() func(next http.Handler) http.Handler {
 	issuerURL, err := url.Parse("https://" + config.Auth0Domain() + "/")
 	if err != nil {

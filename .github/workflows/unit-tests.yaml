@@ -5,11 +5,11 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
         pkg: [
           'gitgateway/v2',
           'repositoryobserver',
-          'manifestgenerator',
           'datastore',
           'datamodel',
           'gitopscontroller',

@@ -3,15 +3,13 @@ package workloadcontroller
 import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
-	"github.com/thecodeisalreadydeployed/kanikogateway/v2"
+	"github.com/thecodeisalreadydeployed/kanikogateway"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/util"
 	"go.uber.org/zap"
 )
 
 func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error) {
-	logger := zap.L().Sugar().With("appID", appID)
-	_ = logger
-
 	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
 	if err != nil {
 		return nil, err
@@ -60,7 +58,22 @@ func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *
 		return nil, err
 	}
 
-	kaniko, err := kanikogateway.NewKanikoGateway(app.ProjectID, app.ID, deployment.ID, deployment.GitSource.RepositoryURL, deployment.GitSource.Branch, deployment.BuildConfiguration, nil)
+	if util.IsDevEnvironment() || util.IsDockerTestEnvironment() {
+		return deployment, nil
+	}
+
+	kaniko, err := kanikogateway.NewKanikoGateway(
+		ctrl.logger.With(zap.String("appID", appID)),
+		ctrl.clusterBackend,
+		app.ProjectID,
+		app.ID,
+		deployment.ID,
+		deployment.GitSource.RepositoryURL,
+		deployment.GitSource.Branch,
+		deployment.BuildConfiguration,
+		ctrl.containerRegistry,
+	)
+
 	if err == nil {
 		if err != nil {
 			return nil, err

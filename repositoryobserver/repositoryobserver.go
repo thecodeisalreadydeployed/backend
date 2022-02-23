@@ -15,45 +15,59 @@ import (
 
 type RepositoryObserver interface {
 	ObserveGitSources()
+	Refresh(id string)
+	CheckChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration)
 }
 
 type repositoryObserver struct {
 	logger             *zap.Logger
 	db                 *gorm.DB
 	workloadController workloadcontroller.WorkloadController
+	refreshChan        map[string]chan bool
 	observables        *sync.Map
-	appChan            chan *model.App
 }
 
 func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
-	appChan := make(chan *model.App)
-	return &repositoryObserver{logger: logger, db: DB, workloadController: workloadController, appChan: appChan, observables: &sync.Map{}}
+	refreshChan := make(map[string]chan bool)
+	return &repositoryObserver{
+		logger:             logger,
+		db:                 DB,
+		workloadController: workloadController,
+		refreshChan:        refreshChan,
+		observables:        &sync.Map{},
+	}
 }
 
-const WaitAfterErrorInterval = 10 * time.Second
+const waitAfterErrorInterval = 10 * time.Second
+const sleepObserverInterval = 3 * time.Minute
 
 func (observer *repositoryObserver) ObserveGitSources() {
 	for {
 		apps, err := datastore.GetObservableApps(observer.db)
 		if err != nil {
 			observer.logger.Error("cannot get observable apps", zap.Error(err))
-			time.Sleep(WaitAfterErrorInterval)
+			time.Sleep(waitAfterErrorInterval)
 		} else {
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
-					go observer.checkGitSourceWrapper(&app)
+					observer.refreshChan[app.ID] = make(chan bool)
+					observer.checkGitSourceWrapper(&app)
 				}
 			}
-			break
 		}
+		time.Sleep(sleepObserverInterval)
 	}
+}
 
-	for {
-		app := <-observer.appChan
-		if _, ok := observer.observables.Load(app.ID); !ok {
-			observer.observables.Store(app.ID, nil)
-			go observer.checkGitSourceWrapper(app)
+func (observer *repositoryObserver) Refresh(id string) {
+	_, ok := observer.observables.Load(id)
+	if ok {
+		select {
+		case observer.refreshChan[id] <- true:
+			break
+		default:
+			break
 		}
 	}
 }
@@ -85,7 +99,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 	var duration time.Duration
 	var restart bool
 	for {
-		commit, duration = checkChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
+		commit, duration = observer.CheckChanges(app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 
 		if duration > gitgateway.MaximumInterval {
 			duration = gitgateway.MaximumInterval
@@ -93,10 +107,15 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		if commit == nil {
 			if duration == -1 {
 				logger.Error("failed to fetch the repository, waiting for the next retry")
-				time.Sleep(WaitAfterErrorInterval)
+				time.Sleep(waitAfterErrorInterval)
 			} else {
 				logger.Info("no changes in the application, waiting for the next repository check")
-				time.Sleep(duration)
+				select {
+				case <-observer.refreshChan[app.ID]:
+					break
+				case <-time.After(duration):
+					break
+				}
 				restart = true
 				break
 			}
@@ -113,13 +132,18 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		_, err := observer.workloadController.NewDeployment(app.ID, commit)
 		if err != nil {
 			logger.Error("failed to deploy new revision, waiting for the next retry", zap.Error(err))
-			time.Sleep(WaitAfterErrorInterval)
+			time.Sleep(waitAfterErrorInterval)
 		} else {
 			break
 		}
 	}
 
-	time.Sleep(duration)
+	select {
+	case <-observer.refreshChan[app.ID]:
+		break
+	case <-time.After(duration):
+		break
+	}
 	return true
 }
 
@@ -127,7 +151,7 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	observableNow, err := datastore.IsObservableApp(observer.db, app.ID)
 	if err != nil {
 		logger.Error("application status check failed", zap.Error(err))
-		time.Sleep(WaitAfterErrorInterval)
+		time.Sleep(waitAfterErrorInterval)
 		return true, false
 	}
 	if observableNow {
@@ -138,29 +162,34 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	}
 }
 
-func checkChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
+func (observer *repositoryObserver) CheckChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration) {
 	git, err := gitgateway.NewGitGatewayRemote(repoURL)
 	if err != nil {
+		observer.logger.Error("cannot connect to remote", zap.Error(err))
 		return nil, -1
 	}
 
 	duration, err := git.CommitInterval()
 	if err != nil {
+		observer.logger.Error("cannot get commit interval", zap.Error(err))
 		return nil, -1
 	}
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
+		observer.logger.Error("cannot checkout", zap.Error(err))
 		return nil, -1
 	}
 
 	ref, err := git.Head()
 	if err != nil {
+		observer.logger.Error("cannot get repository head", zap.Error(err))
 		return nil, -1
 	}
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
+		observer.logger.Error("cannot get commit diff", zap.Error(err))
 		return nil, -1
 	}
 
