@@ -68,19 +68,17 @@ CMD node main
 
 	projectID := projects.Array().Element(0).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, projectID)
-	time.Sleep(30 * time.Second)
+	if os.Getenv("GITHUB_WORKFLOW") == "test: kind" {
+		time.Sleep(30 * time.Second)
+	}
 
 	expect.POST("/apps").
 		WithForm(dto.CreateAppRequest{
-			ProjectID:       projectID,
-			Name:            appName,
-			RepositoryURL:   "https://github.com/thecodeisalreadydeployed/fixture-nest.git",
-			BuildScript:     fixtureNest,
-			InstallCommand:  "yarn install --frozen-lockfile",
-			BuildCommand:    "yarn build",
-			OutputDirectory: "dist",
-			StartCommand:    "node main",
-			Branch:          "main",
+			ProjectID:     projectID,
+			Name:          appName,
+			RepositoryURL: "https://github.com/thecodeisalreadydeployed/fixture-nest",
+			BuildScript:   fixtureNest,
+			Branch:        "main",
 		}).Expect().Status(http.StatusOK)
 
 	apps := expect.GET("/projects/" + projectID + "/apps").
@@ -93,7 +91,7 @@ CMD node main
 	appID := apps.Array().Element(0).Object().Value("id").String().Raw()
 	assert.NotEmpty(t, appID)
 
-	expect.PUT(fmt.Sprintf("/apps/%s/observable/disable", appID)).Expect().Status(http.StatusOK)
+	expect.POST(fmt.Sprintf("/apps/%s/observable/disable", appID)).Expect().Status(http.StatusOK)
 
 	expect.GET(fmt.Sprintf("/projects/%s", projectID)).
 		Expect().Status(http.StatusOK).JSON().
