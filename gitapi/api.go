@@ -54,6 +54,9 @@ func (backend *gitAPIBackend) getOwnerAndRepo(repoURL string) (string, string) {
 		backend.logger.Error("invalid repository URL")
 		return "", ""
 	}
+	if strings.HasSuffix(parts[len(parts)-1], ".git") {
+		strings.TrimSuffix(parts[len(parts)-1], ".git")
+	}
 	return parts[len(parts)-2], parts[len(parts)-1]
 }
 
