@@ -53,7 +53,7 @@ func (observer *repositoryObserver) ObserveGitSources() {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
 					observer.refreshChan[app.ID] = make(chan bool)
-					observer.checkGitSourceWrapper(&app)
+					go observer.checkGitSourceWrapper(&app)
 				}
 			}
 		}
