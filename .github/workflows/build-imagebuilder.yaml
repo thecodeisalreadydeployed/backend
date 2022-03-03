@@ -10,6 +10,7 @@ on:
     branches:
       - main
       - ci/senior-project
+      - dev/imagebuilder
 jobs:
   test:
     runs-on: ubuntu-20.04
