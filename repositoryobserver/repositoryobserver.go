@@ -1,6 +1,7 @@
 package repositoryobserver
 
 import (
+	"github.com/thecodeisalreadydeployed/gitapi"
 	"sync"
 	"time"
 
@@ -25,16 +26,19 @@ type repositoryObserver struct {
 	workloadController workloadcontroller.WorkloadController
 	refreshChan        map[string]chan bool
 	observables        *sync.Map
+	gapi               gitapi.GitAPIBackend
 }
 
 func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
 	refreshChan := make(map[string]chan bool)
+	gapi := gitapi.NewGitAPIBackend(logger)
 	return &repositoryObserver{
 		logger:             logger,
 		db:                 DB,
 		workloadController: workloadController,
 		refreshChan:        refreshChan,
 		observables:        &sync.Map{},
+		gapi:               gapi,
 	}
 }
 
@@ -135,6 +139,17 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 			logger.Error("failed to deploy new revision, waiting for the next retry", zap.Error(err))
 			time.Sleep(waitAfterErrorInterval)
 		} else {
+			break
+		}
+	}
+
+	for {
+		gs, err := observer.gapi.FillGitSource(&app.GitSource)
+		if err != nil {
+			logger.Error("failed to get new commit info, waiting for the next retry", zap.Error(err))
+			time.Sleep(waitAfterErrorInterval)
+		} else {
+			app.GitSource = *gs
 			break
 		}
 	}
