@@ -55,7 +55,7 @@ func (backend *gitAPIBackend) getOwnerAndRepo(repoURL string) (string, string) {
 		return "", ""
 	}
 	if strings.HasSuffix(parts[len(parts)-1], ".git") {
-		strings.TrimSuffix(parts[len(parts)-1], ".git")
+		parts[len(parts)-1] = strings.TrimSuffix(parts[len(parts)-1], ".git")
 	}
 	return parts[len(parts)-2], parts[len(parts)-1]
 }
