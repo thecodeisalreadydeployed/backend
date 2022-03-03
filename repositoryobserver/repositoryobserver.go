@@ -39,7 +39,7 @@ func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController w
 }
 
 const waitAfterErrorInterval = 10 * time.Second
-const sleepObserverInterval = 3 * time.Minute
+const sleepObserverInterval = 30 * time.Second
 
 func (observer *repositoryObserver) ObserveGitSources() {
 	for {
@@ -48,11 +48,12 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			observer.logger.Error("cannot get observable apps", zap.Error(err))
 			time.Sleep(waitAfterErrorInterval)
 		} else {
+			observer.logger.Info("obtained observable apps")
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					observer.observables.Store(app.ID, nil)
 					observer.refreshChan[app.ID] = make(chan bool)
-					observer.checkGitSourceWrapper(&app)
+					go observer.checkGitSourceWrapper(&app)
 				}
 			}
 		}
@@ -137,6 +138,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 			break
 		}
 	}
+	logger.Info("deployment completed")
 
 	select {
 	case <-observer.refreshChan[app.ID]:
@@ -177,7 +179,7 @@ func (observer *repositoryObserver) CheckChanges(repoURL string, branch string, 
 
 	checkoutErr := git.Checkout(branch)
 	if checkoutErr != nil {
-		observer.logger.Error("cannot checkout", zap.Error(err))
+		observer.logger.Error("cannot checkout", zap.Error(checkoutErr))
 		return nil, -1
 	}
 
@@ -189,7 +191,7 @@ func (observer *repositoryObserver) CheckChanges(repoURL string, branch string, 
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
-		observer.logger.Error("cannot get commit diff", zap.Error(err))
+		observer.logger.Error("cannot get commit diff", zap.Error(diffErr))
 		return nil, -1
 	}
 

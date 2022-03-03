@@ -36,7 +36,7 @@ func TestFillGitSource(t *testing.T) {
 	logger := zaptest.NewLogger(t)
 	gitHubAPI := NewGitHubAPI(logger, "octocat", "Hello-World")
 	gs, err := gitHubAPI.FillGitSource(&model.GitSource{
-		RepositoryURL: "https://github.com/octocat/Hello-World",
+		RepositoryURL: "https://github.com/octocat/Hello-World.git",
 		Branch:        "master",
 	})
 	assert.Nil(t, err)
@@ -44,7 +44,7 @@ func TestFillGitSource(t *testing.T) {
 		CommitSHA:        "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d",
 		CommitMessage:    "Merge pull request #6 from Spaceghost/patch-1\n\nNew line at end of file.",
 		CommitAuthorName: "The Octocat",
-		RepositoryURL:    "https://github.com/octocat/Hello-World",
+		RepositoryURL:    "https://github.com/octocat/Hello-World.git",
 		Branch:           "master",
 	}, gs)
 }
