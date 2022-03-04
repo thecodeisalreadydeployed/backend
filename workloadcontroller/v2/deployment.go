@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *string) (*model.Deployment, error) {
-	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
+func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *string, dataStore datastore.DataStore) (*model.Deployment, error) {
+	app, err := dataStore.GetAppByID(appID)
 	if err != nil {
 		return nil, err
 	}
@@ -43,12 +43,12 @@ func (ctrl *workloadController) NewDeployment(appID string, expectedCommitHash *
 	}
 
 	app.GitSource = gitSource
-	app, err = datastore.SaveApp(datastore.GetDB(), app)
+	app, err = dataStore.SaveApp(app)
 	if err != nil {
 		return nil, err
 	}
 
-	deployment, err := datastore.SaveDeployment(datastore.GetDB(), &model.Deployment{
+	deployment, err := dataStore.SaveDeployment(&model.Deployment{
 		AppID:              appID,
 		GitSource:          app.GitSource,
 		BuildConfiguration: app.BuildConfiguration,

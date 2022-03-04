@@ -5,8 +5,8 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func (ctrl *workloadController) NewProject(project *model.Project) (*model.Project, error) {
-	prj, createErr := datastore.SaveProject(datastore.GetDB(), project)
+func (ctrl *workloadController) NewProject(project *model.Project, dataStore datastore.DataStore) (*model.Project, error) {
+	prj, createErr := dataStore.SaveProject(project)
 	if createErr != nil {
 		return nil, createErr
 	}
