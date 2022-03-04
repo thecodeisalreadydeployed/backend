@@ -1,13 +1,11 @@
 package datastore
 
 import (
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"testing"
-	"time"
 )
 
 func TestGetAllPresets(t *testing.T) {
@@ -65,11 +63,6 @@ func TestGetPresetByID(t *testing.T) {
 }
 
 func TestSavePreset(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -104,11 +97,6 @@ func TestSavePreset(t *testing.T) {
 }
 
 func TestRemovePreset(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)

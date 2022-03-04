@@ -1,13 +1,11 @@
 package datastore
 
 import (
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"testing"
-	"time"
 )
 
 func TestGetEventsByDeploymentID(t *testing.T) {
@@ -65,11 +63,6 @@ func TestGetEventByID(t *testing.T) {
 }
 
 func TestSaveEvent(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -83,8 +76,8 @@ func TestSaveEvent(t *testing.T) {
 			"dpl-test",
 			"Downloading dependencies (1/20)",
 			model.INFO,
-			time.Unix(0, 0),
-			time.Unix(0, 0),
+			sqlmock.AnyArg(),
+			sqlmock.AnyArg(),
 			"abcdefghijklmnopqrstuvwxyz0").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()

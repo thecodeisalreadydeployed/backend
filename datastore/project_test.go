@@ -1,12 +1,9 @@
 package datastore
 
 import (
-	"regexp"
-	"time"
-
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/model"
+	"regexp"
 
 	"testing"
 
@@ -68,11 +65,6 @@ func TestGetProjectByID(t *testing.T) {
 }
 
 func TestSaveProject(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -82,7 +74,7 @@ func TestSaveProject(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("Best Project", time.Unix(0, 0), time.Unix(0, 0), "prj-test").
+		WithArgs("Best Project", sqlmock.AnyArg(), sqlmock.AnyArg(), "prj-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -107,11 +99,6 @@ func TestSaveProject(t *testing.T) {
 }
 
 func TestRemoveProject(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)

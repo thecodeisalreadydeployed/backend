@@ -1,14 +1,11 @@
 package datastore
 
 import (
-	"regexp"
-	"testing"
-	"time"
-
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/model"
+	"regexp"
+	"testing"
 )
 
 func TestGetAllApps(t *testing.T) {
@@ -116,11 +113,6 @@ func TestGetAppByID(t *testing.T) {
 }
 
 func TestSaveApp(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -140,8 +132,8 @@ func TestSaveApp(t *testing.T) {
 				RepositoryURL:    "a",
 				Branch:           "a",
 			}),
-			time.Unix(0, 0),
-			time.Unix(0, 0),
+			sqlmock.AnyArg(),
+			sqlmock.AnyArg(),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
 			"app-test").
@@ -170,11 +162,6 @@ func TestSaveApp(t *testing.T) {
 }
 
 func TestRemoveApp(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -262,11 +249,6 @@ func TestIsObservableApp(t *testing.T) {
 }
 
 func TestSetObservable(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -289,8 +271,8 @@ func TestSetObservable(t *testing.T) {
 				RepositoryURL:    "a",
 				Branch:           "a",
 			}),
-			time.Unix(0, 0),
-			time.Unix(0, 0),
+			sqlmock.AnyArg(),
+			sqlmock.AnyArg(),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			false,
 			"app-test").
