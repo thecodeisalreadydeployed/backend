@@ -111,7 +111,11 @@ func disableObservable(ctx *fiber.Ctx) error {
 func forceRefresh(observer repositoryobserver.RepositoryObserver) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		appID := ctx.Params("appID")
-		observer.Refresh(appID)
-		return ctx.SendStatus(fiber.StatusOK)
+		ok := observer.Refresh(appID)
+		if ok {
+			return ctx.SendStatus(fiber.StatusOK)
+		} else {
+			return ctx.SendStatus(fiber.StatusInternalServerError)
+		}
 	}
 }
