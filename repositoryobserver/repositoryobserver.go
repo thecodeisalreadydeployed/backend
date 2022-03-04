@@ -51,7 +51,6 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			observer.logger.Error("cannot get observable apps", zap.Error(err))
 			time.Sleep(waitAfterErrorInterval)
 		} else {
-			observer.logger.Info("obtained observable apps")
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
 					thisApp := app
