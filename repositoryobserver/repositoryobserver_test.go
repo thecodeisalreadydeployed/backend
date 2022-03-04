@@ -93,7 +93,7 @@ func TestObserveGitSources(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	workloadController := mock_workloadcontroller.NewMockWorkloadController(ctrl)
-	workloadController.EXPECT().NewDeployment(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+	workloadController.EXPECT().NewDeployment(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
 
 	repositoryObserver := NewRepositoryObserver(logger, d, workloadController)
 	go repositoryObserver.ObserveGitSources()
