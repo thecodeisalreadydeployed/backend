@@ -34,7 +34,8 @@ func main() {
 	zap.ReplaceGlobals(logger)
 
 	config.BindEnv()
-	datastore.Migrate()
+	dataStore := datastore.NewDataStore()
+	dataStore.CreateSeed()
 
 	containerRegistry := containerregistry.NewContainerRegistry(config.DefaultContainerRegistryConfiguration())
 	if util.IsKubernetesTestEnvironment() {
@@ -44,8 +45,8 @@ func main() {
 	clusterBackend := clusterbackend.NewClusterBackend(zap.L())
 	gitOpsController := gitopscontroller.NewGitOpsController(zap.L())
 	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController, clusterBackend, containerRegistry)
-	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), datastore.GetDB(), workloadController)
+	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), dataStore, workloadController)
 	go repositoryObserver.ObserveGitSources()
-	go workloadController.ObserveWorkloads()
-	apiserver.APIServer(3000, workloadController, repositoryObserver)
+	go workloadController.ObserveWorkloads(dataStore)
+	apiserver.APIServer(3000, workloadController, repositoryObserver, dataStore)
 }
