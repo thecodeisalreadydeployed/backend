@@ -21,8 +21,10 @@ import (
 )
 
 func TestCheckChanges(t *testing.T) {
+	logger := zaptest.NewLogger(t)
 	observer := NewRepositoryObserver(nil, nil, nil)
 	changeString, duration := observer.CheckChanges(
+		logger,
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"37e8e4d20d889924780f2373453a246591b6b11a",
@@ -32,6 +34,7 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
 	changeString, duration = observer.CheckChanges(
+		logger,
 		"https://github.com/thecodeisalreadydeployed/fixture-monorepo",
 		"main",
 		"5da29979c5ef986dc8ec6aa603e0862310abc96e",
@@ -41,6 +44,7 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, 19*time.Minute+57*time.Second, duration)
 
 	changeString, duration = observer.CheckChanges(
+		logger,
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
 		"main",
 		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
@@ -50,6 +54,7 @@ func TestCheckChanges(t *testing.T) {
 	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 
 	changeString, duration = observer.CheckChanges(
+		logger,
 		"https://github.com/thecodeisalreadydeployed/fixture-nest",
 		"dev",
 		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
