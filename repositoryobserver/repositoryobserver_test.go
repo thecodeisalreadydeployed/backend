@@ -1,18 +1,14 @@
 package repositoryobserver
 
 import (
-	"bou.ke/monkey"
-	"errors"
 	"regexp"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/mock/gomock"
-	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/datastore"
-	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/model"
 	mock_workloadcontroller "github.com/thecodeisalreadydeployed/workloadcontroller/v2/mock"
 	"go.uber.org/zap/zaptest"
@@ -55,11 +51,6 @@ func TestCheckChanges(t *testing.T) {
 }
 
 func TestObserveGitSources(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	datastore.ExpectVersionQuery(mock)
@@ -67,13 +58,23 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
-	clean, path, msg, hash, revisedMsg, revisedHash := initRepository(t)
-	defer clean()
+	url := "https://github.com/thecodeisalreadydeployed/fixture-nest"
+	branch := "main"
+
+	// 1 commit before main
+	hash := "62139be31792ab4a43c00eadcc8af6cadd90ee66"
+	msg := "feat: init NestJS project"
+	author := "trif0lium"
+
+	// main commit
+	revisedHash := "14bc77fc515e6d66b8d9c15126ee49ca55faf879"
+	revisedMsg := "chore(app): Hello World -> fixture-nest"
+	revisedAuthor := "trif0lium"
 
 	// Return fresh app.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
-		WillReturnRows(getObservableAppRows(path, msg, hash))
+		WillReturnRows(getObservableAppRows(hash, msg, author, url, branch))
 
 	// Return observable of same fresh app.
 	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
@@ -82,12 +83,7 @@ func TestObserveGitSources(t *testing.T) {
 		WillReturnRows(rows)
 
 	// Return saved app.
-	expectSaveApp(mock, revisedHash, revisedMsg, path)
-
-	// Return error fetching datastore after deploying once.
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
-		WithArgs("app-test").
-		WillReturnError(errors.New("simulated failure"))
+	expectSaveApp(mock, revisedHash, revisedMsg, revisedAuthor, url, branch)
 
 	mock.ExpectClose()
 
@@ -109,7 +105,7 @@ func TestObserveGitSources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, path string) {
+func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, revisedAuthor string, url string, branch string) {
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
 	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
 
@@ -117,16 +113,16 @@ func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, 
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
 		WithArgs(
 			"prj-test",
-			"Best App",
+			"Fixture Nest",
 			model.GetGitSourceString(model.GitSource{
 				CommitSHA:        revisedHash,
 				CommitMessage:    revisedMsg,
-				CommitAuthorName: config.DefaultGitSignature().Name,
-				RepositoryURL:    path,
-				Branch:           "main",
+				CommitAuthorName: revisedAuthor,
+				RepositoryURL:    url,
+				Branch:           branch,
 			}),
-			time.Unix(0, 0),
-			time.Unix(0, 0),
+			sqlmock.AnyArg(),
+			sqlmock.AnyArg(),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
 			"app-test").
@@ -134,23 +130,21 @@ func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, 
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
 		WithArgs("app-test").
-		WillReturnRows(getObservableAppRows(path, revisedMsg, revisedHash))
+		WillReturnRows(getObservableAppRows(revisedHash, revisedMsg, revisedAuthor, url, branch))
 }
 
-func getObservableAppRows(path string, msg string, hash string) *sqlmock.Rows {
+func getObservableAppRows(hash string, msg string, author string, url string, branch string) *sqlmock.Rows {
 	app := model.App{
 		ID:        "app-test",
 		ProjectID: "prj-test",
-		Name:      "Best App",
+		Name:      "Fixture Nest",
 		GitSource: model.GitSource{
 			CommitSHA:        hash,
 			CommitMessage:    msg,
-			CommitAuthorName: config.DefaultGitSignature().Name,
-			RepositoryURL:    path,
-			Branch:           "main",
+			CommitAuthorName: author,
+			RepositoryURL:    url,
+			Branch:           branch,
 		},
-		CreatedAt:          time.Unix(0, 0),
-		UpdatedAt:          time.Unix(0, 0),
 		BuildConfiguration: model.BuildConfiguration{},
 		Observable:         true,
 	}
