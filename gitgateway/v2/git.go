@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
-	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/memory"
@@ -90,24 +89,35 @@ func (g *gitGateway) Checkout(branch string) error {
 	}
 
 	if g.repositoryType == Remote {
-		localBranchReferenceName := plumbing.NewBranchReferenceName(branch)
-		remoteReferenceName := plumbing.NewRemoteReferenceName("origin", branch)
-		err := g.repo.CreateBranch(&gitconfig.Branch{Name: branch, Remote: "origin", Merge: localBranchReferenceName})
-		if err != nil {
-			return fmt.Errorf("cannot create branch: %w", err)
-		}
-		newReference := plumbing.NewSymbolicReference(localBranchReferenceName, remoteReferenceName)
-		err = g.repo.Storer.SetReference(newReference)
-		if err != nil {
-			return fmt.Errorf("cannot set reference: %w", err)
-		}
+		// refs/heads/<localBranchName>
+		// localBranchReferenceName := plumbing.NewBranchReferenceName(branch)
 
-		checkoutErr := w.Checkout(&git.CheckoutOptions{
-			Branch: plumbing.NewBranchReferenceName(localBranchReferenceName.String()),
+		// // refs/remotes/origin/<remoteBranchName>
+		// remoteReferenceName := plumbing.NewRemoteReferenceName("origin", branch)
+
+		// err := g.repo.CreateBranch(&gitconfig.Branch{Name: branch, Remote: "origin", Merge: localBranchReferenceName})
+		// if err != nil {
+		// 	return fmt.Errorf("cannot create branch: %w", err)
+		// }
+		// newReference := plumbing.NewSymbolicReference(localBranchReferenceName, remoteReferenceName)
+		// err = g.repo.Storer.SetReference(newReference)
+		// if err != nil {
+		// 	return fmt.Errorf("cannot set reference: %w", err)
+		// }
+
+		// checkoutErr := w.Checkout(&git.CheckoutOptions{
+		// 	Branch: plumbing.NewBranchReferenceName(localBranchReferenceName.String()),
+		// })
+
+		// if checkoutErr != nil {
+		// 	return fmt.Errorf("cannot checkout: %w", checkoutErr)
+		// }
+
+		err := w.Checkout(&git.CheckoutOptions{
+			Branch: plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)),
 		})
-
-		if checkoutErr != nil {
-			return fmt.Errorf("cannot checkout: %w", checkoutErr)
+		if err != nil {
+			return fmt.Errorf("cannot checkout: %w", err)
 		}
 
 		return nil
