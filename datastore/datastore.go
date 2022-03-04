@@ -2,20 +2,66 @@ package datastore
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/util"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 	"log"
 	"os"
+	"testing"
 	"time"
 
 	"github.com/thecodeisalreadydeployed/datamodel"
-	"github.com/thecodeisalreadydeployed/util"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-var DB *gorm.DB
+type DataStore interface {
+	CreateSeed()
+	IsReady() bool
 
-func Migrate() {
+	GetAllApps() (*[]model.App, error)
+	GetObservableApps() (*[]model.App, error)
+	SetObservable(appID string, observable bool) error
+	IsObservableApp(appID string) (bool, error)
+	GetAppsByProjectID(projectID string) (*[]model.App, error)
+	GetAppByID(appID string) (*model.App, error)
+	SaveApp(app *model.App) (*model.App, error)
+	RemoveApp(id string) error
+	GetAppsByName(name string) (*[]model.App, error)
+
+	GetPendingDeployments() (*[]model.Deployment, error)
+	GetDeploymentsByAppID(appID string) (*[]model.Deployment, error)
+	GetDeploymentByID(deploymentID string) (*model.Deployment, error)
+	SetDeploymentState(deploymentID string, state model.DeploymentState) error
+	SaveDeployment(deployment *model.Deployment) (*model.Deployment, error)
+	RemoveDeployment(id string) error
+
+	GetEventsByDeploymentID(deploymentID string) (*[]model.Event, error)
+	GetEventByID(eventID string) (*model.Event, error)
+	SaveEvent(event *model.Event) (*model.Event, error)
+	IsValidKSUID(str string) bool
+
+	GetAllPresets() (*[]model.Preset, error)
+	GetPresetByID(presetID string) (*model.Preset, error)
+	GetPresetsByName(name string) (*[]model.Preset, error)
+	SavePreset(preset *model.Preset) (*model.Preset, error)
+	RemovePreset(id string) error
+
+	GetAllProjects() (*[]model.Project, error)
+	GetProjectByID(id string) (*model.Project, error)
+	SaveProject(project *model.Project) (*model.Project, error)
+	RemoveProject(id string) error
+	GetProjectsByName(name string) (*[]model.Project, error)
+}
+
+type dataStore struct {
+	DB     *gorm.DB
+	logger *zap.Logger
+}
+
+func NewDataStore() DataStore {
 	// dsn := "host=localhost user=user password=password dbname=codedeploy port=5432 sslmode=disable TimeZone=Asia/Bangkok"
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Bangkok",
@@ -43,7 +89,7 @@ func Migrate() {
 		panic(err)
 	}
 
-	DB = database
+	var DB = database
 	err = DB.AutoMigrate(&datamodel.Project{})
 	if err != nil {
 		panic(err)
@@ -69,18 +115,28 @@ func Migrate() {
 		panic(err)
 	}
 
-	seedPreset()
-	if util.IsDevEnvironment() {
-		seed()
+	return &dataStore{
+		DB:     DB,
+		logger: zap.L(),
 	}
 }
 
-func GetDB() *gorm.DB {
-	return DB
+func NewMockDataStore(gdb *gorm.DB, t *testing.T) DataStore {
+	return &dataStore{
+		DB:     gdb,
+		logger: zaptest.NewLogger(t),
+	}
 }
 
-func IsReady() bool {
-	_sql, err := GetDB().DB()
+func (d *dataStore) CreateSeed() {
+	d.seedPreset()
+	if util.IsDevEnvironment() {
+		d.seed()
+	}
+}
+
+func (d *dataStore) IsReady() bool {
+	_sql, err := d.DB.DB()
 	if err != nil {
 		return false
 	}
