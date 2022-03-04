@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/thecodeisalreadydeployed/datastore"
 	"log"
 
 	"github.com/thecodeisalreadydeployed/repositoryobserver"
@@ -18,7 +19,7 @@ import (
 	"github.com/thecodeisalreadydeployed/apiserver/validator"
 )
 
-func APIServer(port int, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver) {
+func APIServer(port int, workloadController workloadcontroller.WorkloadController, observer repositoryobserver.RepositoryObserver, dataStore datastore.DataStore) {
 	firebaseAuth := auth.SetupFirebase()
 	gitAPIBackend := gitapi.NewGitAPIBackend(zap.L())
 	statusAPIBackend := statusapi.NewStatusAPIBackend(zap.L())
@@ -27,13 +28,13 @@ func APIServer(port int, workloadController workloadcontroller.WorkloadControlle
 
 	app.Use(cors.New())
 
-	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
-	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated(firebaseAuth)), workloadController, observer, statusAPIBackend, gitAPIBackend)
-	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated(firebaseAuth)), workloadController)
-	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated(firebaseAuth)))
+	controller.NewProjectController(app.Group("projects", auth.EnsureAuthenticated(firebaseAuth)), workloadController, dataStore)
+	controller.NewAppController(app.Group("apps", auth.EnsureAuthenticated(firebaseAuth)), workloadController, observer, statusAPIBackend, gitAPIBackend, dataStore)
+	controller.NewDeploymentController(app.Group("deployments", auth.EnsureAuthenticated(firebaseAuth)), workloadController, dataStore)
+	controller.NewPresetController(app.Group("presets", auth.EnsureAuthenticated(firebaseAuth)), dataStore)
 	controller.NewGitAPIController(app.Group("gitapi", auth.EnsureAuthenticated(firebaseAuth)), gitAPIBackend)
 
-	controller.NewHealthController(app.Group("health"))
+	controller.NewHealthController(app.Group("health"), dataStore)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%d", port)))
 }
