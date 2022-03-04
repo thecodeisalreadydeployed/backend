@@ -52,16 +52,6 @@ func TestCheckChanges(t *testing.T) {
 
 	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
 	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
-
-	changeString, duration = observer.CheckChanges(
-		logger,
-		"https://github.com/thecodeisalreadydeployed/fixture-nest",
-		"dev",
-		"62139be31792ab4a43c00eadcc8af6cadd90ee66",
-	)
-
-	assert.Equal(t, "14bc77fc515e6d66b8d9c15126ee49ca55faf879", *changeString)
-	assert.Equal(t, 723*time.Hour+39*time.Minute+44*time.Second+500*time.Millisecond, duration)
 }
 
 func TestObserveGitSources(t *testing.T) {
