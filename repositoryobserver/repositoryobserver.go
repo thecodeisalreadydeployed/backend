@@ -164,7 +164,7 @@ func (observer *repositoryObserver) reportChanges(app *model.App, logger *zap.Lo
 
 func (observer *repositoryObserver) newDeployment(logger *zap.Logger, app *model.App, commit *string) {
 	for {
-		_, err := observer.workloadController.NewDeployment(app.ID, commit)
+		_, err := observer.workloadController.NewDeployment(app.ID, commit, observer.dataStore)
 		if err != nil {
 			logger.Error("failed to deploy new revision, waiting for the next retry", zap.Error(err))
 			time.Sleep(waitAfterErrorInterval)
@@ -242,7 +242,7 @@ func (observer *repositoryObserver) CheckChanges(logger *zap.Logger, repoURL str
 
 	diff, diffErr := git.Diff(currentCommitSHA, ref)
 	if diffErr != nil {
-		observer.logger.Error("cannot get commit diff", zap.Error(diffErr))
+		logger.Error("cannot get commit diff", zap.Error(diffErr))
 		return nil, -1
 	}
 
