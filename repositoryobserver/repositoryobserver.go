@@ -16,7 +16,7 @@ import (
 
 type RepositoryObserver interface {
 	ObserveGitSources()
-	Refresh(id string)
+	Refresh(id string) bool
 	CheckChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration)
 }
 
@@ -66,16 +66,17 @@ func (observer *repositoryObserver) ObserveGitSources() {
 	}
 }
 
-func (observer *repositoryObserver) Refresh(id string) {
+func (observer *repositoryObserver) Refresh(id string) bool {
 	_, ok := observer.observables.Load(id)
 	if ok {
 		select {
 		case observer.refreshChan[id] <- true:
-			break
+			return true
 		default:
-			break
+			return false
 		}
 	}
+	return false
 }
 
 func (observer *repositoryObserver) checkGitSourceWrapper(app *model.App) {
