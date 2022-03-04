@@ -161,26 +161,3 @@ func getObservableAppRows(hash string, msg string, author string, url string, br
 		a.Observable,
 	)
 }
-
-func initRepository(t *testing.T) (func(), string, string, string, string, string) {
-	path, clean := gitgateway.InitRepository()
-
-	git, err := gitgateway.NewGitGatewayLocal(path)
-	assert.Nil(t, err)
-
-	err = git.WriteFile(".thecodeisalreadydeployed", "data")
-	assert.Nil(t, err)
-
-	msg := "This is a commit."
-	hash, err := git.Commit([]string{".thecodeisalreadydeployed"}, msg)
-	assert.Nil(t, err)
-
-	err = git.WriteFile(".thecodeisalreadydeployed", "new data")
-	assert.Nil(t, err)
-
-	revisedMsg := "This is another commit."
-	revisedHash, err := git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
-	assert.Nil(t, err)
-
-	return clean, path, msg, hash, revisedMsg, revisedHash
-}
