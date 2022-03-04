@@ -8,7 +8,6 @@ import (
 	faker "github.com/bxcodec/faker/v3"
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/model"
-	"go.uber.org/zap"
 )
 
 func (d *dataStore) seedPreset() {
@@ -46,7 +45,7 @@ func (d *dataStore) seedPreset() {
 	}
 
 	if err := d.DB.Omit("Deployment").Create(&data).Error; err != nil {
-		zap.L().Error("Failed to seed apps.")
+		d.logger.Error("Failed to seed apps.")
 	}
 }
 
@@ -61,10 +60,10 @@ func (d *dataStore) seedExists(name string) bool {
 	var existing int64
 	err := d.DB.Table(name).Count(&existing).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return false
 	} else if existing > 0 {
-		zap.L().Info(fmt.Sprintf("Table '%s' already seeded.", name))
+		d.logger.Info(fmt.Sprintf("Table '%s' already seeded.", name))
 		return true
 	}
 	return false
@@ -80,14 +79,14 @@ func (d *dataStore) seedProjects(size int) {
 		var datum datamodel.Project
 		err := faker.FakeData(&datum)
 		if err != nil {
-			zap.L().Error(err.Error())
+			d.logger.Error(err.Error())
 		}
 
 		datum.ID = withPrefix(datum.ID, "prj")
 		data = append(data, datum)
 	}
 	if err := d.DB.Create(&data).Error; err != nil {
-		zap.L().Error("Failed to seed projects.")
+		d.logger.Error("Failed to seed projects.")
 	}
 
 }
@@ -100,7 +99,7 @@ func (d *dataStore) seedApps(size int) {
 	var keys []string
 	err := d.DB.Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 	}
 
 	var data []datamodel.App
@@ -108,7 +107,7 @@ func (d *dataStore) seedApps(size int) {
 		var datum datamodel.App
 		err := faker.FakeData(&datum)
 		if err != nil {
-			zap.L().Error(err.Error())
+			d.logger.Error(err.Error())
 		}
 
 		datum.ID = withPrefix(datum.ID, "app")
@@ -120,7 +119,7 @@ func (d *dataStore) seedApps(size int) {
 		data = append(data, datum)
 	}
 	if err := d.DB.Omit("Project").Create(&data).Error; err != nil {
-		zap.L().Error("Failed to seed apps.")
+		d.logger.Error("Failed to seed apps.")
 	}
 }
 
@@ -132,7 +131,7 @@ func (d *dataStore) seedDeployments(size int) {
 	var keys []string
 	err := d.DB.Table("apps").Select("ID").Scan(&keys).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 	}
 
 	var data []datamodel.Deployment
@@ -140,7 +139,7 @@ func (d *dataStore) seedDeployments(size int) {
 		var datum datamodel.Deployment
 		err := faker.FakeData(&datum)
 		if err != nil {
-			zap.L().Error(err.Error())
+			d.logger.Error(err.Error())
 		}
 
 		datum.ID = withPrefix(datum.ID, "dpl")
@@ -153,7 +152,7 @@ func (d *dataStore) seedDeployments(size int) {
 		data = append(data, datum)
 	}
 	if err := d.DB.Omit("App").Create(&data).Error; err != nil {
-		zap.L().Error("Failed to seed deployments.")
+		d.logger.Error("Failed to seed deployments.")
 	}
 
 }
@@ -166,7 +165,7 @@ func (d *dataStore) seedEvents(size int) {
 	var keys []string
 	err := d.DB.Table("deployments").Select("ID").Scan(&keys).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 	}
 
 	var data []datamodel.Event
@@ -174,7 +173,7 @@ func (d *dataStore) seedEvents(size int) {
 		var datum datamodel.Event
 		err := faker.FakeData(&datum)
 		if err != nil {
-			zap.L().Error(err.Error())
+			d.logger.Error(err.Error())
 		}
 
 		datum.ID = model.GenerateEventID(datum.ExportedAt)
@@ -184,7 +183,7 @@ func (d *dataStore) seedEvents(size int) {
 		data = append(data, datum)
 	}
 	if err := d.DB.Omit("Deployment").Create(&data).Error; err != nil {
-		zap.L().Error("Failed to seed events.")
+		d.logger.Error("Failed to seed events.")
 	}
 }
 

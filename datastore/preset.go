@@ -6,7 +6,6 @@ import (
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -15,7 +14,7 @@ func (d *dataStore) GetAllPresets() (*[]model.Preset, error) {
 	var _data []datamodel.Preset
 	err := d.DB.Table("presets").Scan(&_data).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -31,7 +30,7 @@ func (d *dataStore) GetAllPresets() (*[]model.Preset, error) {
 
 func (d *dataStore) GetPresetByID(presetID string) (*model.Preset, error) {
 	if !strings.HasPrefix(presetID, "pst-") {
-		zap.L().Error(MsgPresetPrefix)
+		d.logger.Error(MsgPresetPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
@@ -39,7 +38,7 @@ func (d *dataStore) GetPresetByID(presetID string) (*model.Preset, error) {
 	err := d.DB.First(&_data, "id = ?", presetID).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -53,7 +52,7 @@ func (d *dataStore) GetPresetsByName(name string) (*[]model.Preset, error) {
 	err := d.DB.Table("presets").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -72,7 +71,7 @@ func (d *dataStore) SavePreset(preset *model.Preset) (*model.Preset, error) {
 		preset.ID = model.GeneratePresetID()
 	}
 	if !strings.HasPrefix(preset.ID, "pst-") {
-		zap.L().Error(MsgPresetPrefix)
+		d.logger.Error(MsgPresetPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
@@ -80,7 +79,7 @@ func (d *dataStore) SavePreset(preset *model.Preset) (*model.Preset, error) {
 	err := d.DB.Save(a).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 
 		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
 			return nil, errutil.ErrInvalidArgument
@@ -97,17 +96,17 @@ func (d *dataStore) SavePreset(preset *model.Preset) (*model.Preset, error) {
 
 func (d *dataStore) RemovePreset(id string) error {
 	if !strings.HasPrefix(id, "pst-") {
-		zap.L().Error(MsgPresetPrefix)
+		d.logger.Error(MsgPresetPrefix)
 		return errutil.ErrInvalidArgument
 	}
 	var a datamodel.Preset
 	err := d.DB.Table("presets").Where(datamodel.Preset{ID: id}).First(&a).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrNotFound
 	}
 	if err := d.DB.Delete(&a).Error; err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrUnknown
 	}
 	return nil

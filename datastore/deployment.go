@@ -7,8 +7,6 @@ import (
 
 	"gorm.io/gorm"
 
-	"go.uber.org/zap"
-
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
@@ -24,7 +22,7 @@ func (d *dataStore) GetPendingDeployments() (*[]model.Deployment, error) {
 	}).Find(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -40,7 +38,7 @@ func (d *dataStore) GetPendingDeployments() (*[]model.Deployment, error) {
 
 func (d *dataStore) GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app-") {
-		zap.L().Error(MsgAppPrefix)
+		d.logger.Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
@@ -48,7 +46,7 @@ func (d *dataStore) GetDeploymentsByAppID(appID string) (*[]model.Deployment, er
 	err := d.DB.Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -64,7 +62,7 @@ func (d *dataStore) GetDeploymentsByAppID(appID string) (*[]model.Deployment, er
 
 func (d *dataStore) GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	if !strings.HasPrefix(deploymentID, "dpl-") {
-		zap.L().Error(MsgDeploymentPrefix)
+		d.logger.Error(MsgDeploymentPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
@@ -72,7 +70,7 @@ func (d *dataStore) GetDeploymentByID(deploymentID string) (*model.Deployment, e
 	err := d.DB.First(&_data, "id = ?", deploymentID).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -118,7 +116,7 @@ func (d *dataStore) SaveDeployment(deployment *model.Deployment) (*model.Deploym
 		deployment.ID = model.GenerateDeploymentID()
 	}
 	if !strings.HasPrefix(deployment.ID, "dpl-") {
-		zap.L().Error(MsgDeploymentPrefix)
+		d.logger.Error(MsgDeploymentPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
@@ -126,7 +124,7 @@ func (d *dataStore) SaveDeployment(deployment *model.Deployment) (*model.Deploym
 	err := d.DB.Save(a).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 
 		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
 			return nil, errutil.ErrInvalidArgument
@@ -143,17 +141,17 @@ func (d *dataStore) SaveDeployment(deployment *model.Deployment) (*model.Deploym
 
 func (d *dataStore) RemoveDeployment(id string) error {
 	if !strings.HasPrefix(id, "dpl-") {
-		zap.L().Error(MsgDeploymentPrefix)
+		d.logger.Error(MsgDeploymentPrefix)
 		return errutil.ErrInvalidArgument
 	}
 	var dpl datamodel.Deployment
 	err := d.DB.Table("deployments").Where(datamodel.Deployment{ID: id}).First(&dpl).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrNotFound
 	}
 	if err := d.DB.Delete(&dpl).Error; err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrUnknown
 	}
 	return nil

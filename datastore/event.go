@@ -7,7 +7,6 @@ import (
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +15,7 @@ func (d *dataStore) GetEventsByDeploymentID(deploymentID string) (*[]model.Event
 	err := d.DB.Table("events").Where(datamodel.Event{DeploymentID: deploymentID}).Scan(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -32,7 +31,7 @@ func (d *dataStore) GetEventsByDeploymentID(deploymentID string) (*[]model.Event
 
 func (d *dataStore) GetEventByID(eventID string) (*model.Event, error) {
 	if !(d.IsValidKSUID(eventID)) {
-		zap.L().Error(MsgEventPrefix)
+		d.logger.Error(MsgEventPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
@@ -40,7 +39,7 @@ func (d *dataStore) GetEventByID(eventID string) (*model.Event, error) {
 	err := d.DB.First(&_data, "id = ?", eventID).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -53,14 +52,14 @@ func (d *dataStore) SaveEvent(event *model.Event) (*model.Event, error) {
 		event.ID = model.GenerateEventID(event.ExportedAt)
 	}
 	if !(d.IsValidKSUID(event.ID)) {
-		zap.L().Error(MsgEventPrefix)
+		d.logger.Error(MsgEventPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 	e := datamodel.NewEventFromModel(event)
 	err := d.DB.Save(e).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 
 		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
 			return nil, errutil.ErrInvalidArgument
