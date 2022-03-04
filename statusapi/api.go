@@ -22,7 +22,7 @@ type Metadata struct {
 }
 
 type StatusAPIBackend interface {
-	GetActiveDeploymentID(appID string) (string, error)
+	GetActiveDeploymentID(appID string, dataStore datastore.DataStore) (string, error)
 }
 
 type statusAPIBackend struct {
@@ -38,12 +38,12 @@ func NewStatusAPIBackend(logger *zap.Logger) StatusAPIBackend {
 	return &statusAPIBackend{logger: logger, httpClient: &http.Client{Transport: HTTPTransport}}
 }
 
-func (backend *statusAPIBackend) GetActiveDeploymentID(appID string) (string, error) {
+func (backend *statusAPIBackend) GetActiveDeploymentID(appID string, dataStore datastore.DataStore) (string, error) {
 	requestID := uuid.NewString()
 	logger := backend.logger.With(zap.String("appID", appID), zap.String("requestID", requestID))
 	_ = logger
 
-	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
+	app, err := dataStore.GetAppByID(appID)
 	if err != nil {
 		logger.Error(err.Error())
 		return "", err
