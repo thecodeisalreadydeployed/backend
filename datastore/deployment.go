@@ -14,9 +14,9 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func GetPendingDeployments(DB *gorm.DB) (*[]model.Deployment, error) {
+func (d *dataStore) GetPendingDeployments() (*[]model.Deployment, error) {
 	var _data []datamodel.Deployment
-	err := DB.Table("deployments").Where("state IN ?", []string{
+	err := d.DB.Table("deployments").Where("state IN ?", []string{
 		string(model.DeploymentStateQueueing),
 		string(model.DeploymentStateBuilding),
 		string(model.DeploymentStateBuildSucceeded),
@@ -38,14 +38,14 @@ func GetPendingDeployments(DB *gorm.DB) (*[]model.Deployment, error) {
 	return ret, nil
 }
 
-func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, error) {
+func (d *dataStore) GetDeploymentsByAppID(appID string) (*[]model.Deployment, error) {
 	if !strings.HasPrefix(appID, "app-") {
 		zap.L().Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data []datamodel.Deployment
-	err := DB.Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
+	err := d.DB.Table("deployments").Where(datamodel.Deployment{AppID: appID}).Scan(&_data).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -62,14 +62,14 @@ func GetDeploymentsByAppID(DB *gorm.DB, appID string) (*[]model.Deployment, erro
 	return ret, nil
 }
 
-func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, error) {
+func (d *dataStore) GetDeploymentByID(deploymentID string) (*model.Deployment, error) {
 	if !strings.HasPrefix(deploymentID, "dpl-") {
 		zap.L().Error(MsgDeploymentPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.Deployment
-	err := DB.First(&_data, "id = ?", deploymentID).Error
+	err := d.DB.First(&_data, "id = ?", deploymentID).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -80,10 +80,10 @@ func GetDeploymentByID(DB *gorm.DB, deploymentID string) (*model.Deployment, err
 	return &ret, nil
 }
 
-func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.DeploymentState) error {
+func (d *dataStore) SetDeploymentState(deploymentID string, state model.DeploymentState) error {
 	switch state {
 	case model.DeploymentStateBuildSucceeded:
-		err := DB.Table("deployments").
+		err := d.DB.Table("deployments").
 			Where(datamodel.Deployment{ID: deploymentID}).
 			Update("state", state).
 			Update("built_at", time.Now()).
@@ -92,7 +92,7 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 			return err
 		}
 	case model.DeploymentStateCommitted:
-		err := DB.Table("deployments").
+		err := d.DB.Table("deployments").
 			Where(datamodel.Deployment{ID: deploymentID}).
 			Update("state", state).
 			Update("committed_at", time.Now()).
@@ -101,7 +101,7 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 			return err
 		}
 	default:
-		err := DB.Table("deployments").
+		err := d.DB.Table("deployments").
 			Where(datamodel.Deployment{ID: deploymentID}).
 			Update("state", state).
 			Error
@@ -113,7 +113,7 @@ func SetDeploymentState(DB *gorm.DB, deploymentID string, state model.Deployment
 	return nil
 }
 
-func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deployment, error) {
+func (d *dataStore) SaveDeployment(deployment *model.Deployment) (*model.Deployment, error) {
 	if deployment.ID == "" {
 		deployment.ID = model.GenerateDeploymentID()
 	}
@@ -123,7 +123,7 @@ func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deploymen
 	}
 
 	a := datamodel.NewDeploymentFromModel(deployment)
-	err := DB.Save(a).Error
+	err := d.DB.Save(a).Error
 
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -138,21 +138,21 @@ func SaveDeployment(DB *gorm.DB, deployment *model.Deployment) (*model.Deploymen
 
 		return nil, errutil.ErrUnknown
 	}
-	return GetDeploymentByID(DB, deployment.ID)
+	return d.GetDeploymentByID(deployment.ID)
 }
 
-func RemoveDeployment(DB *gorm.DB, id string) error {
+func (d *dataStore) RemoveDeployment(id string) error {
 	if !strings.HasPrefix(id, "dpl-") {
 		zap.L().Error(MsgDeploymentPrefix)
 		return errutil.ErrInvalidArgument
 	}
 	var dpl datamodel.Deployment
-	err := DB.Table("deployments").Where(datamodel.Deployment{ID: id}).First(&dpl).Error
+	err := d.DB.Table("deployments").Where(datamodel.Deployment{ID: id}).First(&dpl).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrNotFound
 	}
-	if err := DB.Delete(&dpl).Error; err != nil {
+	if err := d.DB.Delete(&dpl).Error; err != nil {
 		zap.L().Error(err.Error())
 		return errutil.ErrUnknown
 	}

@@ -11,8 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func seedPreset() {
-	if seedExists("presets") {
+func (d *dataStore) seedPreset() {
+	if d.seedExists("presets") {
 		return
 	}
 
@@ -45,21 +45,21 @@ func seedPreset() {
 		data = append(data, datum)
 	}
 
-	if err := GetDB().Omit("Deployment").Create(&data).Error; err != nil {
+	if err := d.DB.Omit("Deployment").Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed apps.")
 	}
 }
 
-func seed() {
-	seedProjects(5)
-	seedApps(15)
-	seedDeployments(40)
-	seedEvents(60)
+func (d *dataStore) seed() {
+	d.seedProjects(5)
+	d.seedApps(15)
+	d.seedDeployments(40)
+	d.seedEvents(60)
 }
 
-func seedExists(name string) bool {
+func (d *dataStore) seedExists(name string) bool {
 	var existing int64
-	err := GetDB().Table(name).Count(&existing).Error
+	err := d.DB.Table(name).Count(&existing).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 		return false
@@ -70,8 +70,8 @@ func seedExists(name string) bool {
 	return false
 }
 
-func seedProjects(size int) {
-	if seedExists("projects") {
+func (d *dataStore) seedProjects(size int) {
+	if d.seedExists("projects") {
 		return
 	}
 
@@ -86,19 +86,19 @@ func seedProjects(size int) {
 		datum.ID = withPrefix(datum.ID, "prj")
 		data = append(data, datum)
 	}
-	if err := GetDB().Create(&data).Error; err != nil {
+	if err := d.DB.Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed projects.")
 	}
 
 }
 
-func seedApps(size int) {
-	if seedExists("apps") {
+func (d *dataStore) seedApps(size int) {
+	if d.seedExists("apps") {
 		return
 	}
 
 	var keys []string
-	err := GetDB().Table("projects").Select("ID").Scan(&keys).Error
+	err := d.DB.Table("projects").Select("ID").Scan(&keys).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
@@ -119,18 +119,18 @@ func seedApps(size int) {
 
 		data = append(data, datum)
 	}
-	if err := GetDB().Omit("Project").Create(&data).Error; err != nil {
+	if err := d.DB.Omit("Project").Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed apps.")
 	}
 }
 
-func seedDeployments(size int) {
-	if seedExists("deployments") {
+func (d *dataStore) seedDeployments(size int) {
+	if d.seedExists("deployments") {
 		return
 	}
 
 	var keys []string
-	err := GetDB().Table("apps").Select("ID").Scan(&keys).Error
+	err := d.DB.Table("apps").Select("ID").Scan(&keys).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
@@ -152,19 +152,19 @@ func seedDeployments(size int) {
 
 		data = append(data, datum)
 	}
-	if err := GetDB().Omit("App").Create(&data).Error; err != nil {
+	if err := d.DB.Omit("App").Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed deployments.")
 	}
 
 }
 
-func seedEvents(size int) {
-	if seedExists("events") {
+func (d *dataStore) seedEvents(size int) {
+	if d.seedExists("events") {
 		return
 	}
 
 	var keys []string
-	err := GetDB().Table("deployments").Select("ID").Scan(&keys).Error
+	err := d.DB.Table("deployments").Select("ID").Scan(&keys).Error
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
@@ -183,7 +183,7 @@ func seedEvents(size int) {
 
 		data = append(data, datum)
 	}
-	if err := GetDB().Omit("Deployment").Create(&data).Error; err != nil {
+	if err := d.DB.Omit("Deployment").Create(&data).Error; err != nil {
 		zap.L().Error("Failed to seed events.")
 	}
 }
