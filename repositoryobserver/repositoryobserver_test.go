@@ -1,6 +1,7 @@
 package repositoryobserver
 
 import (
+	"bou.ke/monkey"
 	"errors"
 	"regexp"
 	"testing"
@@ -59,6 +60,11 @@ func TestCheckChanges(t *testing.T) {
 }
 
 func TestObserveGitSources(t *testing.T) {
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Unix(0, 0)
+	})
+	defer monkey.UnpatchAll()
+
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	datastore.ExpectVersionQuery(mock)
@@ -66,16 +72,22 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
+	clean, path, msg, hash, revisedMsg, revisedHash := initRepository(t)
+	defer clean()
+
 	// Return fresh app.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `apps` WHERE observable = ?")).
 		WithArgs(true).
-		WillReturnRows(getObservableAppRows(t))
+		WillReturnRows(getObservableAppRows(path, msg, hash))
 
 	// Return observable of same fresh app.
 	rows := sqlmock.NewRows([]string{"Observable"}).AddRow(true)
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
 		WithArgs("app-test").
 		WillReturnRows(rows)
+
+	// Return saved app.
+	expectSaveApp(mock, revisedHash, revisedMsg, path)
 
 	// Return error fetching datastore after deploying once.
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT Observable FROM `apps` WHERE `apps`.`id` = ?")).
@@ -102,31 +114,39 @@ func TestObserveGitSources(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func getObservableAppRows(t *testing.T) *sqlmock.Rows {
-	path, clean := gitgateway.InitRepository()
-	defer clean()
+func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, path string) {
+	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
+	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
 
-	git, err := gitgateway.NewGitGatewayLocal(path)
-	assert.Nil(t, err)
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(exec)).
+		WithArgs(
+			"prj-test",
+			"Best App",
+			model.GetGitSourceString(model.GitSource{
+				CommitSHA:        revisedHash,
+				CommitMessage:    revisedMsg,
+				CommitAuthorName: config.DefaultGitSignature().Name,
+				RepositoryURL:    path,
+				Branch:           "main",
+			}),
+			time.Unix(0, 0),
+			time.Unix(0, 0),
+			model.GetBuildConfigurationString(model.BuildConfiguration{}),
+			true,
+			"app-test").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+	mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WithArgs("app-test").
+		WillReturnRows(getObservableAppRows(path, revisedMsg, revisedHash))
+}
 
-	err = git.WriteFile(".thecodeisalreadydeployed", "data")
-	assert.Nil(t, err)
-
-	msg := "This is a commit."
-	hash, err := git.Commit([]string{".thecodeisalreadydeployed"}, msg)
-	assert.Nil(t, err)
-
-	err = git.WriteFile(".thecodeisalreadydeployed", "new data")
-	assert.Nil(t, err)
-
-	revisedMsg := "This is another commit."
-	_, err = git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
-	assert.Nil(t, err)
-
+func getObservableAppRows(path string, msg string, hash string) *sqlmock.Rows {
 	app := model.App{
 		ID:        "app-test",
 		ProjectID: "prj-test",
-		Name:      "BestApp",
+		Name:      "Best App",
 		GitSource: model.GitSource{
 			CommitSHA:        hash,
 			CommitMessage:    msg,
@@ -151,4 +171,27 @@ func getObservableAppRows(t *testing.T) *sqlmock.Rows {
 		a.BuildConfiguration,
 		a.Observable,
 	)
+}
+
+func initRepository(t *testing.T) (func(), string, string, string, string, string) {
+	path, clean := gitgateway.InitRepository()
+
+	git, err := gitgateway.NewGitGatewayLocal(path)
+	assert.Nil(t, err)
+
+	err = git.WriteFile(".thecodeisalreadydeployed", "data")
+	assert.Nil(t, err)
+
+	msg := "This is a commit."
+	hash, err := git.Commit([]string{".thecodeisalreadydeployed"}, msg)
+	assert.Nil(t, err)
+
+	err = git.WriteFile(".thecodeisalreadydeployed", "new data")
+	assert.Nil(t, err)
+
+	revisedMsg := "This is another commit."
+	revisedHash, err := git.Commit([]string{".thecodeisalreadydeployed"}, revisedMsg)
+	assert.Nil(t, err)
+
+	return clean, path, msg, hash, revisedMsg, revisedHash
 }

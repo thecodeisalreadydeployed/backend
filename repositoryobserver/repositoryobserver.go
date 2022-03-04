@@ -1,6 +1,7 @@
 package repositoryobserver
 
 import (
+	"github.com/thecodeisalreadydeployed/gitapi"
 	"sync"
 	"time"
 
@@ -25,16 +26,19 @@ type repositoryObserver struct {
 	workloadController workloadcontroller.WorkloadController
 	refreshChan        map[string]chan bool
 	observables        *sync.Map
+	gapi               gitapi.GitAPIBackend
 }
 
 func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
 	refreshChan := make(map[string]chan bool)
+	gapi := gitapi.NewGitAPIBackend(logger)
 	return &repositoryObserver{
 		logger:             logger,
 		db:                 DB,
 		workloadController: workloadController,
 		refreshChan:        refreshChan,
 		observables:        &sync.Map{},
+		gapi:               gapi,
 	}
 }
 
@@ -96,6 +100,30 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 		return false
 	}
 
+	commit, duration, restart := observer.reportChanges(app, logger)
+	if restart {
+		return true
+	}
+
+	observer.newDeployment(logger, app, commit)
+
+	observer.fillGitSource(logger, app)
+
+	observer.saveApp(logger, app)
+
+	logger.Info("deployment completed")
+
+	select {
+	case <-observer.refreshChan[app.ID]:
+		logger.Info("refreshing: now observing for changes")
+		break
+	case <-time.After(duration):
+		break
+	}
+	return true
+}
+
+func (observer *repositoryObserver) reportChanges(app *model.App, logger *zap.Logger) (*string, time.Duration, bool) {
 	var commit *string
 	var duration time.Duration
 	var restart bool
@@ -113,6 +141,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 				logger.Info("no changes in the application, waiting for the next repository check")
 				select {
 				case <-observer.refreshChan[app.ID]:
+					logger.Info("refreshing: now observing for changes")
 					break
 				case <-time.After(duration):
 					break
@@ -125,10 +154,10 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 			break
 		}
 	}
-	if restart {
-		return true
-	}
+	return commit, duration, restart
+}
 
+func (observer *repositoryObserver) newDeployment(logger *zap.Logger, app *model.App, commit *string) {
 	for {
 		_, err := observer.workloadController.NewDeployment(app.ID, commit)
 		if err != nil {
@@ -138,15 +167,31 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 			break
 		}
 	}
-	logger.Info("deployment completed")
+}
 
-	select {
-	case <-observer.refreshChan[app.ID]:
-		break
-	case <-time.After(duration):
-		break
+func (observer *repositoryObserver) fillGitSource(logger *zap.Logger, app *model.App) {
+	for {
+		gs, err := observer.gapi.FillGitSource(&app.GitSource)
+		if err != nil {
+			logger.Error("failed to get new commit info, waiting for the next retry", zap.Error(err))
+			time.Sleep(waitAfterErrorInterval)
+		} else {
+			app.GitSource = *gs
+			break
+		}
 	}
-	return true
+}
+
+func (observer *repositoryObserver) saveApp(logger *zap.Logger, app *model.App) {
+	for {
+		_, err := datastore.SaveApp(observer.db, app)
+		if err != nil {
+			logger.Error("failed to save new commit info, waiting for the next retry", zap.Error(err))
+			time.Sleep(waitAfterErrorInterval)
+		} else {
+			break
+		}
+	}
 }
 
 func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *model.App) (bool, bool) {
@@ -159,6 +204,7 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	if observableNow {
 		return false, false
 	} else {
+		logger.Info("app is now set to not be observed")
 		observer.observables.Delete(app.ID)
 		return false, true
 	}
