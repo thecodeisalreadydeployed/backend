@@ -115,6 +115,7 @@ func (observer *repositoryObserver) checkGitSource(app *model.App) bool {
 
 	select {
 	case <-observer.refreshChan[app.ID]:
+		logger.Info("refreshing: now observing for changes")
 		break
 	case <-time.After(duration):
 		break
@@ -140,6 +141,7 @@ func (observer *repositoryObserver) reportChanges(app *model.App, logger *zap.Lo
 				logger.Info("no changes in the application, waiting for the next repository check")
 				select {
 				case <-observer.refreshChan[app.ID]:
+					logger.Info("refreshing: now observing for changes")
 					break
 				case <-time.After(duration):
 					break
@@ -202,6 +204,7 @@ func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *mod
 	if observableNow {
 		return false, false
 	} else {
+		logger.Info("app is now set to not be observed")
 		observer.observables.Delete(app.ID)
 		return false, true
 	}
