@@ -49,6 +49,7 @@ func AppStructString() []string {
 		"UpdatedAt",
 		"BuildConfiguration",
 		"Observable",
+		"FetchInterval",
 	}
 }
 
@@ -106,6 +107,7 @@ func GetAppRows() *sqlmock.Rows {
 			time.Unix(0, 0),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
+			0,
 		)
 }
 
@@ -162,6 +164,7 @@ func GetExpectedApp() *model.App {
 		UpdatedAt:          time.Unix(0, 0),
 		BuildConfiguration: model.BuildConfiguration{},
 		Observable:         true,
+		FetchInterval:      0,
 	}
 }
 

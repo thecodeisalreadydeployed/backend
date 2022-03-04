@@ -126,7 +126,7 @@ func TestSaveApp(t *testing.T) {
 	ExpectVersionQuery(mock)
 
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
-	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
+	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=?,`fetch_interval`=? WHERE `id` = ?"
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
@@ -144,6 +144,7 @@ func TestSaveApp(t *testing.T) {
 			sqlmock.AnyArg(),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
+			0,
 			"app-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
@@ -274,7 +275,7 @@ func TestSetObservable(t *testing.T) {
 		WithArgs("app-test").
 		WillReturnRows(GetAppRows())
 
-	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
+	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=?,`fetch_interval`=? WHERE `id` = ?"
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
 		WithArgs(
@@ -291,6 +292,7 @@ func TestSetObservable(t *testing.T) {
 			sqlmock.AnyArg(),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			false,
+			0,
 			"app-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
