@@ -17,7 +17,7 @@ import (
 type RepositoryObserver interface {
 	ObserveGitSources()
 	Refresh(id string) bool
-	CheckChanges(repoURL string, branch string, currentCommitSHA string) (*string, time.Duration)
+	CheckChanges(logger *zap.Logger, repoURL string, branch string, currentCommitSHA string) (*string, time.Duration)
 }
 
 type repositoryObserver struct {
