@@ -12,7 +12,6 @@ import (
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
-	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/memory"
@@ -41,8 +40,16 @@ type GitGateway interface {
 	CommitInterval() (time.Duration, error)
 }
 
+type RepositoryType int
+
+const (
+	Local RepositoryType = iota
+	Remote
+)
+
 type gitGateway struct {
-	repo *git.Repository
+	repo           *git.Repository
+	repositoryType RepositoryType
 }
 
 func NewGitRepository(path string) (GitGateway, error) {
@@ -50,7 +57,7 @@ func NewGitRepository(path string) (GitGateway, error) {
 	if initErr != nil {
 		return nil, fmt.Errorf("cannot initialize new Git repository: %w", initErr)
 	}
-	return &gitGateway{repo: repo}, nil
+	return &gitGateway{repo: repo, repositoryType: Local}, nil
 }
 
 func NewGitGatewayLocal(path string) (GitGateway, error) {
@@ -60,7 +67,7 @@ func NewGitGatewayLocal(path string) (GitGateway, error) {
 		return nil, fmt.Errorf("cannot open Git repository: %w", openErr)
 	}
 
-	return &gitGateway{repo: repo}, nil
+	return &gitGateway{repo: repo, repositoryType: Local}, nil
 }
 
 func NewGitGatewayRemote(url string) (GitGateway, error) {
@@ -72,7 +79,7 @@ func NewGitGatewayRemote(url string) (GitGateway, error) {
 		return nil, fmt.Errorf("cannot clone Git repository: %w", cloneErr)
 	}
 
-	return &gitGateway{repo: repo}, nil
+	return &gitGateway{repo: repo, repositoryType: Remote}, nil
 }
 
 func (g *gitGateway) Checkout(branch string) error {
@@ -81,20 +88,44 @@ func (g *gitGateway) Checkout(branch string) error {
 		return fmt.Errorf("cannot get Git worktree: %w", worktreeErr)
 	}
 
-	localBranchReferenceName := plumbing.NewBranchReferenceName(branch)
-	remoteReferenceName := plumbing.NewRemoteReferenceName("origin", branch)
-	err := g.repo.CreateBranch(&gitconfig.Branch{Name: branch, Remote: "origin", Merge: localBranchReferenceName})
-	if err != nil {
-		return fmt.Errorf("cannot create branch: %w", err)
-	}
-	newReference := plumbing.NewSymbolicReference(localBranchReferenceName, remoteReferenceName)
-	err = g.repo.Storer.SetReference(newReference)
-	if err != nil {
-		return fmt.Errorf("cannot set reference: %w", err)
+	if g.repositoryType == Remote {
+		// refs/heads/<localBranchName>
+		// localBranchReferenceName := plumbing.NewBranchReferenceName(branch)
+
+		// // refs/remotes/origin/<remoteBranchName>
+		// remoteReferenceName := plumbing.NewRemoteReferenceName("origin", branch)
+
+		// err := g.repo.CreateBranch(&gitconfig.Branch{Name: branch, Remote: "origin", Merge: localBranchReferenceName})
+		// if err != nil {
+		// 	return fmt.Errorf("cannot create branch: %w", err)
+		// }
+		// newReference := plumbing.NewSymbolicReference(localBranchReferenceName, remoteReferenceName)
+		// err = g.repo.Storer.SetReference(newReference)
+		// if err != nil {
+		// 	return fmt.Errorf("cannot set reference: %w", err)
+		// }
+
+		// checkoutErr := w.Checkout(&git.CheckoutOptions{
+		// 	Branch: plumbing.NewBranchReferenceName(localBranchReferenceName.String()),
+		// })
+
+		// if checkoutErr != nil {
+		// 	return fmt.Errorf("cannot checkout: %w", checkoutErr)
+		// }
+
+		err := w.Checkout(&git.CheckoutOptions{
+			Branch: plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)),
+		})
+		if err != nil {
+			return fmt.Errorf("cannot checkout: %w", err)
+		}
+
+		return nil
 	}
 
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName(localBranchReferenceName.String()),
+		Branch: plumbing.NewBranchReferenceName(branch),
+		Force:  true,
 	})
 
 	if checkoutErr != nil {
