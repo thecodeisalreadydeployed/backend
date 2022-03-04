@@ -131,7 +131,7 @@ func (observer *repositoryObserver) reportChanges(app *model.App, logger *zap.Lo
 		commit, duration = observer.CheckChanges(logger, app.GitSource.RepositoryURL, app.GitSource.Branch, app.GitSource.CommitSHA)
 
 		if app.FetchInterval != 0 {
-			duration = app.FetchInterval
+			duration = time.Duration(app.FetchInterval) * time.Second
 		}
 
 		if duration > gitgateway.MaximumInterval {

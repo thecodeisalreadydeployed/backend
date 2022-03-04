@@ -16,7 +16,7 @@ type App struct {
 	UpdatedAt          time.Time          `json:"updatedAt"`
 	BuildConfiguration BuildConfiguration `json:"buildConfiguration"`
 	Observable         bool               `json:"observable"`
-	FetchInterval      time.Duration      `json:"fetchInterval"`
+	FetchInterval      int                `json:"fetchInterval"`
 }
 
 func GenerateAppID() string {

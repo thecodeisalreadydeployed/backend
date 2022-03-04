@@ -2,16 +2,15 @@ package dto
 
 import (
 	"github.com/thecodeisalreadydeployed/model"
-	"time"
 )
 
 type CreateAppRequest struct {
-	ProjectID     string        `json:"projectID" validate:"required"`
-	Name          string        `json:"name" validate:"required"`
-	RepositoryURL string        `json:"repositoryURL" validate:"required"`
-	BuildScript   string        `json:"buildScript" validate:"required"`
-	Branch        string        `json:"branch" validate:"required"`
-	FetchInterval time.Duration `json:"fetchInterval"`
+	ProjectID     string `json:"projectID" validate:"required"`
+	Name          string `json:"name" validate:"required"`
+	RepositoryURL string `json:"repositoryURL" validate:"required"`
+	BuildScript   string `json:"buildScript" validate:"required"`
+	Branch        string `json:"branch" validate:"required"`
+	FetchInterval int    `json:"fetchInterval"`
 }
 
 func (req *CreateAppRequest) ToModel() model.App {
