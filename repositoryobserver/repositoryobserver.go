@@ -55,9 +55,10 @@ func (observer *repositoryObserver) ObserveGitSources() {
 			observer.logger.Info("obtained observable apps")
 			for _, app := range *apps {
 				if _, ok := observer.observables.Load(app.ID); !ok {
-					observer.observables.Store(app.ID, nil)
-					observer.refreshChan[app.ID] = make(chan bool)
-					go observer.checkGitSourceWrapper(&app)
+					thisApp := app
+					observer.observables.Store(thisApp.ID, nil)
+					observer.refreshChan[thisApp.ID] = make(chan bool)
+					go observer.checkGitSourceWrapper(&thisApp)
 				}
 			}
 		}
