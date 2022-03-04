@@ -109,7 +109,7 @@ func TestObserveGitSources(t *testing.T) {
 
 func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, revisedAuthor string, url string, branch string) {
 	query := "SELECT * FROM `apps` WHERE id = ? ORDER BY `apps`.`id` LIMIT 1"
-	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=? WHERE `id` = ?"
+	exec := "UPDATE `apps` SET `project_id`=?,`name`=?,`git_source`=?,`created_at`=?,`updated_at`=?,`build_configuration`=?,`observable`=?,`fetch_interval`=? WHERE `id` = ?"
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
@@ -127,6 +127,7 @@ func expectSaveApp(mock sqlmock.Sqlmock, revisedHash string, revisedMsg string, 
 			sqlmock.AnyArg(),
 			model.GetBuildConfigurationString(model.BuildConfiguration{}),
 			true,
+			0,
 			"app-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
@@ -161,5 +162,6 @@ func getObservableAppRows(hash string, msg string, author string, url string, br
 		a.UpdatedAt,
 		a.BuildConfiguration,
 		a.Observable,
+		a.FetchInterval,
 	)
 }
