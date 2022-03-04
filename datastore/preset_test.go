@@ -20,7 +20,9 @@ func TestGetAllPresets(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAllPresets(gdb)
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetAllPresets()
 	assert.Nil(t, err)
 
 	expected := &[]model.Preset{*GetExpectedPreset()}
@@ -48,7 +50,9 @@ func TestGetPresetByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetPresetByID(gdb, "pst-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetPresetByID("pst-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedPreset()
@@ -83,9 +87,11 @@ func TestSavePreset(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := NewMockDataStore(gdb, t)
+
 	expected := GetExpectedPreset()
 
-	actual, err := SavePreset(gdb, expected)
+	actual, err := d.SavePreset(expected)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 
@@ -118,7 +124,9 @@ func TestRemovePreset(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemovePreset(gdb, "pst-test")
+	d := NewMockDataStore(gdb, t)
+
+	err = d.RemovePreset("pst-test")
 	assert.Nil(t, err)
 
 	err = db.Close()
@@ -141,7 +149,9 @@ func TestGetPresetsByName(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetPresetsByName(gdb, "My Preset")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetPresetsByName("My Preset")
 	assert.Nil(t, err)
 
 	expected := &[]model.Preset{*GetExpectedPreset()}

@@ -22,7 +22,9 @@ func TestGetEventsByDeploymentID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetEventsByDeploymentID(gdb, "dpl-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetEventsByDeploymentID("dpl-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.Event{*GetExpectedEvent()}
@@ -49,7 +51,9 @@ func TestGetEventByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetEventByID(gdb, "abcdefghijklmnopqrstuvwxyz0")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetEventByID("abcdefghijklmnopqrstuvwxyz0")
 	assert.Nil(t, err)
 
 	expected := GetExpectedEvent()
@@ -89,9 +93,11 @@ func TestSaveEvent(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := NewMockDataStore(gdb, t)
+
 	expected := GetExpectedEvent()
 
-	actual, err := SaveEvent(gdb, expected)
+	actual, err := d.SaveEvent(expected)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 

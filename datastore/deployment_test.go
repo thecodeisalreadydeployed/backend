@@ -23,7 +23,9 @@ func TestGetDeploymentByAppID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetDeploymentsByAppID(gdb, "app-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetDeploymentsByAppID("app-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.Deployment{*GetExpectedDeployment()}
@@ -50,7 +52,9 @@ func TestGetDeploymentByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetDeploymentByID(gdb, "dpl-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetDeploymentByID("dpl-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedDeployment()
@@ -81,7 +85,9 @@ func TestSetDeploymentState(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = SetDeploymentState(gdb, "dpl-test", model.DeploymentStateReady)
+	d := NewMockDataStore(gdb, t)
+
+	err = d.SetDeploymentState("dpl-test", model.DeploymentStateReady)
 	assert.Nil(t, err)
 
 	err = db.Close()
@@ -113,7 +119,9 @@ func TestRemoveDeployment(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemoveDeployment(gdb, "dpl-test")
+	d := NewMockDataStore(gdb, t)
+
+	err = d.RemoveDeployment("dpl-test")
 	assert.Nil(t, err)
 
 	err = db.Close()

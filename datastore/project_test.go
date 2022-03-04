@@ -22,7 +22,9 @@ func TestGetAllProjects(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAllProjects(gdb)
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetAllProjects()
 	assert.Nil(t, err)
 
 	expected := &[]model.Project{*GetExpectedProject()}
@@ -50,7 +52,9 @@ func TestGetProjectByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetProjectByID(gdb, "prj-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetProjectByID("prj-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedProject()
@@ -85,9 +89,11 @@ func TestSaveProject(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := NewMockDataStore(gdb, t)
+
 	expected := GetExpectedProject()
 
-	actual, err := SaveProject(gdb, expected)
+	actual, err := d.SaveProject(expected)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 
@@ -120,7 +126,9 @@ func TestRemoveProject(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemoveProject(gdb, "prj-test")
+	d := NewMockDataStore(gdb, t)
+
+	err = d.RemoveProject("prj-test")
 	assert.Nil(t, err)
 
 	err = db.Close()
@@ -143,7 +151,9 @@ func TestGetProjectByName(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetProjectsByName(gdb, "Best Project")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetProjectsByName("Best Project")
 	assert.Nil(t, err)
 
 	expected := &[]model.Project{*GetExpectedProject()}
