@@ -58,6 +58,8 @@ func TestObserveGitSources(t *testing.T) {
 	gdb, err := datastore.OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := datastore.NewMockDataStore(gdb, t)
+
 	url := "https://github.com/thecodeisalreadydeployed/fixture-nest"
 	branch := "main"
 
@@ -93,7 +95,7 @@ func TestObserveGitSources(t *testing.T) {
 	workloadController := mock_workloadcontroller.NewMockWorkloadController(ctrl)
 	workloadController.EXPECT().NewDeployment(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
 
-	repositoryObserver := NewRepositoryObserver(logger, gdb, workloadController)
+	repositoryObserver := NewRepositoryObserver(logger, d, workloadController)
 	go repositoryObserver.ObserveGitSources()
 	timeout := time.After(2 * time.Second)
 	<-timeout

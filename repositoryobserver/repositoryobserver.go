@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
@@ -22,19 +21,19 @@ type RepositoryObserver interface {
 
 type repositoryObserver struct {
 	logger             *zap.Logger
-	db                 *gorm.DB
+	dataStore          datastore.DataStore
 	workloadController workloadcontroller.WorkloadController
 	refreshChan        map[string]chan bool
 	observables        *sync.Map
 	gapi               gitapi.GitAPIBackend
 }
 
-func NewRepositoryObserver(logger *zap.Logger, DB *gorm.DB, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
+func NewRepositoryObserver(logger *zap.Logger, dataStore datastore.DataStore, workloadController workloadcontroller.WorkloadController) RepositoryObserver {
 	refreshChan := make(map[string]chan bool)
 	gapi := gitapi.NewGitAPIBackend(logger)
 	return &repositoryObserver{
 		logger:             logger,
-		db:                 DB,
+		dataStore:          dataStore,
 		workloadController: workloadController,
 		refreshChan:        refreshChan,
 		observables:        &sync.Map{},
@@ -47,7 +46,7 @@ const sleepObserverInterval = 30 * time.Second
 
 func (observer *repositoryObserver) ObserveGitSources() {
 	for {
-		apps, err := datastore.GetObservableApps(observer.db)
+		apps, err := observer.dataStore.GetObservableApps()
 		if err != nil {
 			observer.logger.Error("cannot get observable apps", zap.Error(err))
 			time.Sleep(waitAfterErrorInterval)
@@ -190,7 +189,7 @@ func (observer *repositoryObserver) fillGitSource(logger *zap.Logger, app *model
 
 func (observer *repositoryObserver) saveApp(logger *zap.Logger, app *model.App) {
 	for {
-		_, err := datastore.SaveApp(observer.db, app)
+		_, err := observer.dataStore.SaveApp(app)
 		if err != nil {
 			logger.Error("failed to save new commit info, waiting for the next retry", zap.Error(err))
 			time.Sleep(waitAfterErrorInterval)
@@ -201,7 +200,7 @@ func (observer *repositoryObserver) saveApp(logger *zap.Logger, app *model.App) 
 }
 
 func (observer *repositoryObserver) checkObservable(logger *zap.Logger, app *model.App) (bool, bool) {
-	observableNow, err := datastore.IsObservableApp(observer.db, app.ID)
+	observableNow, err := observer.dataStore.IsObservableApp(app.ID)
 	if err != nil {
 		logger.Error("application status check failed", zap.Error(err))
 		time.Sleep(waitAfterErrorInterval)
