@@ -8,53 +8,63 @@ import (
 	"github.com/thecodeisalreadydeployed/datastore"
 )
 
-func NewPresetController(api fiber.Router) {
-	api.Get("/list", listPresets)
-	api.Get("/search", searchPreset)
-	api.Get("/:presetID", getPreset)
-	api.Post("/", createPreset)
-	api.Delete("/:presetID", deletePreset)
+func NewPresetController(api fiber.Router, dataStore datastore.DataStore) {
+	api.Get("/list", listPresets(dataStore))
+	api.Get("/search", searchPreset(dataStore))
+	api.Get("/:presetID", getPreset(dataStore))
+	api.Post("/", createPreset(dataStore))
+	api.Delete("/:presetID", deletePreset(dataStore))
 }
 
-func listPresets(ctx *fiber.Ctx) error {
-	result, err := datastore.GetAllPresets(datastore.GetDB())
-	return writeResponse(ctx, result, err)
-}
-
-func getPreset(ctx *fiber.Ctx) error {
-	presetID := ctx.Params("presetID")
-	result, err := datastore.GetPresetByID(datastore.GetDB(), presetID)
-	return writeResponse(ctx, result, err)
-}
-
-func searchPreset(ctx *fiber.Ctx) error {
-	presetName := ctx.Query("name")
-	result, err := datastore.GetPresetsByName(datastore.GetDB(), presetName)
-	return writeResponse(ctx, result, err)
-}
-
-func createPreset(ctx *fiber.Ctx) error {
-	input := dto.CreatePresetRequest{}
-
-	if err := ctx.BodyParser(&input); err != nil {
-		return fiber.NewError(errutil.MapStatusCode(err))
+func listPresets(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		result, err := dataStore.GetAllPresets()
+		return writeResponse(ctx, result, err)
 	}
-
-	if validationErrors := validator.CheckStruct(input); len(validationErrors) > 0 {
-		return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
-	}
-
-	inputModel := input.ToModel()
-	app, createErr := datastore.SavePreset(datastore.GetDB(), &inputModel)
-
-	return writeResponse(ctx, app, createErr)
 }
 
-func deletePreset(ctx *fiber.Ctx) error {
-	presetID := ctx.Params("presetID")
-	err := datastore.RemovePreset(datastore.GetDB(), presetID)
-	if err != nil {
-		return fiber.NewError(errutil.MapStatusCode(err))
+func getPreset(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		presetID := ctx.Params("presetID")
+		result, err := dataStore.GetPresetByID(presetID)
+		return writeResponse(ctx, result, err)
 	}
-	return ctx.SendStatus(fiber.StatusOK)
+}
+
+func searchPreset(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		presetName := ctx.Query("name")
+		result, err := dataStore.GetPresetsByName(presetName)
+		return writeResponse(ctx, result, err)
+	}
+}
+
+func createPreset(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		input := dto.CreatePresetRequest{}
+
+		if err := ctx.BodyParser(&input); err != nil {
+			return fiber.NewError(errutil.MapStatusCode(err))
+		}
+
+		if validationErrors := validator.CheckStruct(input); len(validationErrors) > 0 {
+			return ctx.Status(fiber.StatusBadRequest).JSON(validationErrors)
+		}
+
+		inputModel := input.ToModel()
+		app, createErr := dataStore.SavePreset(&inputModel)
+
+		return writeResponse(ctx, app, createErr)
+	}
+}
+
+func deletePreset(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		presetID := ctx.Params("presetID")
+		err := dataStore.RemovePreset(presetID)
+		if err != nil {
+			return fiber.NewError(errutil.MapStatusCode(err))
+		}
+		return ctx.SendStatus(fiber.StatusOK)
+	}
 }
