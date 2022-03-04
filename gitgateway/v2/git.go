@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
+	gitconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/memory"
@@ -80,9 +81,20 @@ func (g *gitGateway) Checkout(branch string) error {
 		return fmt.Errorf("cannot get Git worktree: %w", worktreeErr)
 	}
 
+	localBranchReferenceName := plumbing.NewBranchReferenceName(branch)
+	remoteReferenceName := plumbing.NewRemoteReferenceName("origin", branch)
+	err := g.repo.CreateBranch(&gitconfig.Branch{Name: branch, Remote: "origin", Merge: localBranchReferenceName})
+	if err != nil {
+		return fmt.Errorf("cannot create branch: %w", err)
+	}
+	newReference := plumbing.NewSymbolicReference(localBranchReferenceName, remoteReferenceName)
+	err = g.repo.Storer.SetReference(newReference)
+	if err != nil {
+		return fmt.Errorf("cannot set reference: %w", err)
+	}
+
 	checkoutErr := w.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName(branch),
-		Force:  true,
+		Branch: plumbing.NewBranchReferenceName(localBranchReferenceName.String()),
 	})
 
 	if checkoutErr != nil {
