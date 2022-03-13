@@ -1,13 +1,11 @@
 package datastore
 
 import (
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"testing"
-	"time"
 )
 
 func TestGetEventsByDeploymentID(t *testing.T) {
@@ -24,7 +22,9 @@ func TestGetEventsByDeploymentID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetEventsByDeploymentID(gdb, "dpl-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetEventsByDeploymentID("dpl-test")
 	assert.Nil(t, err)
 
 	expected := &[]model.Event{*GetExpectedEvent()}
@@ -51,7 +51,9 @@ func TestGetEventByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetEventByID(gdb, "abcdefghijklmnopqrstuvwxyz0")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetEventByID("abcdefghijklmnopqrstuvwxyz0")
 	assert.Nil(t, err)
 
 	expected := GetExpectedEvent()
@@ -65,11 +67,6 @@ func TestGetEventByID(t *testing.T) {
 }
 
 func TestSaveEvent(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -83,8 +80,8 @@ func TestSaveEvent(t *testing.T) {
 			"dpl-test",
 			"Downloading dependencies (1/20)",
 			model.INFO,
-			time.Unix(0, 0),
-			time.Unix(0, 0),
+			sqlmock.AnyArg(),
+			sqlmock.AnyArg(),
 			"abcdefghijklmnopqrstuvwxyz0").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
@@ -96,9 +93,11 @@ func TestSaveEvent(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := NewMockDataStore(gdb, t)
+
 	expected := GetExpectedEvent()
 
-	actual, err := SaveEvent(gdb, expected)
+	actual, err := d.SaveEvent(expected)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 

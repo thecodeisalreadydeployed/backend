@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"strings"
 
-	"go.uber.org/zap"
-
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
 	"gorm.io/gorm"
 )
 
-func GetAllApps(DB *gorm.DB) (*[]model.App, error) {
+func (d *dataStore) GetAllApps() (*[]model.App, error) {
 	var _data []datamodel.App
-	err := DB.Table("apps").Scan(&_data).Error
+	err := d.DB.Table("apps").Scan(&_data).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -31,11 +29,11 @@ func GetAllApps(DB *gorm.DB) (*[]model.App, error) {
 	return ret, nil
 }
 
-func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
+func (d *dataStore) GetObservableApps() (*[]model.App, error) {
 	var _data []datamodel.App
-	err := DB.Table("apps").Where("observable = ?", true).Scan(&_data).Error
+	err := d.DB.Table("apps").Where("observable = ?", true).Scan(&_data).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -49,49 +47,49 @@ func GetObservableApps(DB *gorm.DB) (*[]model.App, error) {
 	return ret, nil
 }
 
-func SetObservable(DB *gorm.DB, appID string, observable bool) error {
+func (d *dataStore) SetObservable(appID string, observable bool) error {
 	var app datamodel.App
-	err := DB.First(&app, "id = ?", appID).Error
+	err := d.DB.First(&app, "id = ?", appID).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrNotFound
 	}
 
 	app.Observable = observable
-	err = DB.Save(&app).Error
+	err = d.DB.Save(&app).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrNotFound
 	}
 
 	return nil
 }
 
-func IsObservableApp(DB *gorm.DB, appID string) (bool, error) {
+func (d *dataStore) IsObservableApp(appID string) (bool, error) {
 	var observable bool
-	err := DB.Table("apps").
+	err := d.DB.Table("apps").
 		Where(datamodel.App{ID: appID}).
 		Select("Observable").
 		Scan(&observable).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return false, errutil.ErrNotFound
 	}
 	return observable, nil
 }
 
-func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
+func (d *dataStore) GetAppsByProjectID(projectID string) (*[]model.App, error) {
 	if !strings.HasPrefix(projectID, "prj-") {
-		zap.L().Error(MsgProjectPrefix)
+		d.logger.Error(MsgProjectPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data []datamodel.App
-	err := DB.Table("apps").Where(datamodel.App{ProjectID: projectID}).Scan(&_data).Error
+	err := d.DB.Table("apps").Where(datamodel.App{ProjectID: projectID}).Scan(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -105,17 +103,17 @@ func GetAppsByProjectID(DB *gorm.DB, projectID string) (*[]model.App, error) {
 	return ret, nil
 }
 
-func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
+func (d *dataStore) GetAppByID(appID string) (*model.App, error) {
 	if !strings.HasPrefix(appID, "app-") {
-		zap.L().Error(MsgAppPrefix)
+		d.logger.Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.App
-	err := DB.First(&_data, "id = ?", appID).Error
+	err := d.DB.First(&_data, "id = ?", appID).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -123,20 +121,20 @@ func GetAppByID(DB *gorm.DB, appID string) (*model.App, error) {
 	return &ret, nil
 }
 
-func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
+func (d *dataStore) SaveApp(app *model.App) (*model.App, error) {
 	if app.ID == "" {
 		app.ID = model.GenerateAppID()
 	}
 	if !strings.HasPrefix(app.ID, "app-") {
-		zap.L().Error(MsgAppPrefix)
+		d.logger.Error(MsgAppPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	a := datamodel.NewAppFromModel(app)
-	err := DB.Save(a).Error
+	err := d.DB.Save(a).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 
 		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
 			return nil, errutil.ErrInvalidArgument
@@ -149,34 +147,34 @@ func SaveApp(DB *gorm.DB, app *model.App) (*model.App, error) {
 		return nil, errutil.ErrUnknown
 	}
 
-	return GetAppByID(DB, app.ID)
+	return d.GetAppByID(app.ID)
 }
 
-func RemoveApp(DB *gorm.DB, id string) error {
+func (d *dataStore) RemoveApp(id string) error {
 	if !strings.HasPrefix(id, "app-") {
-		zap.L().Error(MsgAppPrefix)
+		d.logger.Error(MsgAppPrefix)
 		return errutil.ErrInvalidArgument
 	}
 	var a datamodel.App
-	err := DB.Table("apps").Where(datamodel.App{ID: id}).First(&a).Error
+	err := d.DB.Table("apps").Where(datamodel.App{ID: id}).First(&a).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrNotFound
 	}
-	if err := DB.Delete(&a).Error; err != nil {
-		zap.L().Error(err.Error())
+	if err := d.DB.Delete(&a).Error; err != nil {
+		d.logger.Error(err.Error())
 		return errutil.ErrUnknown
 	}
 	return nil
 }
 
-func GetAppsByName(DB *gorm.DB, name string) (*[]model.App, error) {
+func (d *dataStore) GetAppsByName(name string) (*[]model.App, error) {
 	var _data []datamodel.App
 
-	err := DB.Table("apps").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
+	err := d.DB.Table("apps").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 

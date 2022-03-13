@@ -12,8 +12,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func (ctrl *workloadController) setContainerImage(appID string, deploymentID string) {
-	app, err := datastore.GetAppByID(datastore.GetDB(), appID)
+func (ctrl *workloadController) setContainerImage(appID string, deploymentID string, dataStore datastore.DataStore) {
+	app, err := dataStore.GetAppByID(appID)
 	if err != nil {
 		ctrl.logger.Error(err.Error(), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
 		return
@@ -31,16 +31,16 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 		return
 	}
 
-	_ = datastore.SetDeploymentState(datastore.GetDB(), deploymentID, model.DeploymentStateCommitted)
+	_ = dataStore.SetDeploymentState(deploymentID, model.DeploymentStateCommitted)
 }
 
-func (ctrl *workloadController) ObserveWorkloads() {
+func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) {
 	if util.IsDevEnvironment() || util.IsDockerTestEnvironment() {
 		return
 	}
 
 	for {
-		pendingDeployments, err := datastore.GetPendingDeployments(datastore.GetDB())
+		pendingDeployments, err := dataStore.GetPendingDeployments()
 		if err != nil {
 			ctrl.logger.Error(err.Error())
 			continue
@@ -57,7 +57,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 			if deployment.State == model.DeploymentStateQueueing {
 				timeLimit := deployment.UpdatedAt.Add(15 * time.Minute)
 				if time.Now().After(timeLimit) {
-					err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+					err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateError)
 					if err != nil {
 						ctrl.logger.Error(
 							"cannot set deployment state",
@@ -85,7 +85,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					switch p.Status.Phase {
 					case v1.PodSucceeded:
 						ctrl.logger.Info(p.Name, zap.Any("pod", p), zap.Any("containerStatuses", p.Status.ContainerStatuses))
-						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateBuildSucceeded)
+						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateBuildSucceeded)
 						if err != nil {
 							ctrl.logger.Error(
 								"cannot set deployment state",
@@ -104,9 +104,9 @@ func (ctrl *workloadController) ObserveWorkloads() {
 								zap.Error(err),
 							)
 						}
-						go ctrl.setContainerImage(deployment.AppID, deployment.ID)
+						go ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
 					case v1.PodFailed:
-						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateError)
 						if err != nil {
 							ctrl.logger.Error(
 								"cannot set deployment state",
@@ -134,7 +134,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
 
 					if p.Status.Phase == v1.PodRunning {
-						err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateReady)
+						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateReady)
 						if err != nil {
 							ctrl.logger.Error(
 								"cannot set deployment state",
@@ -150,7 +150,7 @@ func (ctrl *workloadController) ObserveWorkloads() {
 					if p.Status.Phase == v1.PodFailed {
 						for _, container := range p.Spec.Containers {
 							if container.Name == "container0" && !strings.HasPrefix(container.Image, "codedeploy://") {
-								err = datastore.SetDeploymentState(datastore.GetDB(), deployment.ID, model.DeploymentStateError)
+								err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateError)
 								if err != nil {
 									ctrl.logger.Error(
 										"cannot set deployment state",

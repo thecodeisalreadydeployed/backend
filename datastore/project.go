@@ -10,14 +10,13 @@ import (
 	"github.com/thecodeisalreadydeployed/datamodel"
 	"github.com/thecodeisalreadydeployed/errutil"
 	"github.com/thecodeisalreadydeployed/model"
-	"go.uber.org/zap"
 )
 
-func GetAllProjects(DB *gorm.DB) (*[]model.Project, error) {
+func (d *dataStore) GetAllProjects() (*[]model.Project, error) {
 	var _data []datamodel.Project
-	err := DB.Table("projects").Scan(&_data).Error
+	err := d.DB.Table("projects").Scan(&_data).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -31,18 +30,18 @@ func GetAllProjects(DB *gorm.DB) (*[]model.Project, error) {
 	return ret, nil
 }
 
-func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
+func (d *dataStore) GetProjectByID(id string) (*model.Project, error) {
 	if !strings.HasPrefix(id, "prj-") {
-		zap.L().Error(MsgProjectPrefix)
+		d.logger.Error(MsgProjectPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	var _data datamodel.Project
 
-	err := DB.Table("projects").First(&_data, "id = ?", id).Error
+	err := d.DB.Table("projects").First(&_data, "id = ?", id).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 
@@ -50,20 +49,20 @@ func GetProjectByID(DB *gorm.DB, id string) (*model.Project, error) {
 	return &ret, nil
 }
 
-func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
+func (d *dataStore) SaveProject(project *model.Project) (*model.Project, error) {
 	if project.ID == "" {
 		project.ID = model.GenerateProjectID()
 	}
 	if !strings.HasPrefix(project.ID, "prj-") {
-		zap.L().Error(MsgProjectPrefix)
+		d.logger.Error(MsgProjectPrefix)
 		return nil, errutil.ErrInvalidArgument
 	}
 
 	p := datamodel.NewProjectFromModel(project)
-	err := DB.Save(p).Error
+	err := d.DB.Save(p).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 
 		if errors.Is(err, gorm.ErrInvalidField) || errors.Is(err, gorm.ErrInvalidData) {
 			return nil, errutil.ErrInvalidArgument
@@ -76,35 +75,35 @@ func SaveProject(DB *gorm.DB, project *model.Project) (*model.Project, error) {
 		return nil, errutil.ErrUnknown
 	}
 
-	return GetProjectByID(DB, project.ID)
+	return d.GetProjectByID(project.ID)
 }
 
-func RemoveProject(DB *gorm.DB, id string) error {
+func (d *dataStore) RemoveProject(id string) error {
 	if !strings.HasPrefix(id, "prj-") {
-		zap.L().Error(MsgProjectPrefix)
+		d.logger.Error(MsgProjectPrefix)
 		return errutil.ErrInvalidArgument
 	}
 	var p datamodel.Project
 
-	err := DB.Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
+	err := d.DB.Table("projects").Where(datamodel.Project{ID: id}).First(&p).Error
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return errutil.ErrNotFound
 	}
-	if err := DB.Delete(&p).Error; err != nil {
-		zap.L().Error(err.Error())
+	if err := d.DB.Delete(&p).Error; err != nil {
+		d.logger.Error(err.Error())
 		return errutil.ErrUnknown
 	}
 	return nil
 }
 
-func GetProjectsByName(DB *gorm.DB, name string) (*[]model.Project, error) {
+func (d *dataStore) GetProjectsByName(name string) (*[]model.Project, error) {
 	var _data []datamodel.Project
 
-	err := DB.Table("projects").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
+	err := d.DB.Table("projects").Where("name LIKE ?", fmt.Sprintf("%%%s%%", name)).Scan(&_data).Error
 
 	if err != nil {
-		zap.L().Error(err.Error())
+		d.logger.Error(err.Error())
 		return nil, errutil.ErrNotFound
 	}
 

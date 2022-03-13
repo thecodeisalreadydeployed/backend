@@ -1,12 +1,9 @@
 package datastore
 
 import (
-	"regexp"
-	"time"
-
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/thecodeisalreadydeployed/model"
+	"regexp"
 
 	"testing"
 
@@ -25,7 +22,9 @@ func TestGetAllProjects(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAllProjects(gdb)
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetAllProjects()
 	assert.Nil(t, err)
 
 	expected := &[]model.Project{*GetExpectedProject()}
@@ -53,7 +52,9 @@ func TestGetProjectByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetProjectByID(gdb, "prj-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetProjectByID("prj-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedProject()
@@ -68,11 +69,6 @@ func TestGetProjectByID(t *testing.T) {
 }
 
 func TestSaveProject(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -82,7 +78,7 @@ func TestSaveProject(t *testing.T) {
 
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta(exec)).
-		WithArgs("Best Project", time.Unix(0, 0), time.Unix(0, 0), "prj-test").
+		WithArgs("Best Project", sqlmock.AnyArg(), sqlmock.AnyArg(), "prj-test").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 	mock.ExpectQuery(regexp.QuoteMeta(query)).
@@ -93,9 +89,11 @@ func TestSaveProject(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := NewMockDataStore(gdb, t)
+
 	expected := GetExpectedProject()
 
-	actual, err := SaveProject(gdb, expected)
+	actual, err := d.SaveProject(expected)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 
@@ -107,11 +105,6 @@ func TestSaveProject(t *testing.T) {
 }
 
 func TestRemoveProject(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -133,7 +126,9 @@ func TestRemoveProject(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemoveProject(gdb, "prj-test")
+	d := NewMockDataStore(gdb, t)
+
+	err = d.RemoveProject("prj-test")
 	assert.Nil(t, err)
 
 	err = db.Close()
@@ -156,7 +151,9 @@ func TestGetProjectByName(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetProjectsByName(gdb, "Best Project")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetProjectsByName("Best Project")
 	assert.Nil(t, err)
 
 	expected := &[]model.Project{*GetExpectedProject()}

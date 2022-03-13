@@ -1,13 +1,11 @@
 package datastore
 
 import (
-	"bou.ke/monkey"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/thecodeisalreadydeployed/model"
 	"regexp"
 	"testing"
-	"time"
 )
 
 func TestGetAllPresets(t *testing.T) {
@@ -22,7 +20,9 @@ func TestGetAllPresets(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetAllPresets(gdb)
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetAllPresets()
 	assert.Nil(t, err)
 
 	expected := &[]model.Preset{*GetExpectedPreset()}
@@ -50,7 +50,9 @@ func TestGetPresetByID(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetPresetByID(gdb, "pst-test")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetPresetByID("pst-test")
 	assert.Nil(t, err)
 
 	expected := GetExpectedPreset()
@@ -65,11 +67,6 @@ func TestGetPresetByID(t *testing.T) {
 }
 
 func TestSavePreset(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -90,9 +87,11 @@ func TestSavePreset(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
+	d := NewMockDataStore(gdb, t)
+
 	expected := GetExpectedPreset()
 
-	actual, err := SavePreset(gdb, expected)
+	actual, err := d.SavePreset(expected)
 	assert.Nil(t, err)
 	assert.Equal(t, expected, actual)
 
@@ -104,11 +103,6 @@ func TestSavePreset(t *testing.T) {
 }
 
 func TestRemovePreset(t *testing.T) {
-	monkey.Patch(time.Now, func() time.Time {
-		return time.Unix(0, 0)
-	})
-	defer monkey.UnpatchAll()
-
 	db, mock, err := sqlmock.New()
 	assert.Nil(t, err)
 	ExpectVersionQuery(mock)
@@ -130,7 +124,9 @@ func TestRemovePreset(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	err = RemovePreset(gdb, "pst-test")
+	d := NewMockDataStore(gdb, t)
+
+	err = d.RemovePreset("pst-test")
 	assert.Nil(t, err)
 
 	err = db.Close()
@@ -153,7 +149,9 @@ func TestGetPresetsByName(t *testing.T) {
 	gdb, err := OpenGormDB(db)
 	assert.Nil(t, err)
 
-	actual, err := GetPresetsByName(gdb, "My Preset")
+	d := NewMockDataStore(gdb, t)
+
+	actual, err := d.GetPresetsByName("My Preset")
 	assert.Nil(t, err)
 
 	expected := &[]model.Preset{*GetExpectedPreset()}

@@ -5,8 +5,8 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 )
 
-func (ctrl *workloadController) NewApp(app *model.App) (*model.App, error) {
-	a, createErr := datastore.SaveApp(datastore.GetDB(), app)
+func (ctrl *workloadController) NewApp(app *model.App, dataStore datastore.DataStore) (*model.App, error) {
+	a, createErr := dataStore.SaveApp(app)
 	if createErr != nil {
 		return nil, createErr
 	}

@@ -10,6 +10,7 @@ type CreateAppRequest struct {
 	RepositoryURL string `json:"repositoryURL" validate:"required"`
 	BuildScript   string `json:"buildScript" validate:"required"`
 	Branch        string `json:"branch" validate:"required"`
+	FetchInterval int    `json:"fetchInterval"`
 }
 
 func (req *CreateAppRequest) ToModel() model.App {
@@ -23,6 +24,7 @@ func (req *CreateAppRequest) ToModel() model.App {
 			RepositoryURL: req.RepositoryURL,
 			Branch:        req.Branch,
 		},
-		Observable: true,
+		Observable:    true,
+		FetchInterval: req.FetchInterval,
 	}
 }

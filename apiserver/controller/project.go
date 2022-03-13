@@ -9,56 +9,66 @@ import (
 	"github.com/thecodeisalreadydeployed/workloadcontroller/v2"
 )
 
-func NewProjectController(api fiber.Router, workloadController workloadcontroller.WorkloadController) {
-	api.Get("/list", listProjects)
-	api.Get("/search", searchProject)
-	api.Get("/:projectID", getProject)
-	api.Get("/:projectID/apps", listProjectApps)
-	api.Post("/", createProject(workloadController))
-	api.Delete("/:projectID", deleteProject)
+func NewProjectController(api fiber.Router, workloadController workloadcontroller.WorkloadController, dataStore datastore.DataStore) {
+	api.Get("/list", listProjects(dataStore))
+	api.Get("/search", searchProject(dataStore))
+	api.Get("/:projectID", getProject(dataStore))
+	api.Get("/:projectID/apps", listProjectApps(dataStore))
+	api.Post("/", createProject(workloadController, dataStore))
+	api.Delete("/:projectID", deleteProject(dataStore))
 }
 
-func listProjects(ctx *fiber.Ctx) error {
-	result, err := datastore.GetAllProjects(datastore.GetDB())
-	return writeResponse(ctx, result, err)
+func listProjects(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		result, err := dataStore.GetAllProjects()
+		return writeResponse(ctx, result, err)
+	}
 }
 
-func getProject(ctx *fiber.Ctx) error {
-	projectID := ctx.Params("projectID")
-	result, err := datastore.GetProjectByID(datastore.GetDB(), projectID)
-	return writeResponse(ctx, result, err)
+func getProject(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		projectID := ctx.Params("projectID")
+		result, err := dataStore.GetProjectByID(projectID)
+		return writeResponse(ctx, result, err)
+	}
 }
 
-func listProjectApps(ctx *fiber.Ctx) error {
-	projectID := ctx.Params("projectID")
-	result, err := datastore.GetAppsByProjectID(datastore.GetDB(), projectID)
-	return writeResponse(ctx, result, err)
+func listProjectApps(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		projectID := ctx.Params("projectID")
+		result, err := dataStore.GetAppsByProjectID(projectID)
+		return writeResponse(ctx, result, err)
+	}
 }
 
-func searchProject(ctx *fiber.Ctx) error {
-	projectName := ctx.Query("name")
-	result, err := datastore.GetProjectsByName(datastore.GetDB(), projectName)
-	return writeResponse(ctx, result, err)
+func searchProject(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		projectName := ctx.Query("name")
+		result, err := dataStore.GetProjectsByName(projectName)
+		return writeResponse(ctx, result, err)
+	}
 }
 
-func createProject(workloadController workloadcontroller.WorkloadController) fiber.Handler {
+func createProject(workloadController workloadcontroller.WorkloadController, dataStore datastore.DataStore) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		input := dto.CreateProjectRequest{}
 		if err := validator.ParseBodyAndValidate(c, &input); err != nil {
 			return err
 		}
 		prj := input.ToModel()
-		project, createErr := workloadController.NewProject(&prj)
+		project, createErr := workloadController.NewProject(&prj, dataStore)
 		return writeResponse(c, project, createErr)
 	}
 
 }
 
-func deleteProject(ctx *fiber.Ctx) error {
-	projectID := ctx.Params("projectID")
-	err := datastore.RemoveProject(datastore.GetDB(), projectID)
-	if err != nil {
-		return fiber.NewError(errutil.MapStatusCode(err))
+func deleteProject(dataStore datastore.DataStore) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		projectID := ctx.Params("projectID")
+		err := dataStore.RemoveProject(projectID)
+		if err != nil {
+			return fiber.NewError(errutil.MapStatusCode(err))
+		}
+		return ctx.SendStatus(fiber.StatusOK)
 	}
-	return ctx.SendStatus(fiber.StatusOK)
 }
