@@ -1,6 +1,8 @@
 package repositoryobserver
 
 import (
+	"fmt"
+	"github.com/spf13/cast"
 	"github.com/thecodeisalreadydeployed/gitapi"
 	"sync"
 	"time"
@@ -60,6 +62,13 @@ func (observer *repositoryObserver) ObserveGitSources() {
 				}
 			}
 		}
+
+		var snapshot []string
+		observer.observables.Range(func(key interface{}, value interface{}) bool {
+			snapshot = append(snapshot, cast.ToString(key))
+			return true
+		})
+		observer.logger.Info(fmt.Sprintf("Currently observing apps: %v", snapshot))
 		time.Sleep(sleepObserverInterval)
 	}
 }
