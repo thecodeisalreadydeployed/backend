@@ -7,6 +7,7 @@ import (
 	"github.com/thecodeisalreadydeployed/model"
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -86,6 +87,10 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 		kubernetesServiceAccountName = containerRegistry.Secret()
 	}
 
+	resourceRequest := apiv1.ResourceList{}
+	resourceRequest[apiv1.ResourceCPU] = resource.MustParse("7")
+	resourceRequest[apiv1.ResourceMemory] = resource.MustParse("7G")
+
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   "builder-" + UID,
@@ -135,6 +140,10 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 				{
 					Name:  "imagebuilder",
 					Image: "ghcr.io/thecodeisalreadydeployed/imagebuilder:" + imageTag,
+					Resources: apiv1.ResourceRequirements{
+						Requests: resourceRequest,
+						Limits:   resourceRequest,
+					},
 					VolumeMounts: []apiv1.VolumeMount{
 						workspace,
 						{
