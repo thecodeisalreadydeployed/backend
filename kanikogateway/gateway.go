@@ -88,8 +88,8 @@ func (gateway kanikoGateway) Deploy() (string, error) {
 	}
 
 	resourceRequest := apiv1.ResourceList{}
-	resourceRequest[apiv1.ResourceCPU] = resource.MustParse("7")
-	resourceRequest[apiv1.ResourceMemory] = resource.MustParse("7G")
+	resourceRequest[apiv1.ResourceCPU] = resource.MustParse("7000m")
+	resourceRequest[apiv1.ResourceMemory] = resource.MustParse("7Gi")
 
 	pod := apiv1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
