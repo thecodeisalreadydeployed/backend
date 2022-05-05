@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/thecodeisalreadydeployed/clusterbackend"
 	"github.com/thecodeisalreadydeployed/config"
 	"github.com/thecodeisalreadydeployed/gitgateway/v2"
 	"github.com/thecodeisalreadydeployed/gitopscontroller/argocd"
@@ -24,10 +25,11 @@ type GitOpsController interface {
 }
 
 type gitOpsController struct {
-	logger       *zap.Logger
-	user         gitgateway.GitGateway
-	path         string
-	argoCDClient argocd.ArgoCDClient
+	logger         *zap.Logger
+	user           gitgateway.GitGateway
+	path           string
+	argoCDClient   argocd.ArgoCDClient
+	clusterBackend clusterbackend.ClusterBackend
 }
 
 var once sync.Once
@@ -56,7 +58,7 @@ func setupUserspace() {
 	})
 }
 
-func NewGitOpsController(logger *zap.Logger) GitOpsController {
+func NewGitOpsController(logger *zap.Logger, clusterBackend clusterbackend.ClusterBackend) GitOpsController {
 	setupUserspace()
 	path := config.DefaultUserspaceRepository()
 	userspace, err := gitgateway.NewGitGatewayLocal(path)
@@ -245,5 +247,11 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, dep
 	if commitErr != nil {
 		return commitErr
 	}
+
+	err = g.clusterBackend.DeleteDeployment(projectID, appID)
+	if err != nil {
+		return err
+	}
+
 	return g.argoCDClient.Sync()
 }
