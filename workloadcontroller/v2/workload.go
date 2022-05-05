@@ -32,6 +32,16 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 		fmt.Printf("err: %v\n", err)
 		return
 	}
+	err = dataStore.SetDeploymentState(deploymentID, model.DeploymentStateCommitted)
+	if err != nil {
+		ctrl.logger.Error(
+			"cannot set deployment state",
+			zap.String("deploymentID", deploymentID),
+			zap.String("desiredState", string(model.DeploymentStateCommitted)),
+			zap.Error(err),
+		)
+		fmt.Printf("err: %v\n", err)
+	}
 }
 
 func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) {
@@ -120,16 +130,7 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 			}
 
 			if deployment.State == model.DeploymentStateBuildSucceeded {
-				ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
-				err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateCommitted)
-				if err != nil {
-					ctrl.logger.Error(
-						"cannot set deployment state",
-						zap.String("deploymentID", deployment.ID),
-						zap.String("desiredState", string(model.DeploymentStateCommitted)),
-						zap.Error(err),
-					)
-				}
+				go ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
 			}
 
 			if deployment.State == model.DeploymentStateCommitted {
