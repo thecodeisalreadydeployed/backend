@@ -58,5 +58,5 @@ func setAnnotations(m *types.Kustomization, metadata map[string]string) error {
 	if m.CommonAnnotations == nil {
 		m.CommonAnnotations = make(map[string]string)
 	}
-	return writeToMap(metadata, m.CommonLabels)
+	return writeToMap(metadata, m.CommonAnnotations)
 }
