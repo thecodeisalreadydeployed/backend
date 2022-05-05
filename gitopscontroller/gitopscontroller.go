@@ -236,21 +236,16 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, dep
 		return err
 	}
 
-	err = kustomize.SetLabel(filepath.Join(g.path, kustomizationFile), map[string]string{
-		"beta.deploys.dev/deployment-id": deploymentID,
-	})
-	if err != nil {
-		return err
-	}
+	// err = kustomize.SetLabel(filepath.Join(g.path, kustomizationFile), map[string]string{
+	// 	"beta.deploys.dev/deployment-id": deploymentID,
+	// })
+	// if err != nil {
+	// 	return err
+	// }
 
 	_, commitErr := g.user.Commit([]string{kustomizationFile}, fmt.Sprintf("%s: %s", prefix, newImage))
 	if commitErr != nil {
 		return commitErr
-	}
-
-	err = g.argoCDClient.DeleteDeployment(projectID, appID)
-	if err != nil {
-		return err
 	}
 
 	return g.argoCDClient.Sync()
