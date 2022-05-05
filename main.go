@@ -43,7 +43,7 @@ func main() {
 	}
 
 	clusterBackend := clusterbackend.NewClusterBackend(zap.L())
-	gitOpsController := gitopscontroller.NewGitOpsController(zap.L())
+	gitOpsController := gitopscontroller.NewGitOpsController(zap.L(), clusterBackend)
 	workloadController := workloadcontroller.NewWorkloadController(zap.L(), gitOpsController, clusterBackend, containerRegistry)
 	repositoryObserver := repositoryobserver.NewRepositoryObserver(zap.L(), dataStore, workloadController)
 	go repositoryObserver.ObserveGitSources()
