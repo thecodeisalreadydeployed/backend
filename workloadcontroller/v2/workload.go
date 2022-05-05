@@ -130,7 +130,7 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 
 			if deployment.State == model.DeploymentStateCommitted {
 				pods, err := ctrl.clusterBackend.Pods("", map[string]string{
-					"beta.deploys.dev/deployment-id": deployment.ID,
+					"beta.deploys.dev/app-id": deployment.AppID,
 				})
 
 				if err != nil {
