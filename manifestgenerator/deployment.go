@@ -96,7 +96,7 @@ func GenerateDeploymentYAML(opts *GenerateDeploymentOptions) (string, error) {
 									Name: "DEPLOYMENT_ID",
 									ValueFrom: &apiv1.EnvVarSource{
 										FieldRef: &apiv1.ObjectFieldSelector{
-											FieldPath: "metadata.labels['beta.deploys.dev/deployment-id']",
+											FieldPath: "metadata.annotations['beta.deploys.dev/deployment-id']",
 										},
 									},
 								},
