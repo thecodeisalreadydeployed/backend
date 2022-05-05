@@ -8,6 +8,7 @@ import (
 	"github.com/thecodeisalreadydeployed/datastore"
 	"github.com/thecodeisalreadydeployed/gitopscontroller"
 	"github.com/thecodeisalreadydeployed/model"
+	"github.com/thecodeisalreadydeployed/statusapi"
 	"go.uber.org/zap"
 )
 
@@ -23,6 +24,7 @@ type workloadController struct {
 	gitOpsController  gitopscontroller.GitOpsController
 	clusterBackend    clusterbackend.ClusterBackend
 	containerRegistry containerregistry.ContainerRegistry
+	statusAPIBackend  statusapi.StatusAPIBackend
 }
 
 func NewWorkloadController(
@@ -36,5 +38,6 @@ func NewWorkloadController(
 		gitOpsController:  gitOpsController,
 		clusterBackend:    clusterBackend,
 		containerRegistry: containerRegistry,
+		statusAPIBackend:  statusapi.NewStatusAPIBackend(logger),
 	}
 }

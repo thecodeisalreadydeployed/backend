@@ -129,6 +129,16 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 			}
 
 			if deployment.State == model.DeploymentStateCommitted {
+				activeDeploymentID, err := ctrl.statusAPIBackend.GetActiveDeploymentID(deployment.AppID, dataStore)
+				if err != nil {
+					ctrl.logger.Error(err.Error())
+					continue
+				}
+
+				if activeDeploymentID != deployment.ID {
+					continue
+				}
+
 				pods, err := ctrl.clusterBackend.Pods("", map[string]string{
 					"beta.deploys.dev/app-id": deployment.AppID,
 				})
