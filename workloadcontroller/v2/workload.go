@@ -134,16 +134,6 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 			}
 
 			if deployment.State == model.DeploymentStateCommitted {
-				activeDeploymentID, err := ctrl.statusAPIBackend.GetActiveDeploymentID(deployment.AppID, dataStore)
-				if err != nil {
-					ctrl.logger.Error(err.Error())
-					continue
-				}
-
-				if activeDeploymentID != deployment.ID {
-					continue
-				}
-
 				pods, err := ctrl.clusterBackend.Pods("", map[string]string{
 					"beta.deploys.dev/app-id": deployment.AppID,
 				})
@@ -155,6 +145,15 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 
 				for _, p := range pods {
 					ctrl.logger.Debug(p.Name, zap.String("phase", string(p.Status.Phase)), zap.String("selfLink", p.SelfLink), zap.String("startTime", p.Status.StartTime.String()))
+
+					annotations := p.GetAnnotations()
+					if _, ok := annotations["beta.deploys.dev/deployment-id"]; ok {
+						if annotations["beta.deploys.dev/deployment-id"] != deployment.ID {
+							continue
+						}
+					} else {
+						continue
+					}
 
 					if p.Status.Phase == v1.PodRunning {
 						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateReady)
