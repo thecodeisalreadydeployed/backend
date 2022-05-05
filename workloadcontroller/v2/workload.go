@@ -16,6 +16,7 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 	app, err := dataStore.GetAppByID(appID)
 	if err != nil {
 		ctrl.logger.Error(err.Error(), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
+		fmt.Printf("err: %v\n", err)
 		return
 	}
 
@@ -28,6 +29,7 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 	err = ctrl.gitOpsController.SetContainerImage(app.ProjectID, app.ID, deploymentID, newImage)
 	if err != nil {
 		ctrl.logger.Error("cannot set container image", zap.Error(err), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
+		fmt.Printf("err: %v\n", err)
 		return
 	}
 }
@@ -102,17 +104,6 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 								zap.Error(err),
 							)
 						}
-						ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
-						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateCommitted)
-						if err != nil {
-							ctrl.logger.Error(
-								"cannot set deployment state",
-								zap.String("deploymentID", deployment.ID),
-								zap.String("desiredState", string(model.DeploymentStateCommitted)),
-								zap.String("podSelfLink", p.SelfLink),
-								zap.Error(err),
-							)
-						}
 					case v1.PodFailed:
 						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateError)
 						if err != nil {
@@ -125,6 +116,19 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 							)
 						}
 					}
+				}
+			}
+
+			if deployment.State == model.DeploymentStateBuildSucceeded {
+				ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
+				err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateCommitted)
+				if err != nil {
+					ctrl.logger.Error(
+						"cannot set deployment state",
+						zap.String("deploymentID", deployment.ID),
+						zap.String("desiredState", string(model.DeploymentStateCommitted)),
+						zap.Error(err),
+					)
 				}
 			}
 
