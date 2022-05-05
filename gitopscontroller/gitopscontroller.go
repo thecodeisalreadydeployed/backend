@@ -248,7 +248,7 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, dep
 		return commitErr
 	}
 
-	err = g.clusterBackend.DeleteDeployment(projectID, appID)
+	err = g.argoCDClient.DeleteDeployment(projectID, appID)
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,7 @@ type ArgoCDClient interface {
 	CreateApp() error
 	Refresh() error
 	Sync() error
+	DeleteDeployment(projectID string, appID string) error
 }
 
 type argoCDClient struct {
@@ -131,6 +132,24 @@ func (client *argoCDClient) Refresh() error {
 
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications?name=" + client.appName + "&refresh=true"
 	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+func (client *argoCDClient) DeleteDeployment(projectID string, appID string) error {
+	if !client.isInitialized {
+		return nil
+	}
+
+	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/userspace/resource?name=" + appID + "&namespace=" + projectID + "&resourceName=" + appID + "&version=v1&kind=Deployment&group=apps&force=false&orphan=false"
+	req, err := http.NewRequest("DELETE", apiURL, nil)
 	if err != nil {
 		return err
 	}
