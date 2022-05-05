@@ -157,7 +157,7 @@ func (client *argoCDClient) Sync() error {
 		"resources": nil,
 		"revision":  "master",
 		"strategy": map[string]interface{}{
-			"apply": map[string]bool{
+			"hook": map[string]bool{
 				"force": true,
 			},
 		},
