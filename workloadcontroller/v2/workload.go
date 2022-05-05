@@ -30,8 +30,6 @@ func (ctrl *workloadController) setContainerImage(appID string, deploymentID str
 		ctrl.logger.Error("cannot set container image", zap.Error(err), zap.String("appID", appID), zap.String("deploymentID", deploymentID))
 		return
 	}
-
-	_ = dataStore.SetDeploymentState(deploymentID, model.DeploymentStateCommitted)
 }
 
 func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) {
@@ -104,7 +102,17 @@ func (ctrl *workloadController) ObserveWorkloads(dataStore datastore.DataStore) 
 								zap.Error(err),
 							)
 						}
-						go ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
+						ctrl.setContainerImage(deployment.AppID, deployment.ID, dataStore)
+						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateCommitted)
+						if err != nil {
+							ctrl.logger.Error(
+								"cannot set deployment state",
+								zap.String("deploymentID", deployment.ID),
+								zap.String("desiredState", string(model.DeploymentStateCommitted)),
+								zap.String("podSelfLink", p.SelfLink),
+								zap.Error(err),
+							)
+						}
 					case v1.PodFailed:
 						err = dataStore.SetDeploymentState(deployment.ID, model.DeploymentStateError)
 						if err != nil {
