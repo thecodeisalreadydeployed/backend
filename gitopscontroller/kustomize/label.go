@@ -34,3 +34,29 @@ func writeToMap(metadata map[string]string, m map[string]string) error {
 	}
 	return nil
 }
+
+func SetAnnotation(kustomizationFilePath string, metadata map[string]string) error {
+	mf, err := NewKustomizationFile(kustomizationFilePath)
+	if err != nil {
+		return err
+	}
+
+	m, err := mf.Read()
+	if err != nil {
+		return err
+	}
+
+	err = setAnnotations(m, metadata)
+	if err != nil {
+		return err
+	}
+
+	return mf.Write(m)
+}
+
+func setAnnotations(m *types.Kustomization, metadata map[string]string) error {
+	if m.CommonAnnotations == nil {
+		m.CommonAnnotations = make(map[string]string)
+	}
+	return writeToMap(metadata, m.CommonLabels)
+}
