@@ -253,5 +253,5 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, dep
 		return err
 	}
 
-	return g.argoCDClient.Refresh()
+	return g.argoCDClient.RefreshUserspace()
 }

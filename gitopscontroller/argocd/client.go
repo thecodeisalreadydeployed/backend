@@ -19,6 +19,7 @@ import (
 type ArgoCDClient interface {
 	CreateApp() error
 	Refresh() error
+	RefreshUserspace() error
 	Sync() error
 	DeleteDeployment(projectID string, appID string) error
 }
@@ -131,6 +132,24 @@ func (client *argoCDClient) Refresh() error {
 	}
 
 	apiURL := config.ArgoCDServerHost() + "/api/v1/applications?name=" + client.appName + "&refresh=true"
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+func (client *argoCDClient) RefreshUserspace() error {
+	if !client.isInitialized {
+		return nil
+	}
+
+	apiURL := config.ArgoCDServerHost() + "/api/v1/applications/userspace?refresh=normal"
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		return err
