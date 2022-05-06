@@ -248,5 +248,10 @@ func (g *gitOpsController) SetContainerImage(projectID string, appID string, dep
 		return commitErr
 	}
 
-	return g.argoCDClient.Sync()
+	err = g.argoCDClient.Sync()
+	if err != nil {
+		return err
+	}
+
+	return g.argoCDClient.Refresh()
 }
